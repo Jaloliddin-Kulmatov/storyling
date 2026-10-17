@@ -1,0 +1,368 @@
+<title>Graded Reader Platform Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~68ch) with full-width comparison tables in scroll boxes; sections marked by a celadon "reading level" tag */
+:root {
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --ink: #1d2826;
+  --muted: #5b6b67;
+  --line: #d6dfdc;
+  --accent: #2f7a68;
+  --accent-soft: #e2f0eb;
+  --warn: #a8641a;
+  --warn-soft: #fbefe0;
+  --font-display: "Gowun Batang", "Noto Serif KR", Georgia, serif;
+  --font-body: "Source Sans 3", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121816; --surface: #19211f; --ink: #e3ebe8; --muted: #9aaba6; --line: #2c3a36;
+    --accent: #6cc3aa; --accent-soft: #1e3530; --warn: #e3a35c; --warn-soft: #362717;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121816; --surface: #19211f; --ink: #e3ebe8; --muted: #9aaba6; --line: #2c3a36;
+  --accent: #6cc3aa; --accent-soft: #1e3530; --warn: #e3a35c; --warn-soft: #362717;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.6;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+.wrap { max-width: 960px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+header { padding-block: 56px 32px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); margin-top: 10px; }
+h1 .ko { color: var(--accent); }
+h2 { font-size: 27px; margin-bottom: 14px; }
+h3 { font-size: 20px; margin-bottom: 8px; }
+.lede { font-size: 19px; color: var(--muted); margin-top: 14px; }
+section { padding-block: 40px 8px; }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); }
+.meta { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); margin-top: 18px; }
+
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); margin-bottom: 18px; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: none; }
+thead th { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
+tbody th { font-weight: 600; width: 22%; color: var(--ink); }
+td.num { font-variant-numeric: tabular-nums; }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 18px; }
+.grid2 > div { min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; }
+.panel ul { margin-bottom: 0; }
+.tag { display: inline-block; font-family: var(--font-mono); font-size: 11.5px; padding: 2px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); margin-bottom: 8px; }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 14px 18px; border-radius: 0 6px 6px 0; margin-bottom: 18px; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* reader mockup */
+.reader { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; margin-bottom: 18px; }
+.reader .bar { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.reader .text { font-family: var(--font-display); font-size: 22px; line-height: 1.9; }
+.w-new { background: var(--warn-soft); border-bottom: 2px solid var(--warn); border-radius: 2px; padding: 0 2px; }
+.w-learn { background: var(--accent-soft); border-radius: 2px; padding: 0 2px; }
+.w-cur { outline: 2px solid var(--accent); border-radius: 3px; }
+.gloss { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; font-size: 15px; background: var(--bg); }
+.gloss b { font-family: var(--font-display); font-size: 18px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+.phases { display: grid; gap: 14px; }
+.phase { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.phase > div { min-width: 0; }
+.phase .when { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.phase .when span { display: block; color: var(--muted); }
+@media (max-width: 560px) { .phase { grid-template-columns: 1fr; gap: 4px; } }
+
+code { font-family: var(--font-mono); font-size: .88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
+.sources { font-size: 14px; color: var(--muted); }
+.sources a { word-break: break-word; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Competitive analysis + product plan · October 2026</div>
+  <h1>Learning languages by reading <span class="ko">읽기</span></h1>
+  <p class="lede prose">What Readle and TTMIK Stories do well, where they fall short, and a plan for a multi-language reading platform that fills the gaps.</p>
+</header>
+
+<section>
+  <h2>1. The two products at a glance</h2>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th></th><th>Readle (Langster)</th><th>TTMIK Stories</th></tr></thead>
+    <tbody>
+      <tr><th>Languages</th><td>Started German-only; now German, French, Spanish, English, Japanese, Chinese</td><td>Korean only</td></tr>
+      <tr><th>Content type</th><td>Short news-style articles adapted from current events and "good news" stories</td><td>Original fiction and non-fiction written in-house: daily life, culture, K-pop, mystery, business</td></tr>
+      <tr><th>Levels</th><td>CEFR A1–C1</td><td>10 levels mapped to the TTMIK curriculum and TOPIK vocabulary</td></tr>
+      <tr><th>Library size</th><td class="num">2,000+ German stories, new ones daily</td><td class="num">1,000+ stories</td></tr>
+      <tr><th>Audio</th><td>Native narration at 1× and 0.75×, but now mixed with AI voices</td><td>Professional voice actors with highlighted text that follows the audio</td></tr>
+      <tr><th>Reading aids</th><td>Tap-to-translate dictionary, 170+ grammar notes, keyword lists</td><td>Tap any word, sentence-by-sentence translation, grammar notes</td></tr>
+      <tr><th>Practice</th><td>Per-story quiz (grammar, vocab, articles), SRS flashcards, Anki export</td><td>Quizzes, flashcards, writing practice, certificates</td></tr>
+      <tr><th>Price (US)</th><td class="num">Free tier · $9.99/mo · $69.99/yr · $249.99 lifetime</td><td class="num">7-day trial · $16.99/mo · $99.99/yr</td></tr>
+      <tr><th>App Store rating</th><td class="num">4.7 (≈1,100 ratings)</td><td class="num">4.7 (≈1,300 ratings)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose" style="font-size:14px;color:var(--muted)">Prices and counts are from App Store listings and review sites as of this research and change often. Check them again before you set your own pricing.</p>
+</section>
+
+<section>
+  <h2>2. What each one gets right</h2>
+  <div class="grid2">
+    <div class="panel">
+      <span class="tag">Readle</span>
+      <h3>Daily habit, low friction</h3>
+      <ul>
+        <li>Stories are short enough to finish in 3–5 minutes, so it fits a commute.</li>
+        <li>Fresh content every day gives people a reason to open the app.</li>
+        <li>Real-world topics make the learner feel they are reading "actual German".</li>
+        <li>The free tier rotates stories, which works as a trial without a paywall wall.</li>
+        <li>Anki export keeps power users happy.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag">TTMIK Stories</span>
+      <h3>Curriculum depth and audio quality</h3>
+      <ul>
+        <li>Levels follow a known curriculum, so learners trust the grading.</li>
+        <li>Human voice actors are a selling point they put in the store listing.</li>
+        <li>Sentence-level translation helps beginners who are stuck on grammar, not words.</li>
+        <li>Writing practice turns reading into output.</li>
+        <li>TTMIK's YouTube, podcast and textbook audience feeds the app.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout prose">
+    <p><strong>Shared pattern.</strong> Both apps use the same core loop: pick a story at your level → read with tap-to-translate and audio → quiz → save words → review with SRS. This loop is the baseline. A new product needs it too, and has to win on something else.</p>
+  </div>
+</section>
+
+<section>
+  <h2>3. Gaps you can win on</h2>
+  <div class="grid2">
+    <div class="panel">
+      <span class="tag warn">Readle weaknesses</span>
+      <ul>
+        <li>Reviewers complain about AI voices replacing human narration.</li>
+        <li>B2 and C1 content is added slowly, so advanced learners outgrow it.</li>
+        <li>Quiz bugs and slow fixes give some users the feeling the app is abandoned.</li>
+        <li>News-only tone. There is little fiction, serialized story or dialogue.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag warn">TTMIK Stories weaknesses</span>
+      <ul>
+        <li>One language, so a learner of Korean and Japanese needs two apps.</li>
+        <li>$16.99/month is expensive compared with most language apps.</li>
+        <li>Limited offline use, according to review roundups.</li>
+        <li>Content is closed. You can't read your own texts with its tools.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Things neither app does</h3>
+  <ol class="prose">
+    <li><strong>Known-word tracking.</strong> Neither app tells you "you know 96% of the words in this story". LingQ does this, but its interface is cluttered. A clean version is an opening.</li>
+    <li><strong>Bring your own text.</strong> Paste an article, a K-drama script or an e-book chapter and get the same tap-to-translate, audio and vocab tools.</li>
+    <li><strong>Explanations in the learner's own language.</strong> Both explain things in English. Learners whose first language is Uzbek, Russian, Turkish, Arabic or another underserved language get little support. This is a real niche, especially for Korean, where Central Asia has a large learner base.</li>
+    <li><strong>Story series and characters.</strong> Serialized stories with recurring characters bring people back better than standalone articles.</li>
+    <li><strong>Social reading.</strong> Book clubs, shared highlights, or a teacher assigning a story to a class.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>4. Product concept</h2>
+  <div class="prose">
+    <p><strong>Positioning:</strong> one reading app for several languages, which always picks stories you can understand. It tracks every word you know, recommends stories at 95–98% known-word coverage, and explains things in your own language.</p>
+    <p>The 95–98% target is the core idea. Research on extensive reading (Paul Nation and others) found that learners read comfortably and pick up new words from context when about 98% of the running words are already known. Graded levels like "A2" or "Level 4" only approximate this. Tracking each learner's own vocabulary measures it directly.</p>
+  </div>
+
+  <h3>The reader screen</h3>
+  <div class="reader" aria-label="Reader mockup">
+    <div class="bar"><span>Korean · Level 3 · Story 12 of "편의점 이야기"</span><span>Known: 96% · 4 new words</span></div>
+    <div class="text">
+      민지는 매일 아침 <span class="w-learn">편의점</span>에 가요. 오늘은 <span class="w-new w-cur">삼각김밥</span>이 다 <span class="w-new">팔렸어요</span>. 점원이 "내일 <span class="w-learn">일찍</span> 오세요." 하고 웃었어요.
+    </div>
+    <div class="gloss">
+      <b>삼각김밥</b> · <em>samgak-gimbap</em> · noun<br>
+      triangle-shaped rice ball wrapped in seaweed (sold in convenience stores)<br>
+      <span style="color:var(--muted)">Uzbek: uchburchak guruch bo'lagi · ▶ audio · + Save to review</span>
+    </div>
+    <div class="legend">
+      <span><span class="w-new">new</span> never seen</span>
+      <span><span class="w-learn">learning</span> in your review deck</span>
+      <span>plain text = known</span>
+    </div>
+  </div>
+
+  <h3>Features by release</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Area</th><th>MVP</th><th>Version 2</th><th>Later</th></tr></thead>
+    <tbody>
+      <tr><th>Reader</th><td>Tap-to-translate, word states (new / learning / known), audio with sentence highlighting, sentence translation</td><td>Offline mode, adjustable font and romanization, dark mode</td><td>Furigana / pinyin toggles, vertical text</td></tr>
+      <tr><th>Content</th><td>150–300 graded stories in 2 languages</td><td>Serialized stories, daily news digest</td><td>Creator marketplace, licensed graded readers</td></tr>
+      <tr><th>Import</th><td>None</td><td>Paste text or URL; level is estimated automatically</td><td>EPUB, subtitles (SRT) from shows</td></tr>
+      <tr><th>Review</th><td>SRS flashcards using the FSRS algorithm, with the sentence the word came from</td><td>Cloze cards, listening cards, Anki export</td><td>Writing prompts checked by AI</td></tr>
+      <tr><th>Progress</th><td>Known-word count, streak, words read</td><td>Coverage estimate per story, CEFR / TOPIK / HSK estimate</td><td>Certificates, placement test</td></tr>
+      <tr><th>Social</th><td>None</td><td>Comments per story</td><td>Classes for teachers, reading clubs</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>5. Content strategy</h2>
+  <div class="prose">
+    <p>Content is the most expensive part and the hardest to copy, so plan it first. TTMIK has staff writers and voice actors. A small team has to use a pipeline instead.</p>
+    <ol>
+      <li><strong>Choose 2 launch languages.</strong> Korean plus one more you can quality-check (Japanese, Spanish or English). Korean alone competes directly with TTMIK. Korean with Uzbek/Russian explanations has almost no competition.</li>
+      <li><strong>Build level word lists</strong> from frequency data and exam lists: CEFR (Profile / Kelly lists), TOPIK vocabulary, HSK 3.0, JLPT. A story's level is the share of its words that fall inside each list.</li>
+      <li><strong>Draft with an LLM</strong> under strict constraints (allowed vocabulary, grammar points, length), then have a native speaker edit every story. Never publish unedited AI text. Readle's reviews show users notice and dislike quality drops.</li>
+      <li><strong>Audio:</strong> use high-quality neural TTS for the MVP and record human audio for the most popular stories later. Say clearly in the app which is which.</li>
+      <li><strong>Public-domain texts</strong> (folk tales, classic short stories) work well at upper levels with modern glossing.</li>
+    </ol>
+  </div>
+<pre class="mermaid">
+flowchart LR
+  A[Topic + level brief] --> B[LLM draft within vocab and grammar limits]
+  B --> C[Auto check: coverage %, length, banned words]
+  C -->|fails| B
+  C -->|passes| D[Native speaker edit]
+  D --> E[Tokenize + gloss + sentence translations]
+  E --> F[TTS audio + timing alignment]
+  F --> G[Publish to library]
+</pre>
+</section>
+
+<section>
+  <h2>6. Technical architecture</h2>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Layer</th><th>Recommended choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><th>Web app</th><td>Next.js (React) + TypeScript, installable as a PWA</td><td>One codebase for desktop and mobile web. Wrap it with Capacitor or rebuild in React Native once there is traction.</td></tr>
+      <tr><th>Backend + DB</th><td>Supabase (Postgres, auth, storage)</td><td>Auth, database, and file storage for audio in one place, at low cost while small.</td></tr>
+      <tr><th>Text processing</th><td>Korean: Kiwi or MeCab-ko · Japanese: Sudachi · Chinese: jieba · European languages: spaCy</td><td>Korean words change form a lot (가요 / 갔어요 / 가니까). You need morphological analysis to map each form to its dictionary form, or the known-word count will be wrong.</td></tr>
+      <tr><th>Dictionary data</th><td>Open dictionaries (Wiktionary dumps, KRDict from the National Institute of Korean Language, JMdict, CC-CEDICT) + LLM glosses checked by an editor</td><td>Free and licensed for reuse. Check each license before launch.</td></tr>
+      <tr><th>AI</th><td>Claude API for story drafts, sentence translation, glosses in the learner's language, and grammar notes</td><td>Generate these once at publish time and store them, rather than on every tap, to keep costs predictable.</td></tr>
+      <tr><th>Audio</th><td>Neural TTS (Azure, Google or ElevenLabs) with word-level timestamps</td><td>Timestamps drive the karaoke-style highlighting.</td></tr>
+      <tr><th>SRS</th><td>FSRS (open-source scheduler)</td><td>Fewer reviews than the classic Anki SM-2 method for the same retention.</td></tr>
+      <tr><th>Payments</th><td>Stripe on the web, RevenueCat once you ship to app stores</td><td>Supports regional pricing.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Core data model</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Table</th><th>Key fields</th></tr></thead>
+    <tbody>
+      <tr><th><code>languages</code></th><td>code, name, script, tokenizer</td></tr>
+      <tr><th><code>lemmas</code></th><td>language, dictionary form, part of speech, frequency rank, level tags (A1, TOPIK 1…)</td></tr>
+      <tr><th><code>stories</code></th><td>language, title, level, series, body, audio URL, status (draft / reviewed / live)</td></tr>
+      <tr><th><code>story_tokens</code></th><td>story, position, surface form, lemma, sentence index, audio start/end</td></tr>
+      <tr><th><code>glosses</code></th><td>lemma, explanation language, meaning, example</td></tr>
+      <tr><th><code>user_words</code></th><td>user, lemma, state (new / learning / known / ignored), FSRS fields, source sentence</td></tr>
+      <tr><th><code>reading_sessions</code></th><td>user, story, started, finished, words read, quiz score</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose">A story's coverage for a user is the share of its <code>story_tokens</code> whose lemma is "known" in <code>user_words</code>. Calculate it in one SQL query and cache it per user per story.</p>
+</section>
+
+<section>
+  <h2>7. Business model</h2>
+  <div class="prose">
+    <ul>
+      <li><strong>Free:</strong> 3 stories a week, full reader, up to 100 saved words. Enough to form a habit.</li>
+      <li><strong>Premium:</strong> about $7.99/month or $49.99/year. That is under both competitors ($9.99 and $16.99 a month).</li>
+      <li><strong>Regional pricing:</strong> much lower prices in Central Asia, South and Southeast Asia, and Latin America, where many Korean learners live.</li>
+      <li><strong>Later:</strong> school and teacher plans, and a revenue share with content creators.</li>
+    </ul>
+    <p><strong>How people will find it:</strong> SEO pages for each free story (people search for "easy Korean story for beginners"), short reading videos on TikTok, Reels and YouTube Shorts, and Telegram channels for learners in Uzbek and Russian.</p>
+  </div>
+</section>
+
+<section>
+  <h2>8. Roadmap</h2>
+  <div class="phases">
+    <div class="phase">
+      <div class="when">Weeks 1–3<span>Validate</span></div>
+      <div>Interview 15–20 learners. Publish 20 free stories as plain web pages with a simple tap-to-translate script, and share them in learner communities. Measure how many finish a story and come back.</div>
+    </div>
+    <div class="phase">
+      <div class="when">Weeks 4–10<span>MVP</span></div>
+      <div>Accounts, reader with word states, audio highlighting, FSRS review, and 150 stories in 2 languages. Private beta with 100 users.</div>
+    </div>
+    <div class="phase">
+      <div class="when">Weeks 11–16<span>Launch</span></div>
+      <div>Paywall, SEO story pages, coverage-based recommendations, PWA install. Public launch on Product Hunt and Reddit (r/Korean, r/LearnJapanese, r/languagelearning).</div>
+    </div>
+    <div class="phase">
+      <div class="when">Months 5–9<span>Grow</span></div>
+      <div>Text and URL import, serialized stories, offline mode, native mobile apps, a third language, and human audio for top stories.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>9. Metrics and risks</h2>
+  <div class="grid2">
+    <div class="panel">
+      <span class="tag">Track these</span>
+      <ul>
+        <li>Story completion rate (target above 60%)</li>
+        <li>Day-7 and day-30 retention</li>
+        <li>Words moved to "known" per week</li>
+        <li>Free-to-paid conversion (3–5% is typical for consumer subscriptions)</li>
+        <li>Reviews done per day versus stories read (a balance check)</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag warn">Risks</span>
+      <ul>
+        <li><strong>Content quality.</strong> AI drafts that sound unnatural. Fix: a native editor on every story.</li>
+        <li><strong>Bad tokenization</strong> in Korean and Japanese breaks word tracking. Test the analyzer on your own stories early.</li>
+        <li><strong>Copyright.</strong> Don't copy competitors' stories or news articles. User imports stay private to that user.</li>
+        <li><strong>Scope.</strong> Too many languages too soon. Make two languages excellent first.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>10. Next steps</h2>
+  <ol class="prose">
+    <li>Pick the two launch languages and the explanation languages (for example Korean and English, explained in English, Uzbek and Russian).</li>
+    <li>Choose a name and register the domain.</li>
+    <li>Write or generate and edit the first 20 stories.</li>
+    <li>Build the static validation site (step 1 of the roadmap) before writing the full app.</li>
+  </ol>
+</section>
+
+<section class="sources">
+  <h3>Sources</h3>
+  <ul>
+    <li><a href="https://apps.apple.com/us/app/-/id1483552317">Readle on the App Store</a></li>
+    <li><a href="https://www.alllanguageresources.com/readle/">All Language Resources: Readle review</a></li>
+    <li><a href="https://apps.apple.com/us/app/korean-reading-ttmik-stories/id1659613381">TTMIK Stories on the App Store</a></li>
+    <li><a href="https://edtechimpact.com/products/httpsttmikstoriesapp/">EdTech Impact: TTMIK Stories</a></li>
+    <li><a href="https://blog.talktomeinkorean.com/what-is-graded-reading-why-do-you-need-it-for-learning-korean">TTMIK blog: What is graded reading?</a></li>
+  </ul>
+</section>
+</div>

@@ -1,0 +1,728 @@
+<title>Storyling Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky contents rail on the left (desktop), one reading column (~72ch) with wide tables/diagrams in scroll boxes */
+:root {
+  --bg: #f4f7f6;
+  --surface: #ffffff;
+  --surface-2: #edf2f0;
+  --ink: #10201b;
+  --muted: #55665f;
+  --line: #d9e3df;
+  --primary: #0b8a6a;
+  --primary-soft: #daf2ea;
+  --new: #a86f00;
+  --new-soft: #ffefbd;
+  --learn: #2b6de0;
+  --learn-soft: #e1eaff;
+  --bad: #c2410c;
+  --bad-soft: #fde6dc;
+  --f-ui: "Plus Jakarta Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --f-serif: "Newsreader", Georgia, serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #9db0a9; --line: #26392f;
+    --primary: #36c89d; --primary-soft: #12382d; --new: #f3c344; --new-soft: #3b3010; --learn: #8bb0ff; --learn-soft: #172644; --bad: #ff9a6c; --bad-soft: #3a1d12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #9db0a9; --line: #26392f;
+  --primary: #36c89d; --primary-soft: #12382d; --new: #f3c344; --new-soft: #3b3010; --learn: #8bb0ff; --learn-soft: #172644; --bad: #ff9a6c; --bad-soft: #3a1d12;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 16px; line-height: 1.62; padding-inline: 16px; padding-block: 0 80px; }
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; }
+@media (max-width: 960px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 0; } .toc { display: none; } }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; padding-top: 40px; max-height: calc(100vh - 48px); overflow-y: auto; }
+.toc .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -.02em; margin-bottom: 20px; }
+.mark { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: var(--surface); display: grid; place-items: center; font-family: var(--f-serif); font-size: 19px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: toc; }
+.toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+.toc a:hover { background: var(--surface-2); color: var(--ink); }
+main { min-width: 0; }
+header.top { padding-block: 48px 28px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+h1, h2, h3, h4 { margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h1 { font-size: clamp(34px, 5vw, 52px); font-weight: 800; line-height: 1.05; margin-top: 10px; }
+h1 em { font-family: var(--f-serif); font-weight: 500; font-style: italic; color: var(--primary); letter-spacing: -.01em; }
+.lede { font-size: 19px; color: var(--muted); max-width: 64ch; margin: 16px 0 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; font-size: 13.5px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+section { padding-block: 44px 4px; scroll-margin-top: 16px; }
+section > h2 { font-size: 30px; font-weight: 800; margin-bottom: 6px; display: flex; gap: 14px; align-items: baseline; }
+section > h2 .n { font-family: var(--f-mono); font-size: 14px; color: var(--primary); font-weight: 500; }
+section > .sub { color: var(--muted); margin: 0 0 22px; max-width: 70ch; }
+h3 { font-size: 20px; font-weight: 700; margin: 28px 0 10px; }
+h4 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+p { margin: 0 0 14px; max-width: 72ch; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; max-width: 72ch; }
+li { margin-bottom: 6px; }
+a { color: var(--primary); }
+code { font-family: var(--f-mono); font-size: .86em; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+pre.code { font-family: var(--f-mono); font-size: 13px; line-height: 1.55; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; margin: 0 0 18px; }
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 640px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td, tr:last-child th { border-bottom: 0; }
+thead th { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--surface-2); white-space: nowrap; }
+tbody th { font-weight: 600; }
+td.c, th.c { text-align: center; }
+.dot { font-size: 17px; line-height: 1; }
+.y { color: var(--primary); } .p { color: var(--new); } .n0 { color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 14px; margin-bottom: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; min-width: 0; }
+.card p:last-child, .card ul:last-child { margin-bottom: 0; }
+.card .k { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+.pillar { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; padding: 22px 0; border-top: 1px solid var(--line); }
+.pillar .num { font-family: var(--f-serif); font-size: 40px; line-height: 1; color: var(--primary); }
+.pillar h3 { margin-top: 0; }
+.fixes { font-size: 13.5px; color: var(--muted); margin-bottom: 10px; }
+.fixes b { color: var(--bad); font-weight: 600; }
+.tag { display: inline-block; font-family: var(--f-mono); font-size: 11px; padding: 2px 7px; border-radius: 6px; margin-right: 4px; vertical-align: 1px; white-space: nowrap; }
+.t-mvp { background: var(--primary-soft); color: var(--primary); }
+.t-v1 { background: var(--learn-soft); color: var(--learn); }
+.t-v2 { background: var(--new-soft); color: var(--new); }
+.t-later { background: var(--surface-2); color: var(--muted); }
+.callout { background: var(--primary-soft); border-radius: 12px; padding: 16px 18px; margin: 0 0 20px; max-width: 76ch; }
+.callout p:last-child { margin-bottom: 0; }
+.warn { background: var(--bad-soft); }
+pre.mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; overflow-x: auto; margin: 0 0 20px; text-align: center; }
+.formula { font-family: var(--f-mono); font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 0 0 16px; overflow-x: auto; white-space: pre; }
+.phase { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; padding: 18px 0; border-top: 1px solid var(--line); }
+.phase .when { font-family: var(--f-mono); font-size: 13px; color: var(--primary); }
+.phase .when span { display: block; color: var(--muted); }
+.phase ul { margin-bottom: 0; }
+@media (max-width: 600px) { .phase, .pillar { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.sources { font-size: 14px; color: var(--muted); }
+.sources a { word-break: break-word; }
+.small { font-size: 13.5px; color: var(--muted); }
+</style>
+
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="brand"><span class="mark">S</span>Storyling</div>
+  <ol>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#market">Competitors</a></li>
+    <li><a href="#gaps">Gap matrix</a></li>
+    <li><a href="#product">Product pillars</a></li>
+    <li><a href="#journeys">User journeys</a></li>
+    <li><a href="#engine">Learning engine</a></li>
+    <li><a href="#content">Content system</a></li>
+    <li><a href="#ai">AI usage</a></li>
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#data">Data model</a></li>
+    <li><a href="#clients">Web &amp; app</a></li>
+    <li><a href="#design">Design system</a></li>
+    <li><a href="#business">Business model</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#team">Team &amp; cost</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#risks">Risks</a></li>
+    <li><a href="#quality">Testing</a></li>
+    <li><a href="#open">Open decisions</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <div class="eyebrow">Product &amp; architecture blueprint · Draft 1</div>
+  <h1>Storyling: learn languages through stories you can <em>almost</em> read</h1>
+  <p class="lede">What existing story apps get wrong, the features that fix it, and how to build Storyling as a website and an iOS/Android app from one codebase.</p>
+  <div class="meta"><span><b>Date</b> 6 Oct 2026</span><span><b>Languages</b> 10 at launch</span><span><b>Platforms</b> Web, iOS, Android, browser extension</span><span><b>Design</b> <a href="https://claude.ai/artifact/CH7GK3ocsQ8aHUXFK9KAHa">Storyling Design canvas</a></span></div>
+</header>
+
+<!-- ───────────── 1 ───────────── -->
+<section id="summary">
+  <h2><span class="n">01</span>Summary</h2>
+  <p>Story apps for language learners fall into three groups. <b>Curated graded readers</b> (Readle, TTMIK Stories, Todaii, Du Chinese, Satori Reader) have good content but cover one language each, grade by a level label instead of what you know, and can't read your own texts. <b>Import readers</b> (LingQ, Readlang) read anything and track your words, but reviewers call them cluttered and buggy. <b>AI story apps</b> (StoryLearning app, Langua, ReadYours) generate endless personal stories, but even their makers say the stories are simple, and quality checking is unclear.</p>
+  <p>Storyling combines the strengths of all three and adds what none of them has: <b>every text is fitted to the words you actually know</b>, <b>stories bring your new words back on a schedule</b>, and reading flows into <b>listening, speaking and retelling</b>. It ships on web, iOS and Android with one subscription for all 10 languages.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Pillar 1</div><h4>Just-right reading</h4><p>Each text shows how many of its words you know. Any story or import can be rewritten to your level.</p></div>
+    <div class="card"><div class="k">Pillar 2</div><h4>Stories that remember you</h4><p>Series and personal stories reuse your learning words at growing intervals, so reading becomes review.</p></div>
+    <div class="card"><div class="k">Pillar 3</div><h4>Read → listen → speak</h4><p>Synced audio, shadowing with pronunciation feedback, and a short retell after every story.</p></div>
+    <div class="card"><div class="k">Pillar 4</div><h4>Any text, anywhere</h4><p>Web pages, EPUB, subtitles and photos of real pages become readable lessons, online or offline.</p></div>
+    <div class="card"><div class="k">Pillar 5</div><h4>Trust by default</h4><p>Quality badges on content, labeled audio, honest feedback, clear trials, one plan for every language.</p></div>
+  </div>
+</section>
+
+<!-- ───────────── 2 ───────────── -->
+<section id="market">
+  <h2><span class="n">02</span>Competitors and what users say</h2>
+  <p class="sub">Based on public app-store listings, review sites and the apps' own help pages. This is desk research, not user interviews: confirm the main points with 15–20 learner interviews before committing roadmap money.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Group</th><th>Apps</th><th>Strength</th><th>Weakness</th></tr></thead>
+    <tbody>
+      <tr><th>Curated graded readers</th><td>Readle, TTMIK Stories, Todaii, Du Chinese, Satori Reader, The Chairman's Bao</td><td>Edited stories, native or professional audio, clear levels, polished apps</td><td>Usually one language per app; levels are labels, not personal; closed catalogs; advanced content grows slowly</td></tr>
+      <tr><th>Import readers</th><td>LingQ, Readlang, Learning With Texts</td><td>Read anything; known-word tracking; browser import</td><td>Cluttered, confusing interfaces; bugs; weak machine translations for some languages; word limits on free plans</td></tr>
+      <tr><th>Parallel-text audiobooks</th><td>Beelinguapp</td><td>Side-by-side translation with audio; offline; many languages</td><td>Passive; weak grammar help; limited structure; no desktop version (per reviews)</td></tr>
+      <tr><th>AI story generators</th><td>StoryLearning app, Langua, ReadYours, Lenguia, MeloLingua</td><td>Unlimited stories at a chosen level; saved words woven into new stories</td><td>Stories are short and plain; unclear quality control; speech features can be unreliable</td></tr>
+      <tr><th>Course apps with stories</th><td>Duolingo Stories</td><td>Huge reach, polished, motivating</td><td>Short scripted dialogues; gamification over reading; features like word lists and sentence discussions were removed</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Most repeated complaints</h3>
+  <div class="tablebox"><table>
+    <thead><tr><th>Complaint</th><th>Where it shows up</th><th>What Storyling does</th></tr></thead>
+    <tbody>
+      <tr><td>Crashes, broken quizzes, review bugs</td><td>LingQ reviews; Readle reviews (quizzes showing numbers, "abandoned" feeling)</td><td>Offline-first core with tests on every scheduler and reader path; error budget and crash-free target in release gates</td></tr>
+      <tr><td>Cluttered, confusing interface</td><td>LingQ: poor design named in 27% of negative reviews (Make Headway review)</td><td>One primary action per screen; the reader shows text first, tools on demand</td></tr>
+      <tr><td>Bad machine translations in some languages</td><td>LingQ (Japanese and Polish called unusable)</td><td>Glosses and translations made once at publish time, checked, and fixable through reports; per-language test sets</td></tr>
+      <tr><td>AI stories are bland</td><td>Langua's own help page says its AI stories "aren't going to win awards"</td><td>Editor-reviewed series for the catalog; style guides per genre; human ratings feed the generator</td></tr>
+      <tr><td>Advanced learners run out of content</td><td>Readle (slow C1 additions)</td><td>Rewrite-to-level makes any real text usable; imports have no limits</td></tr>
+      <tr><td>One app and one subscription per language</td><td>TTMIK Stories ($16.99/mo, Korean only), Todaii (one app per language)</td><td>One plan for all 10 languages</td></tr>
+      <tr><td>AI voices swapped in without saying</td><td>Readle reviews</td><td>Every audio track labeled: human, neural or device voice</td></tr>
+      <tr><td>Speech feedback praises mistakes</td><td>Langua review: pronunciation tool gave positive feedback for intentional errors</td><td>Score only when recognition confidence is high; otherwise "couldn't hear clearly, try again"</td></tr>
+      <tr><td>Removed helpful features</td><td>Duolingo (word lists, sentence discussions)</td><td>Word notebook and per-sentence questions are core features, never paywalled</td></tr>
+      <tr><td>Surprise trial charges</td><td>LingQ Trustpilot reviews</td><td>Trial reminder 2 days before charge; cancel in two taps on web</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ───────────── 3 ───────────── -->
+<section id="gaps">
+  <h2><span class="n">03</span>Gap matrix</h2>
+  <p class="sub"><span class="dot y">●</span> offered &nbsp; <span class="dot p">◐</span> partly &nbsp; <span class="dot n0">○</span> not found in our research &nbsp; — not relevant. A ○ means we didn't find it in public material, not that it definitely doesn't exist.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Capability</th><th class="c">Readle</th><th class="c">TTMIK</th><th class="c">Todaii</th><th class="c">LingQ</th><th class="c">Beelingu&shy;app</th><th class="c">Du Chinese</th><th class="c">Satori</th><th class="c">AI story apps</th><th class="c">Storyling</th></tr></thead>
+    <tbody>
+      <tr><th>Many languages, one subscription</th><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot y">●</td></tr>
+      <tr><th>Graded by <i>your</i> known words (coverage %)</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>Read your own texts</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>Rewrite any text to your level</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>Series that recycle your words</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot y">●</td><td class="c dot y">●</td></tr>
+      <tr><th>Speaking tied to the story (shadow, retell)</th><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>AI tutor that answers about the text</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot p">◐</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>Script controls (furigana, pinyin, stress…)</th><td class="c">—</td><td class="c">—</td><td class="c dot y">●</td><td class="c dot p">◐</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot y">●</td></tr>
+      <tr><th>Web and mobile</th><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot n0">○</td><td class="c dot y">●</td><td class="c dot y">●</td><td class="c dot p">◐</td><td class="c dot y">●</td></tr>
+      <tr><th>Photo of a real page → lesson</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td></tr>
+      <tr><th>Classroom assignments</th><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot p">◐</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot n0">○</td><td class="c dot y">●</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p><b>The real white space</b> isn't any single feature. Competitors each cover two or three rows. Nobody combines personal coverage, quality-checked content, and a full read → listen → speak loop in one calm app for many languages. That combination is the product.</p></div>
+</section>
+
+<!-- ───────────── 4 ───────────── -->
+<section id="product">
+  <h2><span class="n">04</span>Product pillars and features</h2>
+  <p class="sub">Release tags: <span class="tag t-mvp">MVP</span> first public beta · <span class="tag t-v1">v1</span> public launch · <span class="tag t-v2">v2</span> within a year · <span class="tag t-later">later</span>.</p>
+
+  <div class="pillar"><div class="num">1</div><div>
+    <h3>Just-right reading</h3>
+    <div class="fixes">Fixes: <b>levels that are only labels</b>, <b>advanced learners running out of content</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Personal word model.</b> Every word has a chance-you-know-it score that updates from what you read, tap, review and say. No manual "mark as known" chores.</li>
+      <li><span class="tag t-mvp">MVP</span><b>3-minute placement.</b> A yes/no vocabulary check across frequency bands, with made-up words mixed in to catch guessing. Seeds the word model on day one.</li>
+      <li><span class="tag t-mvp">MVP</span><b>Fit badge on every text.</b> "You know 96% · 7 new words". The library is sorted so the best fits come first.</li>
+      <li><span class="tag t-v1">v1</span><b>Level slider.</b> Easier / Original / Harder for any story or import. The rewrite keeps names and plot, and shows which words changed.</li>
+      <li><span class="tag t-v1">v1</span><b>Pre-reading warm-up.</b> The 3–5 most important new words, with audio, before you start.</li>
+    </ul>
+  </div></div>
+
+  <div class="pillar"><div class="num">2</div><div>
+    <h3>Stories that remember you</h3>
+    <div class="fixes">Fixes: <b>flashcard fatigue</b>, <b>one-off stories with no continuity</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Series with recurring characters.</b> Episodes of 2–5 minutes, 5–20 episodes per series, built so vocabulary repeats across episodes.</li>
+      <li><span class="tag t-v1">v1</span><b>Story for me.</b> Pick a genre and a setting; the story uses your due words and your interests. Labeled "AI-written · auto-checked".</li>
+      <li><span class="tag t-v1">v1</span><b>Reading counts as review.</b> Meeting a due word in a story and understanding it (no tap) counts as a successful review, so you do fewer flashcards.</li>
+      <li><span class="tag t-v1">v1</span><b>Encounter meter.</b> Each word shows how often you've met it in context (for example 4 of ~10), because learning from reading needs many meetings.</li>
+      <li><span class="tag t-v2">v2</span><b>Daily episode.</b> One new episode generated overnight for each subscriber, using that day's due words.</li>
+    </ul>
+  </div></div>
+
+  <div class="pillar"><div class="num">3</div><div>
+    <h3>Read → listen → speak → retell</h3>
+    <div class="fixes">Fixes: <b>passive reading with no output</b>, <b>unreliable speech feedback</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Synced audio.</b> Sentence highlighting, 0.75× without pitch drop, repeat a sentence, tap a word to hear it.</li>
+      <li><span class="tag t-v1">v1</span><b>Listen mode.</b> Background audio with lock-screen controls and a pause after each sentence for shadowing. Works offline.</li>
+      <li><span class="tag t-v1">v1</span><b>Shadowing with feedback.</b> Record a sentence and see which sounds were off. A score is shown only when recognition is confident.</li>
+      <li><span class="tag t-v2">v2</span><b>Retell.</b> Say or type 2–4 sentences about the story. Feedback praises what you got right, corrects up to 3 things, and links each to a word or pattern from the story.</li>
+      <li><span class="tag t-v2">v2</span><b>Talk to a character.</b> A short conversation with a character from the story, limited to the story's vocabulary.</li>
+    </ul>
+  </div></div>
+
+  <div class="pillar"><div class="num">4</div><div>
+    <h3>Any text, anywhere</h3>
+    <div class="fixes">Fixes: <b>closed catalogs</b>, <b>no desktop or no offline</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Paste text or a link.</b> Tokenized, glossed and given a fit badge in seconds. Private to you.</li>
+      <li><span class="tag t-v1">v1</span><b>Browser extension.</b> Storyling word colors on any web page; one click saves it to your library.</li>
+      <li><span class="tag t-v1">v1</span><b>EPUB and subtitles.</b> Read a whole book chapter by chapter, or a show's subtitles before watching.</li>
+      <li><span class="tag t-v2">v2</span><b>Photo import.</b> Take a photo of a menu, sign or book page. On-device text recognition turns it into a lesson.</li>
+      <li><span class="tag t-mvp">MVP</span><b>Offline first.</b> Downloaded stories, audio and reviews work on a plane, free tier included; progress syncs later.</li>
+    </ul>
+  </div></div>
+
+  <div class="pillar"><div class="num">5</div><div>
+    <h3>Help exactly where you're stuck</h3>
+    <div class="fixes">Fixes: <b>weak grammar explanations</b>, <b>removed discussions</b>, <b>scripts that block reading</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Script controls per language.</b> Furigana only on kanji you don't know, pinyin and tones, Korean romanization off by default, Russian stress marks, German noun gender colors, simplified or traditional Chinese.</li>
+      <li><span class="tag t-v1">v1</span><b>Ask the text.</b> "Why is it 에게 here?" Answers come from an AI tutor grounded in the sentence, with the pattern linked to other story examples.</li>
+      <li><span class="tag t-v1">v1</span><b>Pattern cards.</b> Each grammar pattern collects every sentence you've read that uses it.</li>
+      <li><span class="tag t-v1">v1</span><b>Word notes.</b> Add your own nuance notes and mnemonics to any word; they show on review cards.</li>
+      <li><span class="tag t-v2">v2</span><b>Sentence questions.</b> Ask and answer questions on a sentence with other learners, moderated, with editor answers pinned.</li>
+    </ul>
+  </div></div>
+
+  <div class="pillar"><div class="num">6</div><div>
+    <h3>Trust and together</h3>
+    <div class="fixes">Fixes: <b>surprise charges</b>, <b>hidden AI content</b>, <b>learning alone</b>.</div>
+    <ul>
+      <li><span class="tag t-mvp">MVP</span><b>Quality badges.</b> "Editor-reviewed" or "AI-written · auto-checked" on every story; an audio label on every player.</li>
+      <li><span class="tag t-mvp">MVP</span><b>Report a problem</b> on any word, sentence or translation. Fixes ship to everyone.</li>
+      <li><span class="tag t-mvp">MVP</span><b>Your data is yours.</b> Export words to CSV or Anki; delete your account in settings.</li>
+      <li><span class="tag t-v2">v2</span><b>Classes.</b> Teachers assign stories, set a coverage target, and see who finished and who struggled with which words.</li>
+      <li><span class="tag t-v2">v2</span><b>Reading clubs.</b> Small groups read the same series weekly, with shared highlights.</li>
+      <li><span class="tag t-later">later</span><b>Explanations in more languages</b> than English, a kids mode, and more learning languages (Arabic, Hindi, Turkish…).</li>
+    </ul>
+  </div></div>
+
+  <h3>Accessibility built in</h3>
+  <ul>
+    <li>Word states differ in shape as well as color (amber underline for new, blue dotted box for learning), so they work for colorblind readers.</li>
+    <li>Adjustable text size, line spacing and a dyslexia-friendly font option; full screen-reader labels; 44 px touch targets.</li>
+    <li>Every audio track has its text; every image has alt text; motion respects reduced-motion settings.</li>
+  </ul>
+</section>
+
+<!-- ───────────── 5 ───────────── -->
+<section id="journeys">
+  <h2><span class="n">05</span>Core user journeys</h2>
+  <div class="cards">
+    <div class="card"><div class="k">First 5 minutes</div><ol><li>Pick a language (10 cards).</li><li>3-minute placement check.</li><li>Pick 3 interests.</li><li>First story opens at about 95% fit, audio ready.</li><li>Finish → "You met 6 new words" → save 3.</li></ol></div>
+    <div class="card"><div class="k">Daily habit (10–15 min)</div><ol><li>Home shows today's plan: 1 episode, due reviews, 1 speaking task.</li><li>Read the next episode; due words appear in it.</li><li>Quick retell or shadow 3 sentences.</li><li>Remaining flashcards (fewer, because reading counted).</li></ol></div>
+    <div class="card"><div class="k">Real-world text</div><ol><li>Share a web article to Storyling, or take a photo of a page.</li><li>See its fit: 81%, too hard.</li><li>Slide to Easier: 95%.</li><li>Read the easier version, then the original.</li></ol></div>
+    <div class="card"><div class="k">Commute</div><ol><li>Downloaded series plays in Listen mode, phone locked.</li><li>Pause after each sentence to shadow.</li><li>"Didn't catch it" taps mark sentences to read later.</li></ol></div>
+    <div class="card"><div class="k">Teacher</div><ol><li>Create a class, share a code.</li><li>Assign "Episode 3" with a 95% target.</li><li>Dashboard: completion, quiz results, hardest words.</li></ol></div>
+  </div>
+</section>
+
+<!-- ───────────── 6 ───────────── -->
+<section id="engine">
+  <h2><span class="n">06</span>The learning engine</h2>
+  <p class="sub">Four parts: a word model, a coverage calculator, a scheduler, and a recommender. They live in a shared TypeScript package, so web, app and server compute the same numbers, even offline.</p>
+
+  <h3>Word model</h3>
+  <p>Each (learner, lemma) pair stores a probability that the learner knows the word. It starts from the placement test and the word's frequency rank, then updates from events.</p>
+  <div class="formula">prior(word)   = sigmoid( a · (V_est − rank(word)) / V_est )        // V_est = estimated vocabulary size from placement
+update        = logit(p) += w_event                                  // per event, then clamp
+w_event       : read past without tapping +0.35 · tapped −0.6 · review Good +0.8 / Again −1.0
+                used correctly in retell +1.0 · shadowed clearly +0.2
+known         : p ≥ 0.90        learning : saved by the learner, or 0.35 ≤ p < 0.90 after a tap</div>
+  <p class="small">The weights are starting guesses. Fit them on real event logs once there are a few thousand learners (logistic regression on "tapped next time or not").</p>
+
+  <h3>Placement (3 minutes)</h3>
+  <ul>
+    <li>40 items: real words sampled from frequency bands (1k, 2k, 3k, 5k, 8k), plus 10 made-up words that look real.</li>
+    <li>The learner answers "I know it" or "Not sure". Saying yes to made-up words lowers the estimate (the standard yes/no-test correction).</li>
+    <li>Output: estimated vocabulary size and a CEFR/HSK/JLPT/TOPIK band, shown honestly as an estimate.</li>
+  </ul>
+
+  <h3>Coverage and fit</h3>
+  <div class="formula">coverage(text, user) = Σ p_known(lemma_i) / N        // over word tokens; names and numbers excluded
+fit: ≥ 98% Easy · 95–98% Just right · 90–95% Stretch · &lt; 90% Too hard → offer "Make it easier"</div>
+  <p>The 95–98% band comes from reading research: Hu and Nation (2000) found 98% known words to be the comfortable level for unassisted reading of fiction. Storyling allows a little below that because tap-to-translate and audio help.</p>
+
+  <h3>Scheduler</h3>
+  <ul>
+    <li><b>FSRS</b> (open-source spaced-repetition algorithm, <code>ts-fsrs</code>) for flashcards.</li>
+    <li><b>Narrative review:</b> when a due word appears in a story and the learner reads past it without tapping, that counts as a "Good" review. Tapping it counts as "Again".</li>
+    <li><b>Daily plan</b> balances new reading, due reviews and one speaking task, sized to the learner's goal (5 / 10 / 20 min).</li>
+  </ul>
+
+  <h3>Recommender</h3>
+  <div class="formula">score = 1.0 · fit_closeness(coverage, 0.965) + 0.6 · series_continuity + 0.4 · interest_match
+      + 0.3 · due_words_in_text + 0.2 · freshness − 0.5 · recently_abandoned</div>
+  <p class="small">A simple weighted score is easy to explain and debug. Swap in a learned ranker later, once there's data.</p>
+</section>
+
+<!-- ───────────── 7 ───────────── -->
+<section id="content">
+  <h2><span class="n">07</span>Content system</h2>
+  <p class="sub">Three kinds of text, each with its own quality bar.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Kind</th><th>Made by</th><th>Checks</th><th>Badge</th><th>Audio</th></tr></thead>
+    <tbody>
+      <tr><th>Catalog series</th><td>AI draft from a story brief, then a native editor</td><td>Automatic checks + editor review + second read for flagship series</td><td>Editor-reviewed</td><td>Neural voice; human narration for top series</td></tr>
+      <tr><th>Personal stories</th><td>AI, for one learner</td><td>Automatic checks only, regenerated if they fail</td><td>AI-written · auto-checked</td><td>Neural voice, made on first play</td></tr>
+      <tr><th>Imports</th><td>The learner (web, EPUB, subtitles, photo)</td><td>Tokenizer + gloss confidence; low-confidence words flagged</td><td>Your text</td><td>Neural voice on request</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Catalog pipeline</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Series brief: characters, setting, level, target words] --> B[AI draft per episode]
+  B --> C[NLP: tokenize, lemmatize, readings]
+  C --> D{Automatic checks}
+  D -->|coverage, length, banned words, back-translation| E[Native editor in CMS]
+  D -->|fail| B
+  E --> F[Glosses + sentence translations]
+  F --> G[Audio: neural or human + word timings]
+  G --> H[Publish + SEO page]
+  H --> I[Learner reports] --> E
+</pre>
+  <h3>Automatic checks (every AI text)</h3>
+  <ul>
+    <li><b>Level fit:</b> coverage against the target band's word list, new-word budget (2–5%), sentence length limits.</li>
+    <li><b>Grammar and naturalness:</b> a second AI pass reviews the text as a native editor would and lists problems; any "high" problem fails the text.</li>
+    <li><b>Meaning:</b> back-translation compared with the brief or the original (for rewrites), so plot and names are kept.</li>
+    <li><b>Safety:</b> age-appropriate content filter; no real private people.</li>
+    <li><b>Tokenization sanity:</b> every token maps to a lemma with a gloss; unknown tokens send the text to review.</li>
+  </ul>
+  <h3>Dictionary data</h3>
+  <p>Seed lemmas and glosses from open dictionaries (Wiktionary, JMdict, CC-CEDICT, the National Institute of Korean Language's learner dictionary), then fill gaps with AI glosses that editors check. Most are CC BY-SA licensed, which requires attribution and share-alike for the dictionary data. Get a licensing review before launch.</p>
+</section>
+
+<!-- ───────────── 8 ───────────── -->
+<section id="ai">
+  <h2><span class="n">08</span>AI usage</h2>
+  <p class="sub">All AI features call Claude through the official Anthropic SDK from the server, never from the client. Default model: <code>claude-opus-5-5</code>, with effort tuned per feature.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Feature</th><th>When it runs</th><th>Settings</th><th>Cost controls</th></tr></thead>
+    <tbody>
+      <tr><td>Catalog episode drafts</td><td>Offline, in batches</td><td>Effort high; structured output (title, sentences, target words used)</td><td>Message Batches API (50% cheaper); style guide cached as a prompt prefix</td></tr>
+      <tr><td>Glosses and sentence translations</td><td>At publish or import</td><td>Effort low; structured output keyed by token index</td><td>Done once per text and cached for all learners</td></tr>
+      <tr><td>Level rewrite</td><td>On demand</td><td>Effort medium; allowed-word list in the prompt; up to 3 attempts against the checker</td><td>Result cached per (text, band)</td></tr>
+      <tr><td>Story for me / daily episode</td><td>On demand, or overnight</td><td>Effort medium; learner's due words + interests</td><td>Overnight episodes via Batch API; daily quota by plan</td></tr>
+      <tr><td>Ask the text</td><td>Live chat</td><td>Effort low; streaming; story text as a cached prefix</td><td>Prompt caching; answers to common questions reused</td></tr>
+      <tr><td>Retell feedback</td><td>After a story</td><td>Effort medium; structured output (praise, up to 3 corrections, linked words)</td><td>Short inputs; one call per retell</td></tr>
+      <tr><td>Content checker</td><td>Every AI text</td><td>Effort medium; returns a list of problems with severity</td><td>Runs only on new text</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Refusals:</b> enable the API's server-side fallback option and always check the stop reason before using output.</li>
+    <li><b>Grounding:</b> the tutor only receives the current story and the learner's level. Learner-imported text is passed as clearly marked data, never as instructions.</li>
+    <li><b>Evals:</b> each AI feature has a fixed test set graded by native reviewers (level fit, correctness, naturalness, story quality). No prompt or model change ships without beating the current version.</li>
+  </ul>
+  <p class="small">Rough cost of a 250-word personal story with glosses: a few cents of AI usage at Claude Opus 5.5 prices ($4 / $20 per million input / output tokens), about half that through the Batch API. Measure real token use in the beta before setting plan limits.</p>
+</section>
+
+<!-- ───────────── 9 ───────────── -->
+<section id="arch">
+  <h2><span class="n">09</span>System architecture</h2>
+  <p class="sub">One TypeScript monorepo for all apps, plus one Python service for language processing. Offline-first clients sync with Postgres.</p>
+<pre class="mermaid">
+flowchart TB
+  subgraph Clients
+    W[Web app + SEO pages\nNext.js]
+    M[iOS / Android\nExpo React Native]
+    X[Browser extension\nWXT]
+  end
+  subgraph Device
+    L[(Local SQLite\nwords, stories, reviews)]
+  end
+  W --- L
+  M --- L
+  L <-->|sync| PS[PowerSync]
+  W & M & X -->|HTTPS| API[Core API\nTypeScript, Hono]
+  PS <--> DB[(Postgres\nSupabase)]
+  API --> DB
+  API --> Q[Workflows\nInngest]
+  Q --> NLP[NLP service\nPython, FastAPI]
+  Q --> AI[Claude API]
+  Q --> TTS[Neural TTS +\nforced alignment]
+  Q --> ST[(Object storage + CDN\naudio, images)]
+  API --> PAY[Stripe + RevenueCat]
+  API --> AN[PostHog + Sentry]
+</pre>
+
+  <div class="tablebox"><table>
+    <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><th>Monorepo</th><td>pnpm workspaces + Turborepo</td><td>Share the learning engine, API types and design tokens across web, app and extension</td></tr>
+      <tr><th>Web</th><td>Next.js (App Router), React, Tailwind, Radix UI primitives</td><td>Server-rendered SEO story pages plus the web app in one project</td></tr>
+      <tr><th>Mobile</th><td>Expo (React Native), Expo Router, EAS builds and over-the-air updates</td><td>One codebase for iOS and Android; same TypeScript engine as web</td></tr>
+      <tr><th>Extension</th><td>WXT (Manifest V3, Chrome, Firefox, Safari)</td><td>Word colors on any page; "save to Storyling"</td></tr>
+      <tr><th>Offline sync</th><td>PowerSync over Postgres; SQLite on device (native) and SQLite WASM on web</td><td>Reading and review work offline; conflict-free sync of append-only events</td></tr>
+      <tr><th>Core API</th><td>TypeScript, Hono, Zod schemas, OpenAPI-generated client</td><td>Typed end to end; the same schemas validate on client and server</td></tr>
+      <tr><th>Database &amp; auth</th><td>Supabase: Postgres, row-level security, Auth (email link, Apple, Google), Storage</td><td>Managed Postgres with per-user access rules; fast to start</td></tr>
+      <tr><th>Workflows</th><td>Inngest (durable steps, retries, waits for editor approval)</td><td>Content pipeline steps survive failures; human review is a step</td></tr>
+      <tr><th>Language processing</th><td>Python FastAPI: spaCy/Stanza (en, es, fr, de, it, pt), pymorphy3 + stress dictionary (ru), jieba + pypinyin (zh), SudachiPy (ja), Kiwi (ko)</td><td>The best tokenizers and lemmatizers are Python libraries</td></tr>
+      <tr><th>AI</th><td>Claude API (<code>claude-opus-5-5</code>), Batch API, prompt caching, structured outputs</td><td>See section 08</td></tr>
+      <tr><th>Speech</th><td>Neural TTS with word timestamps (pick vendor by a native-listener test); Montreal Forced Aligner for human recordings; pronunciation assessment API with confidence gating</td><td>Synced highlighting; honest speaking feedback</td></tr>
+      <tr><th>Text recognition</th><td>On-device: Apple Vision (iOS), Google ML Kit (Android)</td><td>Fast, private, works offline; supports CJK and Cyrillic</td></tr>
+      <tr><th>Search &amp; similar stories</th><td>Postgres full-text search + pgvector embeddings</td><td>"More like this" without another database</td></tr>
+      <tr><th>Media</th><td>Cloudflare R2 + CDN; audio as AAC in MP4, one file per story with sentence timings</td><td>Cheap egress; one request per story</td></tr>
+      <tr><th>Payments</th><td>Stripe Billing (web), RevenueCat (App Store / Play), one entitlements table</td><td>One subscription across platforms; regional prices</td></tr>
+      <tr><th>Observability</th><td>Sentry (errors, crashes), PostHog (analytics, feature flags, experiments), OpenTelemetry traces</td><td>Crash-free and funnel targets are release gates</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Repository layout</h3>
+<pre class="code">storyling/
+├─ apps/
+│  ├─ web/            Next.js: marketing, SEO story pages, web app
+│  ├─ mobile/         Expo: iOS + Android
+│  ├─ extension/      WXT browser extension
+│  ├─ admin/          Editor CMS: review queue, glossary, reports
+│  └─ api/            Hono core API
+├─ services/
+│  └─ nlp/            Python FastAPI: tokenize, lemmatize, readings, alignment
+├─ packages/
+│  ├─ core/           word model, coverage, FSRS, recommender (pure TS, tested)
+│  ├─ reader/         reader state machine: selection, audio sync, script controls
+│  ├─ db/             schema, migrations, sync rules
+│  ├─ api-client/     generated from OpenAPI
+│  ├─ ui-tokens/      design tokens → Tailwind config + React Native theme
+│  └─ prompts/        versioned AI prompts + eval sets
+└─ content/           series briefs, style guides, word lists per language</pre>
+
+  <h3>How a reading session flows</h3>
+<pre class="mermaid">
+sequenceDiagram
+  participant U as Learner
+  participant C as App (local SQLite)
+  participant S as Sync
+  participant A as API
+  U->>C: Open episode
+  C->>C: Coverage from local word model
+  U->>C: Tap word / read past words
+  C->>C: Append events, update p_known
+  U->>C: Finish story
+  C->>C: Narrative reviews, FSRS updates
+  C-->>S: Upload events when online
+  S-->>A: Server recomputes, resolves conflicts
+  A-->>C: New daily plan + next episode
+</pre>
+  <p><b>Sync rule:</b> clients never overwrite each other's word scores. They upload append-only events, and the server replays them in timestamp order to compute the official state. This makes phone + laptop use safe.</p>
+
+  <h3>Security and privacy</h3>
+  <ul>
+    <li>Row-level security: a learner can read only their own words, imports, recordings and notes.</li>
+    <li>Voice recordings are deleted after scoring unless the learner keeps them.</li>
+    <li>GDPR: data export (JSON, CSV, Anki), account deletion within 30 days, EU data region option.</li>
+    <li>Kids mode (later) needs parental consent flows (COPPA, GDPR-K) and no community features.</li>
+    <li>Learner text sent to AI is marked as data, never instructions, to block prompt injection from imported pages.</li>
+  </ul>
+</section>
+
+<!-- ───────────── 10 ───────────── -->
+<section id="data">
+  <h2><span class="n">10</span>Data model</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Table</th><th>Key fields</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><th><code>languages</code></th><td>code, name, script, direction, tokenizer, voice ids</td><td>10 rows at launch</td></tr>
+      <tr><th><code>lemmas</code></th><td>lang, lemma, pos, frequency rank, level tags (CEFR / HSK / JLPT / TOPIK)</td><td>Unique (lang, lemma, pos)</td></tr>
+      <tr><th><code>forms</code></th><td>lemma_id, surface form, features</td><td>Maps 갔어요 → 가다, war → sein</td></tr>
+      <tr><th><code>senses</code></th><td>lemma_id, gloss (English), example, source, reviewed_by</td><td>One lemma, several meanings</td></tr>
+      <tr><th><code>series</code></th><td>lang, title, characters, level band, cover art</td><td>Episodes ordered</td></tr>
+      <tr><th><code>stories</code></th><td>kind (catalog / personal / import), owner_id, series_id, episode, status, badge</td><td>Personal and imports are private</td></tr>
+      <tr><th><code>story_versions</code></th><td>story_id, band (original / easier / harder), created_by, check results</td><td>Level slider reads these</td></tr>
+      <tr><th><code>sentences</code></th><td>version_id, index, text, English translation</td><td></td></tr>
+      <tr><th><code>tokens</code></th><td>sentence_id, index, surface, lemma_id, sense_id, reading (furigana / pinyin / stress), is_name</td><td>Written once by the NLP service</td></tr>
+      <tr><th><code>audio_tracks</code></th><td>version_id, source (human / neural / device), voice, url, sentence + word timings</td><td>Source label shown in player</td></tr>
+      <tr><th><code>user_words</code></th><td>user_id, lemma_id, p_known, state, encounters, taps, FSRS stability / difficulty / due, note</td><td>Derived from events on the server</td></tr>
+      <tr><th><code>events</code></th><td>user_id, type, story_id, token ref, value, client_ts, device_id</td><td>Append-only; the source of truth</td></tr>
+      <tr><th><code>sessions</code></th><td>user_id, story_id, started, finished, words read, coverage at start</td><td>Powers progress charts</td></tr>
+      <tr><th><code>speech_attempts</code></th><td>user_id, sentence_id, scores, confidence, kept_audio_url</td><td>Audio deleted by default</td></tr>
+      <tr><th><code>retells</code></th><td>user_id, story_id, text / transcript, feedback JSON</td><td></td></tr>
+      <tr><th><code>reports</code></th><td>target (token / sentence / audio), reason, status, resolver</td><td>Feeds the editor queue</td></tr>
+      <tr><th><code>classes</code>, <code>assignments</code></th><td>teacher, join code, story, due date, coverage target</td><td>v2</td></tr>
+      <tr><th><code>entitlements</code></th><td>user_id, plan, source (Stripe / App Store / Play), expires</td><td>One truth for all platforms</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ───────────── 11 ───────────── -->
+<section id="clients">
+  <h2><span class="n">11</span>Web and app specifics</h2>
+  <div class="cards">
+    <div class="card"><div class="k">Web</div>
+      <ul>
+        <li>Every free episode has a public, server-rendered page ("Easy Korean story: At the convenience store") for search traffic, with a "Read with your level" button.</li>
+        <li>The reader uses native HTML <code>&lt;ruby&gt;</code> for furigana and pinyin.</li>
+        <li>Keyboard shortcuts: ← → sentences, Space play, 1/2/3 word state.</li>
+        <li>Installable PWA; offline library through SQLite WASM.</li>
+        <li>Wide screens: text column + word panel + series rail.</li>
+      </ul></div>
+    <div class="card"><div class="k">iOS and Android</div>
+      <ul>
+        <li>React Native has no <code>&lt;ruby&gt;</code>, so the reader lays out tokens as wrapping views with readings above. Profile it early on long CJK texts.</li>
+        <li>Background audio with lock-screen controls (react-native-track-player).</li>
+        <li>Downloads: stories + audio + glosses packed per series.</li>
+        <li>Share sheet: "Read in Storyling" from any app; camera import.</li>
+        <li>Widgets: today's plan and due count; gentle reminders the learner sets.</li>
+      </ul></div>
+    <div class="card"><div class="k">Shared</div>
+      <ul>
+        <li><code>packages/core</code>: word model, coverage, FSRS and recommender, with identical results on every platform.</li>
+        <li><code>packages/reader</code>: selection, audio sync and script controls as a state machine; each platform only draws it.</li>
+        <li><code>packages/ui-tokens</code>: one source of colors, type and spacing for Tailwind and the native theme.</li>
+      </ul></div>
+  </div>
+</section>
+
+<!-- ───────────── 12 ───────────── -->
+<section id="design">
+  <h2><span class="n">12</span>Design system</h2>
+  <p class="sub">Full screens for web and app are on the <a href="https://claude.ai/artifact/CH7GK3ocsQ8aHUXFK9KAHa">Storyling Design canvas</a>. The core rules:</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Token</th><th>Light</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><th>Jade (primary)</th><td><code>#0B8A6A</code></td><td>Actions, progress, "known"</td></tr>
+      <tr><th>Amber (new word)</th><td><code>#FFEFBD</code> highlight + <code>#A86F00</code> underline</td><td>Words you haven't met</td></tr>
+      <tr><th>Blue (learning)</th><td><code>#E1EAFF</code> + <code>#2B6DE0</code> dotted outline</td><td>Words in review</td></tr>
+      <tr><th>Ink / paper</th><td><code>#10201B</code> on <code>#F4F7F6</code></td><td>Text and ground; dark theme mirrors it</td></tr>
+      <tr><th>Type</th><td>Plus Jakarta Sans (interface), Newsreader + Noto Serif CJK (reading)</td><td>Reading text is a serif, sized 20–24 px, line height 1.9–2.0</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Text first.</b> In the reader nothing competes with the story; tools appear on tap.</li>
+    <li><b>One primary action per screen</b>, always in the same place (bottom on phone, top-right on web).</li>
+    <li><b>Honest labels everywhere:</b> fit %, content badge, audio source, "estimate" on level guesses.</li>
+    <li><b>Calm motivation.</b> Streaks are optional and forgiving (freeze days); no leaderboards by default.</li>
+  </ul>
+</section>
+
+<!-- ───────────── 13 ───────────── -->
+<section id="business">
+  <h2><span class="n">13</span>Business model</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Plan</th><th>Price (hypothesis)</th><th>Includes</th></tr></thead>
+    <tbody>
+      <tr><th>Free</th><td>$0</td><td>All 10 languages; 3 catalog episodes a day; unlimited imports (reading); full word tracking and reviews; offline; 3 AI questions a day</td></tr>
+      <tr><th>Plus</th><td>$7.99 / month or $59.99 / year</td><td>Unlimited catalog; level slider; Story for me (daily quota); Listen mode; shadowing and retell feedback; audio for imports; EPUB / subtitles / photo import</td></tr>
+      <tr><th>Classroom</th><td>Per seat, per term [PRICE TO TEST]</td><td>Plus for students, teacher dashboard, assignments, reports</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Reference prices:</b> Readle $9.99/mo or $69.99/yr; TTMIK Stories $16.99/mo or $99.99/yr (one language); Todaii $12.99 per 3 months, $17.99/yr or $24.99 lifetime.</li>
+    <li><b>Regional pricing</b> for Central and South Asia, Latin America and Southeast Asia, where many learners of Korean, Japanese and English live.</li>
+    <li><b>Growth:</b> SEO story pages, short reading clips on TikTok, Reels and Shorts, teacher referrals, and the browser extension as a free entry point.</li>
+  </ul>
+</section>
+
+<!-- ───────────── 14 ───────────── -->
+<section id="roadmap">
+  <h2><span class="n">14</span>Roadmap</h2>
+  <div class="phase"><div class="when">Oct – Nov 2026<span>Phase 0 · Foundations</span></div><div><ul>
+    <li>Monorepo, design tokens, database schema and sync rules.</li>
+    <li>NLP service for Korean, Japanese and Spanish; golden test sets.</li>
+    <li>Content pipeline v1 and editor CMS; first 3 series (60 episodes).</li>
+    <li>Public SEO story pages and a waitlist to test demand.</li>
+  </ul></div></div>
+  <div class="phase"><div class="when">Dec 2026 – Feb 2027<span>Phase 1 · MVP beta</span></div><div><ul>
+    <li>Web app + iOS/Android beta (TestFlight, Play testing).</li>
+    <li>Placement, reader, synced audio, word model, FSRS review, offline sync.</li>
+    <li>5 languages, about 300 episodes; paste/link import; quality badges; reports.</li>
+    <li>Paywall and subscriptions; 500–1,000 beta learners.</li>
+  </ul></div></div>
+  <div class="phase"><div class="when">Mar – May 2027<span>Phase 2 · Public v1</span></div><div><ul>
+    <li>All 10 languages; level slider; Story for me; narrative review; encounter meter.</li>
+    <li>Ask the text; pattern cards; word notes; Listen mode; shadowing.</li>
+    <li>Browser extension; EPUB and subtitle import; App Store and Play launch.</li>
+  </ul></div></div>
+  <div class="phase"><div class="when">Jun – Sep 2027<span>Phase 3 · Output and groups</span></div><div><ul>
+    <li>Retell with feedback; talk to a character; photo import.</li>
+    <li>Daily personal episode; sentence questions; classes beta with 10 schools.</li>
+  </ul></div></div>
+  <div class="phase"><div class="when">Q4 2027 onward<span>Phase 4 · Expansion</span></div><div><ul>
+    <li>Explanation languages beyond English; kids mode; Arabic (right-to-left), Hindi, Turkish.</li>
+    <li>Human-narrated flagship series; creator program for teachers and writers.</li>
+  </ul></div></div>
+</section>
+
+<!-- ───────────── 15 ───────────── -->
+<section id="team">
+  <h2><span class="n">15</span>Team and running cost</h2>
+  <div class="cards">
+    <div class="card"><div class="k">Core team for MVP</div><ul>
+      <li>Founder / product lead</li><li>Product designer</li><li>2 full-stack TypeScript engineers (web, API)</li><li>1 React Native engineer</li><li>1 NLP / ML engineer (Python)</li><li>Native editors per language (freelance, part time)</li></ul></div>
+    <div class="card"><div class="k">Monthly running costs to budget for</div><ul>
+      <li>Hosting: Supabase, API hosting, Vercel or Cloudflare</li><li>AI usage (Claude): grows with active Plus users; cap it per plan</li><li>Neural TTS: one-time per text, cached</li><li>Sync (PowerSync), analytics, error tracking</li><li>Apple and Google developer accounts; app-store fees on in-app purchases</li></ul>
+      <p class="small">Get quotes once the beta shows real usage. Don't guess at scale numbers before then.</p></div>
+  </div>
+</section>
+
+<!-- ───────────── 16 ───────────── -->
+<section id="metrics">
+  <h2><span class="n">16</span>Success metrics</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Metric</th><th>Definition</th><th>Beta target</th></tr></thead>
+    <tbody>
+      <tr><td>Activation</td><td>Finishes the first story in the first session</td><td>≥ 60%</td></tr>
+      <tr><td>Retention</td><td>Day 1 / Day 7 / Day 30 active</td><td>45% / 25% / 15%, then improve</td></tr>
+      <tr><td>Fit accuracy</td><td>Taps per 100 words vs predicted coverage</td><td>Predicted within ±3 points</td></tr>
+      <tr><td>Learning</td><td>Words moving to known per active week</td><td>Track by level; no fixed target yet</td></tr>
+      <tr><td>Story completion</td><td>Finished / started</td><td>≥ 70%</td></tr>
+      <tr><td>Content quality</td><td>Valid reports per 1,000 sentences</td><td>&lt; 1 for editor-reviewed</td></tr>
+      <tr><td>Reliability</td><td>Crash-free sessions</td><td>≥ 99.5%</td></tr>
+      <tr><td>Business</td><td>Free → Plus conversion within 30 days; refund rate</td><td>3–5%; &lt; 2%</td></tr>
+      <tr><td>Unit cost</td><td>AI + TTS cost per active Plus user per month</td><td>&lt; 15% of revenue per user</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Retention targets are starting goals for a beta. Published benchmarks vary widely between apps, so measure against your own baseline.</p>
+</section>
+
+<!-- ───────────── 17 ───────────── -->
+<section id="risks">
+  <h2><span class="n">17</span>Risks and mitigations</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>AI text with errors reaches learners</td><td>Trust loss; learners learn mistakes</td><td>Native editors for the catalog; automatic checks; report button; badges that say what's checked</td></tr>
+      <tr><td>Tokenizer mistakes in Korean, Japanese, Chinese</td><td>Wrong glosses, wrong coverage</td><td>Golden test sets per language; editor corrections stored as overrides; confidence flags on imports</td></tr>
+      <tr><td>10 languages at uneven quality</td><td>Weak languages hurt reviews</td><td>Quality tiers: a language goes public only after it passes its test set and has 50+ reviewed episodes</td></tr>
+      <tr><td>AI cost grows faster than revenue</td><td>Margins</td><td>Batch API overnight, caching, daily quotas, cost per user tracked as a release metric</td></tr>
+      <tr><td>Copyright on imports and dictionaries</td><td>Legal</td><td>Imports stay private; no sharing of imported text; license review of dictionary data</td></tr>
+      <tr><td>Speech scoring is wrong</td><td>Learners lose trust</td><td>Confidence gating; never praise low-confidence attempts; human-rated test set</td></tr>
+      <tr><td>Scope creep</td><td>Late launch</td><td>MVP limited to pillars 1, 4 and the audio part of 3; everything else waits for retention data</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ───────────── 18 ───────────── -->
+<section id="quality">
+  <h2><span class="n">18</span>Testing and quality</h2>
+  <ul>
+    <li><b>Unit tests</b> for <code>packages/core</code>: word model updates, coverage, FSRS scheduling, recommender ordering.</li>
+    <li><b>Golden tests</b> per language: 500 sentences with expected tokens, lemmas and readings; run in CI on every NLP change.</li>
+    <li><b>AI evals</b>: fixed prompts per feature, graded by native reviewers plus an AI grader checked against them.</li>
+    <li><b>End-to-end tests</b>: Playwright on web; Maestro on iOS and Android (onboarding, read, review, offline, purchase).</li>
+    <li><b>Release gates</b>: crash-free ≥ 99.5%, no failing golden tests, AI eval score not below the current version.</li>
+  </ul>
+</section>
+
+<!-- ───────────── 19 ───────────── -->
+<section id="open">
+  <h2><span class="n">19</span>Open decisions</h2>
+  <ol>
+    <li><b>Launch languages:</b> all 10 at once, or 5 first (for example Korean, Japanese, Spanish, English, Chinese) and 5 in v1?</li>
+    <li><b>Main market:</b> global English speakers, or Central Asian learners first (with Uzbek and Russian explanations moved earlier)?</li>
+    <li><b>Human narration:</b> budget for human voices on the top series from day one, or neural only until revenue?</li>
+    <li><b>Schools:</b> pursue the classroom plan in 2027, or stay consumer-only?</li>
+    <li><b>Hosting region:</b> EU data residency needed at launch?</li>
+  </ol>
+</section>
+
+<section id="sources" class="sources">
+  <h2><span class="n">20</span>Sources</h2>
+  <ul>
+    <li><a href="https://apps.apple.com/us/app/-/id1483552317">Readle on the App Store</a> · <a href="https://www.alllanguageresources.com/readle/">All Language Resources: Readle review</a></li>
+    <li><a href="https://apps.apple.com/us/app/korean-reading-ttmik-stories/id1659613381">TTMIK Stories on the App Store</a> · <a href="https://edtechimpact.com/products/httpsttmikstoriesapp/">EdTech Impact: TTMIK Stories</a></li>
+    <li><a href="https://apps.apple.com/us/app/todaii-learn-german-a1-c1/id6443652990">Todaii: Learn German on the App Store</a></li>
+    <li><a href="https://makeheadway.com/blog/lingq-review/">Make Headway: LingQ review</a> · <a href="https://ie.trustpilot.com/review/lingq.com">LingQ on Trustpilot</a> · <a href="https://storylearning.com/lingq-review">StoryLearning: LingQ review</a></li>
+    <li><a href="https://ling-app.com/tips/beelinguapp-review">Ling: Beelinguapp review</a> · <a href="https://www.fluentu.com/blog/reviews/beelingapp">FluentU: Beelinguapp review</a></li>
+    <li><a href="https://goeastmandarin.com/du-chinese-review/">GoEast Mandarin: Du Chinese review</a> · <a href="https://www.tofugu.com/reviews/satori-reader/">Tofugu: Satori Reader review</a></li>
+    <li><a href="https://uxplanet.org/duolingo-ux-breakdown-1-year-of-daily-use-a290f461de2d">UX Planet: Duolingo UX breakdown</a> · <a href="https://www.alternativeto.net/software/duolingo/about/">AlternativeTo: Duolingo</a></li>
+    <li><a href="https://storylearning.com/best-ai-language-learning-apps">StoryLearning: best AI language apps</a> · <a href="https://support.languatalk.com/article/137-are-the-ai-stories-any-good">Langua help: are the AI stories any good?</a> · <a href="https://www.unite.ai/languatalk-review/">Unite.AI: LanguaTalk review</a></li>
+    <li><a href="https://play.google.com/store/apps/details?id=com.fdapps.readyours">ReadYours on Google Play</a> · <a href="https://www.lenguia.com/functions/stories">Lenguia stories</a> · <a href="https://melolingua.com/ai-story-language-app">MeloLingua</a></li>
+    <li><a href="https://forum.readlang.com/t/readlang-vs-new-competition/4759">Readlang forum: Readlang vs new competition</a> · <a href="https://community.wanikani.com/t/graded-readers-in-the-app-store/27718?page=2">WaniKani community: graded readers</a></li>
+    <li>Hu, M. &amp; Nation, P. (2000). Unknown vocabulary density and reading comprehension. <i>Reading in a Foreign Language</i>, 13(1). Summarized in <a href="https://jalt-publications.org/content/index.php/jer/article/download/301/59/2397">JALT Journal of Extensive Reading</a>.</li>
+    <li><a href="https://gitnux.org/language-learning-industry-statistics/">Gitnux: language learning industry statistics</a></li>
+  </ul>
+</section>
+</main>
+</div>

@@ -1,0 +1,1043 @@
+<title>Storyling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Gowun+Batang:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell. Desktop = left sidebar + content (+ word panel in articles). Phone = top bar + bottom tab bar; word lookup is a bottom sheet. */
+:root {
+  --bg: #f4f7f6;
+  --surface: #ffffff;
+  --surface-2: #edf2f0;
+  --ink: #10201b;
+  --muted: #5a6b65;
+  --line: #dce5e1;
+  --primary: #0b8a6a;
+  --primary-ink: #ffffff;
+  --primary-soft: #daf2ea;
+  --new: #e9a800;
+  --new-soft: #ffefbd;
+  --learn: #2b6de0;
+  --learn-soft: #e1eaff;
+  --bad: #d9480f;
+  --bad-soft: #fde6dc;
+  --shadow: 0 1px 2px rgba(16,32,27,.05), 0 6px 20px rgba(16,32,27,.07);
+  --f-ui: "Plus Jakarta Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --f-read: "Newsreader", "Gowun Batang", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --side: 232px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #93a7a0; --line: #24372f;
+    --primary: #36c89d; --primary-ink: #04140f; --primary-soft: #12382d;
+    --new: #f3c344; --new-soft: #3b3010; --learn: #77a2ff; --learn-soft: #172644; --bad: #ff8a5c; --bad-soft: #3a1d12;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #93a7a0; --line: #24372f;
+  --primary: #36c89d; --primary-ink: #04140f; --primary-soft: #12382d;
+  --new: #f3c344; --new-soft: #3b3010; --learn: #77a2ff; --learn-soft: #172644; --bad: #ff8a5c; --bad-soft: #3a1d12;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15.5px; line-height: 1.55; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ── shell ── */
+.shell { min-height: 100vh; }
+.side { position: fixed; top: 0; bottom: 0; left: 0; width: var(--side); background: var(--surface); border-right: 1px solid var(--line); padding: calc(env(safe-area-inset-top, 0px) + 20px) 14px 20px; display: flex; flex-direction: column; gap: 18px; z-index: 20; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 21px; letter-spacing: -.03em; background: none; border: 0; padding: 0 6px; }
+.logo .mark { width: 32px; height: 32px; border-radius: 9px; background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; font-family: var(--f-read); font-size: 20px; font-weight: 500; }
+.langpill { display: flex; align-items: center; gap: 10px; width: 100%; border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 9px 12px; text-align: left; }
+.langpill .nat { font-family: var(--f-read); font-size: 19px; font-weight: 500; }
+.langpill .sub { font-size: 12px; color: var(--muted); display: block; line-height: 1.2; }
+.langpill .chev { margin-left: auto; color: var(--muted); }
+.navlist { display: grid; gap: 2px; }
+.navbtn { display: flex; align-items: center; gap: 12px; border: 0; background: none; padding: 10px 12px; border-radius: 10px; font-weight: 600; color: var(--muted); text-align: left; }
+.navbtn svg { width: 20px; height: 20px; flex: none; }
+.navbtn:hover { background: var(--surface-2); color: var(--ink); }
+.navbtn[aria-current="page"] { background: var(--primary-soft); color: var(--primary); }
+.navbtn .badge { margin-left: auto; }
+.badge { font-family: var(--f-mono); font-size: 11px; min-width: 20px; padding: 1px 6px; border-radius: 99px; background: var(--bad); color: #fff; text-align: center; line-height: 1.5; }
+.side .foot { margin-top: auto; font-size: 12px; color: var(--muted); padding: 0 6px; }
+.content { margin-left: var(--side); padding: 28px 32px 120px; }
+.content-inner { max-width: 940px; margin: 0 auto; }
+.topbar, .tabbar { display: none; }
+
+@media (max-width: 899px) {
+  .side { display: none; }
+  .content { margin-left: 0; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  .topbar .langpill { width: auto; padding: 6px 10px; }
+  .topbar .langpill .nat { font-size: 16px; }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar .navbtn { flex-direction: column; gap: 2px; font-size: 11px; padding: 6px 2px; position: relative; justify-content: center; }
+  .tabbar .navbtn .badge { position: absolute; top: 0; left: 55%; margin: 0; }
+  .tabbar .navbtn[aria-current="page"] { background: none; }
+  body.reading .tabbar { display: none; }
+}
+
+/* ── buttons & chips ── */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 10px 16px; border-radius: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { background: none; border-color: transparent; }
+.btn.sm { padding: 6px 11px; font-size: 13.5px; border-radius: 9px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 10px 14px; font-weight: 700; color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-pressed="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-block: 12px; }
+.chip { border: 1px solid var(--line); background: var(--surface); padding: 5px 12px; border-radius: 99px; font-size: 13.5px; font-weight: 600; white-space: nowrap; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; padding: 3px; background: var(--surface-2); gap: 2px; }
+.seg button { border: 0; background: none; padding: 5px 11px; border-radius: 7px; font-size: 13.5px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+/* ── onboarding ── */
+.ob { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+.ob-card { width: 100%; max-width: 760px; }
+.ob-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 26px; height: 5px; border-radius: 99px; background: var(--line); }
+.dots i.on { background: var(--primary); }
+.ob h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; line-height: 1.1; }
+.ob p.lead { color: var(--muted); font-size: 17px; margin: 10px 0 26px; }
+.langs { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.lang-opt { border: 2px solid var(--line); background: var(--surface); border-radius: 18px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 4px; min-height: 140px; transition: border-color .15s, transform .15s; }
+.lang-opt:hover { transform: translateY(-2px); border-color: var(--muted); }
+.lang-opt[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.lang-opt .big { font-family: var(--f-read); font-size: 34px; line-height: 1.1; font-weight: 500; margin-bottom: auto; }
+.lang-opt .nm { font-weight: 800; font-size: 16px; }
+.lang-opt .ct { font-size: 12.5px; color: var(--muted); }
+.opts { display: grid; gap: 10px; }
+.opt { border: 2px solid var(--line); background: var(--surface); border-radius: 14px; padding: 14px 18px; text-align: left; display: flex; align-items: center; gap: 14px; }
+.opt[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.opt .ic { width: 42px; height: 42px; border-radius: 11px; background: var(--surface-2); display: grid; place-items: center; font-weight: 800; flex: none; font-family: var(--f-mono); font-size: 13px; }
+.opt b { display: block; }
+.opt span.d { font-size: 13.5px; color: var(--muted); }
+.ob-nav { display: flex; justify-content: space-between; margin-top: 28px; gap: 10px; }
+
+/* ── feed ── */
+.hello { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 14px; margin-bottom: 18px; }
+.hello h1 { font-size: 28px; font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; display: block; line-height: 1.2; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 560px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.feature { display: grid; grid-template-columns: 260px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; text-align: left; padding: 0; width: 100%; margin-bottom: 8px; box-shadow: var(--shadow); }
+.feature .art { min-height: 180px; }
+.feature .fb { padding: 20px 22px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.feature .t { font-family: var(--f-read); font-size: 28px; line-height: 1.2; font-weight: 500; }
+@media (max-width: 640px) { .feature { grid-template-columns: 1fr; } .feature .art { min-height: 140px; } }
+.list { display: grid; gap: 10px; }
+.item { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: left; width: 100%; }
+.item:hover { border-color: var(--muted); }
+.item .art { height: 84px; border-radius: 11px; }
+.item .t { font-family: var(--f-read); font-size: 19px; font-weight: 500; line-height: 1.25; }
+.item .tt { font-size: 13.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.lvl { font-family: var(--f-mono); font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--surface-2); color: var(--ink); }
+.fit { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+.fit.easy { background: var(--primary-soft); color: var(--primary); }
+.fit.right { background: var(--primary); color: var(--primary-ink); }
+.fit.stretch { background: var(--new-soft); color: color-mix(in srgb, var(--new) 50%, var(--ink)); }
+.fit.hard { background: var(--bad-soft); color: var(--bad); }
+.read-tag { color: var(--primary); font-weight: 700; }
+.covbar { display: flex; height: 5px; border-radius: 99px; overflow: hidden; background: var(--new-soft); margin-top: 6px; }
+.covbar i { display: block; height: 100%; }
+.covbar .k { background: var(--primary); } .covbar .l { background: var(--learn); }
+.section-h { display: flex; justify-content: space-between; align-items: center; margin: 26px 0 4px; }
+.section-h h2 { font-size: 19px; font-weight: 800; }
+
+/* article art */
+.art { position: relative; overflow: hidden; display: block; background: var(--surface-2); }
+.art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art.a-food { background: #ffe7c7; } .art.a-daily { background: #dff1ff; } .art.a-work { background: #e6e6fb; } .art.a-weather { background: #d9ecf2; }
+.art.a-animals { background: #fbe3ea; } .art.a-travel { background: #fff1c9; } .art.a-city { background: #dcf3e8; } .art.a-home { background: #f1e7dc; } .art.a-mine { background: #ebe7f5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .art { filter: saturate(.8) brightness(.62); } }
+:root[data-theme="dark"] .art { filter: saturate(.8) brightness(.62); }
+
+/* ── article ── */
+.art-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 24px; align-items: start; }
+@media (max-width: 1099px) { .art-wrap { grid-template-columns: minmax(0, 1fr); } }
+.banner { height: 170px; border-radius: 18px; margin: 12px 0 18px; }
+.a-title { font-family: var(--f-read); font-size: clamp(28px, 4vw, 38px); font-weight: 500; line-height: 1.15; letter-spacing: 0; }
+.a-sub { color: var(--muted); margin-top: 4px; }
+.opts-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 16px 0; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; font-size: 13.5px; font-weight: 600; padding: 4px 6px; }
+.toggle i { width: 34px; height: 20px; border-radius: 99px; background: var(--line); position: relative; transition: background .15s; }
+.toggle i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle[aria-pressed="true"] i { background: var(--primary); }
+.toggle[aria-pressed="true"] i::after { left: 16px; }
+.page { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: clamp(18px, 4vw, 34px); }
+.text { font-family: var(--f-read); font-size: clamp(20px, 2.4vw, 24px); line-height: 2; }
+.sent { display: block; padding: 4px 8px; margin: 0 -8px; border-radius: 8px; transition: background .2s; }
+.sent + .sent { margin-top: 6px; }
+.sent.cur { background: var(--primary-soft); }
+.sent .tr { display: block; font-family: var(--f-ui); font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 2px 0 6px; }
+.w { background: none; border: 0; padding: 0 1px; margin: 0; font: inherit; line-height: inherit; color: inherit; border-radius: 4px; }
+.hl .w.new { background: linear-gradient(transparent 60%, var(--new-soft) 60%); }
+.hl .w.learn { background: var(--learn-soft); box-shadow: inset 0 -2px 0 var(--learn); }
+.w:hover { background: var(--surface-2); }
+.w.sel { outline: 2px solid var(--primary); outline-offset: 1px; }
+.end { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+.end p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+.panel { position: sticky; top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.lemma { font-family: var(--f-read); font-size: 34px; font-weight: 500; line-height: 1.15; }
+.pos { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+.pos .py { font-family: var(--f-ui); font-size: 14px; color: var(--primary); font-weight: 700; }
+.gloss { font-size: 17px; font-weight: 500; }
+.wstate { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.wstate button { border: 1px solid var(--line); background: var(--surface-2); border-radius: 9px; padding: 8px 4px; font-size: 12.5px; font-weight: 700; }
+.wstate button[aria-pressed="true"].s-learning { background: var(--learn); border-color: var(--learn); color: #fff; }
+.wstate button[aria-pressed="true"].s-known { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.wstate button[aria-pressed="true"].s-ignored { background: var(--muted); border-color: var(--muted); color: var(--surface); }
+.box { background: var(--surface-2); border-radius: 12px; padding: 12px; font-size: 14.5px; }
+.box h4 { margin: 0 0 6px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ai { white-space: pre-wrap; margin-top: 10px; }
+.ring { --p: 80; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--primary) calc(var(--p) * 1%), var(--new-soft) 0); }
+.ring span { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-weight: 800; font-size: 19px; }
+.kv { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+.kv b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.legend { display: grid; gap: 6px; font-size: 13.5px; }
+.legend .sw { display: inline-block; font-family: var(--f-read); font-size: 16px; padding: 0 5px; margin-right: 6px; }
+.sheet-bg { display: none; }
+@media (max-width: 1099px) {
+  .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 40; border-radius: 20px 20px 0 0; max-height: 70vh; overflow-y: auto; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -12px 40px rgba(0,0,0,.2); max-width: 640px; margin: 0 auto; }
+  .panel.idle { display: none; }
+  .sheet-bg.on { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.25); z-index: 35; }
+  .panel .grab { width: 40px; height: 4px; border-radius: 99px; background: var(--line); align-self: center; }
+}
+@media (min-width: 1100px) { .panel .grab, .panel .x { display: none; } }
+
+/* audio bar */
+.player { position: fixed; left: var(--side); right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+.player .in { max-width: 940px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.player .pbtn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; flex: none; }
+.player .ibtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.player .prog { flex: 1; min-width: 0; }
+.player .bar { height: 5px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.player .bar i { display: block; height: 100%; background: var(--primary); transition: width .25s; }
+.player .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; justify-content: space-between; gap: 8px; }
+@media (max-width: 899px) { .player { left: 0; } }
+
+/* quiz */
+.quiz { background: var(--surface-2); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.quiz .q { font-family: var(--f-read); font-size: 26px; }
+.quiz .ctx { font-family: var(--f-read); font-size: 17px; color: var(--muted); }
+.quiz .ctx mark { background: var(--new-soft); color: var(--ink); border-radius: 3px; padding: 0 2px; }
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .choices { grid-template-columns: 1fr; } }
+.choice { border: 2px solid var(--line); background: var(--surface); border-radius: 11px; padding: 10px 12px; text-align: left; font-weight: 600; }
+.choice.ok { border-color: var(--primary); background: var(--primary-soft); }
+.choice.no { border-color: var(--bad); background: var(--bad-soft); }
+
+/* dictionary & words */
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; margin: 14px 0; }
+.search input { border: 0; background: none; padding: 10px 0; width: 100%; outline: none; font-size: 16px; }
+.search:focus-within { border-color: var(--primary); }
+.dlist { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.drow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.drow:last-child { border-bottom: 0; }
+.drow .l { font-family: var(--f-read); font-size: 21px; font-weight: 500; }
+.drow .g { font-size: 14px; color: var(--muted); }
+.st { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); }
+.st.learning { background: var(--learn-soft); color: var(--learn); }
+.st.known { background: var(--primary-soft); color: var(--primary); }
+.st.new { background: var(--new-soft); color: color-mix(in srgb, var(--new) 50%, var(--ink)); }
+.flash { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px 22px; text-align: center; display: grid; gap: 16px; box-shadow: var(--shadow); max-width: 600px; margin: 18px auto 0; }
+.flash .lemma { font-size: 46px; }
+.flash .ctx { font-family: var(--f-read); font-size: 20px; line-height: 1.7; }
+.flash .ctx mark { background: var(--learn-soft); color: inherit; box-shadow: inset 0 -2px 0 var(--learn); border-radius: 3px; padding: 0 2px; }
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grades .btn { flex-direction: column; gap: 0; }
+.grades .btn small { font-weight: 500; font-size: 11.5px; opacity: .75; }
+.empty { text-align: center; padding: 44px 20px; background: var(--surface); border: 1px dashed var(--line); border-radius: 18px; margin-top: 18px; }
+.empty h2 { font-size: 21px; margin-bottom: 6px; }
+
+/* forms */
+.form { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+.form label { font-size: 13px; font-weight: 700; color: var(--muted); display: grid; gap: 6px; }
+.form textarea, .form input { border: 1px solid var(--line); border-radius: 11px; background: var(--surface-2); padding: 10px 12px; width: 100%; }
+.form textarea { min-height: 190px; resize: vertical; font-family: var(--f-read); font-size: 18px; line-height: 1.6; }
+.status { font-size: 14px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+.card + .card { margin-top: 12px; }
+.card h3 { font-size: 16px; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 11px; font-size: 14.5px; z-index: 60; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="root"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/*DATA*/
+const CATS = { daily: "Daily life", food: "Food", work: "Work", weather: "Weather", animals: "Animals", travel: "Travel", city: "City", home: "Home", mine: "My texts" };
+const PUNCT = /^[\p{P}\p{S}]+$/u;
+STORIES.forEach(st => {
+  st.noSpace = !!LANGS[st.lang].noSpace;
+  st.sents = st.sents.map(([str, tr]) => ({
+    tokens: str.split(" ").map(t => {
+      if (PUNCT.test(t)) return { s: t, p: true };
+      const [s, l] = t.split("=");
+      return { s, l: l || s };
+    }),
+    tr: tr || null,
+  }));
+});
+const AUDIO = /*AUDIO*/{};
+
+const ART = {
+  food: `<circle cx="60" cy="58" r="30" fill="#f08a4b"/><rect x="26" y="50" width="68" height="10" rx="5" fill="#c4572a"/><path d="M48 26c-4-6 4-8 0-14M60 28c-4-6 4-8 0-14M72 26c-4-6 4-8 0-14" stroke="#c4572a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  daily: `<rect x="40" y="16" width="40" height="64" rx="8" fill="#2f6fd6"/><rect x="45" y="24" width="30" height="44" rx="3" fill="#bcd9ff"/><circle cx="60" cy="74" r="3" fill="#bcd9ff"/><circle cx="90" cy="24" r="8" fill="#ffb84d"/>`,
+  work: `<rect x="34" y="20" width="52" height="64" rx="3" fill="#5a5fc8"/><g fill="#dcdcff"><rect x="42" y="28" width="10" height="9"/><rect x="56" y="28" width="10" height="9"/><rect x="70" y="28" width="10" height="9"/><rect x="42" y="42" width="10" height="9"/><rect x="56" y="42" width="10" height="9"/><rect x="70" y="42" width="10" height="9"/><rect x="42" y="56" width="10" height="9"/><rect x="70" y="56" width="10" height="9"/></g><rect x="54" y="66" width="12" height="18" fill="#2e317d"/>`,
+  weather: `<ellipse cx="60" cy="38" rx="30" ry="16" fill="#5b8fa8"/><circle cx="48" cy="32" r="13" fill="#5b8fa8"/><circle cx="68" cy="28" r="15" fill="#5b8fa8"/><g stroke="#2d6f8c" stroke-width="3" stroke-linecap="round"><path d="M42 62l-4 10M58 62l-4 10M74 62l-4 10M50 76l-3 7M66 76l-3 7"/></g>`,
+  animals: `<circle cx="60" cy="54" r="24" fill="#e0779a"/><path d="M40 40l2-22 14 14zM80 40l-2-22-14 14z" fill="#e0779a"/><circle cx="51" cy="52" r="3" fill="#5a1f33"/><circle cx="69" cy="52" r="3" fill="#5a1f33"/><path d="M56 62q4 4 8 0" stroke="#5a1f33" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+  travel: `<circle cx="84" cy="26" r="11" fill="#f2a200"/><path d="M8 86l34-46 20 26 14-16 36 36z" fill="#d48a1e"/><path d="M8 86l34-46 10 13-14 33z" fill="#b06b0c"/>`,
+  city: `<rect x="22" y="30" width="76" height="40" rx="10" fill="#1f9e74"/><g fill="#d6f5e8"><rect x="30" y="38" width="16" height="13" rx="2"/><rect x="52" y="38" width="16" height="13" rx="2"/><rect x="74" y="38" width="16" height="13" rx="2"/></g><circle cx="40" cy="74" r="6" fill="#145c45"/><circle cx="80" cy="74" r="6" fill="#145c45"/><rect x="10" y="80" width="100" height="3" fill="#145c45"/>`,
+  home: `<path d="M24 50L60 22l36 28v34H24z" fill="#b5835a"/><rect x="52" y="60" width="16" height="24" fill="#6e4628"/><circle cx="92" cy="70" r="7" fill="none" stroke="#e5a400" stroke-width="3.5"/><path d="M99 70h12M106 70v6" stroke="#e5a400" stroke-width="3.5" stroke-linecap="round"/>`,
+  mine: `<rect x="30" y="18" width="52" height="64" rx="5" fill="#8a7cc6"/><g stroke="#ece8fb" stroke-width="3" stroke-linecap="round"><path d="M40 32h32M40 42h32M40 52h22"/></g><path d="M78 56l16-16 6 6-16 16-8 2z" fill="#4c3f8a"/>`,
+};
+const art = (cat, cls = "") => `<span class="art a-${cat} ${cls}" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">${ART[cat] || ART.mine}</svg></span>`;
+
+const ICONS = {
+  read: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>`,
+  dict: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>`,
+  words: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>`,
+  import: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3 3 3-3"/></svg>`,
+  me: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>`,
+  play: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>`,
+  pause: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`,
+  prev: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 5L8 12l10 7zM6 5h2v14H6z"/></svg>`,
+  next: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 5l10 7-10 7zM16 5h2v14h-2z"/></svg>`,
+  speaker: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>`,
+};
+
+// ═════════════════════════ state ═════════════════════════
+const KEY = "ilgi.v2";
+const fresh = () => ({ lang: null, words: {}, imports: [], done: {}, seeded: {}, fLevel: "all", fCat: "all", showTr: false, hl: true });
+let S;
+try { S = { ...fresh(), ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch { S = fresh(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+
+let view = S.lang ? "read" : "onboard";
+let ob = { step: 0, lang: S.lang, level: 1 };
+let storyId = null, sel = null, cur = 0, playing = false, rate = 1;
+let quiz = null, flip = false, wordsTab = "review", dq = "";
+let sample = null, sampleChecked = false, aiCtl = null, aiOut = {};
+
+const $ = s => document.querySelector(s);
+const root = $("#root");
+const h = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shown = l => l.split("#")[0];
+const wkey = (lang, l) => lang + "|" + l;
+const stateOf = (lang, l) => S.words[wkey(lang, l)]?.s || "new";
+const stories = (lang = S.lang) => [...S.imports.filter(s => s.lang === lang), ...STORIES.filter(s => s.lang === lang)];
+const findStory = id => [...STORIES, ...S.imports].find(s => s.id === id);
+
+function lookup(story, l) {
+  const d = story?.dict?.[l];
+  if (d) return { pos: d[0], g: d[1] };
+  const lang = story ? story.lang : S.lang;
+  const e = D[lang]?.[l] || D[lang]?.[l.toLowerCase()];
+  return e ? { pos: e[0], g: e[1], r: e[2] || "" } : null;
+}
+const trOf = se => typeof se.tr === "string" ? se.tr : (se.tr?.en || (se.tr ? Object.values(se.tr)[0] : "") || "");
+const ttOf = st => typeof st.tt === "string" ? st.tt : (st.tt?.en || "");
+function coverage(st) {
+  let k = 0, l = 0, n = 0;
+  for (const se of st.sents) for (const t of se.tokens) {
+    if (t.p) continue;
+    const s = stateOf(st.lang, t.l);
+    if (s === "known" || s === "ignored") k++; else if (s === "learning") l++; else n++;
+  }
+  const total = k + l + n || 1;
+  return { k, l, n, total, pct: Math.round(k / total * 100) };
+}
+function fit(p) {
+  if (p >= 97) return ["easy", "Easy"];
+  if (p >= 85) return ["right", "Just right"];
+  if (p >= 70) return ["stretch", "Stretch"];
+  return ["hard", "Hard"];
+}
+const due = () => Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning" && (w.due || 0) <= Date.now());
+const knownCount = lang => Object.entries(S.words).filter(([k, w]) => k.startsWith(lang + "|") && w.s === "known").length;
+function toast(m) { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function seedLang(lang, level) {
+  if (S.seeded[lang]) return;
+  let list = SEED[lang];
+  if (level === 0) list = list.slice(0, 8);
+  if (level === 2) {
+    const first = LANGS[lang].levels[0];
+    list = [...list, ...STORIES.filter(s => s.lang === lang && s.level === first).flatMap(s => s.sents.flatMap(se => se.tokens.filter(t => !t.p).map(t => t.l)))];
+  }
+  for (const l of list) S.words[wkey(lang, l)] ||= { s: "known" };
+  S.seeded[lang] = true;
+}
+
+// ═════════════════════════ audio ═════════════════════════
+// Stories and dictionary words play from recorded files: one file per story and one per language,
+// with the start/end time of every clip in AUDIO. Imported texts fall back to the browser's speech engine.
+const synth = window.speechSynthesis;
+const srcCache = {};
+let actx = null, curEl = null, curNode = null, poll = 0, token = 0;
+function unlockAudio() {
+  // called synchronously inside a click so later playback is allowed
+  try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch {}
+}
+function waitMeta(el) { return new Promise((ok, bad) => { if (el.readyState >= 1) return ok(); el.onloadedmetadata = ok; el.onerror = bad; setTimeout(bad, 8000); }); }
+function loadSource(file) {
+  return srcCache[file] ||= (async () => {
+    let ab = null;
+    try { const r = await fetch(file); if (r.ok) ab = await r.arrayBuffer(); } catch {}
+    if (ab) {
+      try { // media element keeps the pitch natural at 0.75×
+        const el = new Audio(); el.preload = "auto"; el.src = URL.createObjectURL(new Blob([ab], { type: "audio/mp4" }));
+        await waitMeta(el); return { el };
+      } catch {}
+      try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); return { buf: await actx.decodeAudioData(ab.slice(0)) }; } catch {}
+    }
+    const el = new Audio(); el.preload = "auto"; el.src = file;
+    await waitMeta(el); return { el };
+  })().catch(e => { delete srcCache[file]; throw e; });
+}
+function stopClip() {
+  token++; clearInterval(poll);
+  if (curEl) { curEl.pause(); curEl = null; }
+  if (curNode) { try { curNode.stop(); } catch {} curNode = null; }
+  synth?.cancel();
+}
+async function playClip(file, span, onend) {
+  stopClip(); const my = token;
+  let src;
+  try { src = await loadSource(file); } catch { if (my === token) { toast("Couldn't load the audio. Try again."); onend?.(false); } return; }
+  if (my !== token) return;
+  const [start, end] = span, from = Math.max(0, start - 0.04);
+  if (src.el) {
+    const el = src.el; curEl = el;
+    el.playbackRate = rate; el.currentTime = from;
+    try { await el.play(); } catch { if (my === token) { curEl = null; toast("Tap play again to start the audio."); onend?.(false); } return; }
+    poll = setInterval(() => {
+      if (my !== token) return clearInterval(poll);
+      if (el.currentTime >= end + 0.06 || el.ended) { clearInterval(poll); el.pause(); curEl = null; onend?.(true); }
+    }, 40);
+  } else {
+    if (actx.state === "suspended") await actx.resume();
+    const n = actx.createBufferSource(); n.buffer = src.buf; n.playbackRate.value = rate; n.connect(actx.destination);
+    n.onended = () => { if (my === token && curNode === n) { curNode = null; onend?.(true); } };
+    curNode = n; n.start(0, from, end - from + 0.08);
+  }
+}
+function speakTTS(text, lang, onend) {
+  stopClip();
+  if (!synth) { toast("Audio for your own texts isn't available in this browser."); onend?.(false); return; }
+  const u = new SpeechSynthesisUtterance(text); u.lang = LANGS[lang].tts; u.rate = rate;
+  const c = LANGS[lang].tts.slice(0, 2), v = synth.getVoices().find(v => v.lang?.toLowerCase().startsWith(c)); if (v) u.voice = v;
+  let done = false; const fin = ok => { if (!done) { done = true; onend?.(ok); } };
+  u.onend = () => fin(true); u.onerror = () => fin(false);
+  synth.speak(u);
+}
+const sentText = (st, se) => se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + t.s).join("");
+function playSentence(st, i, onend) {
+  const a = AUDIO.stories[st.id];
+  if (a?.s[i]) playClip(a.f, a.s[i], onend); else speakTTS(sentText(st, st.sents[i]), st.lang, onend);
+}
+function playWord(lang, lemma, surface) {
+  const a = AUDIO.words[lang], span = a?.w[lemma] || a?.w[lemma.toLowerCase?.()];
+  if (span) playClip(a.f, span); else speakTTS(surface || shown(lemma), lang);
+}
+function preload(st) {
+  const a = AUDIO.stories[st.id]; if (a) loadSource(a.f).catch(() => {});
+  const w = AUDIO.words[st.lang]; if (w) loadSource(w.f).catch(() => {});
+}
+function stop() { playing = false; stopClip(); }
+function playFrom(st, i) {
+  stop(); playing = true; cur = i; paintPlayer(st);
+  const step = j => {
+    if (!playing || j >= st.sents.length) { playing = false; if (j >= st.sents.length) cur = 0; paintPlayer(st); return; }
+    cur = j; paintPlayer(st);
+    playSentence(st, j, ok => { if (!playing) return; if (ok === false) { playing = false; paintPlayer(st); return; } setTimeout(() => playing && step(j + 1), 250); });
+  };
+  step(i);
+}
+function paintPlayer(st) {
+  document.querySelectorAll(".sent.cur").forEach(e => e.classList.remove("cur"));
+  if (playing) document.querySelector(`.sent[data-si="${cur}"]`)?.classList.add("cur");
+  const p = $("#player"); if (!p) return;
+  const n = st.sents.length;
+  p.querySelector(".pbtn").innerHTML = playing ? ICONS.pause : ICONS.play;
+  p.querySelector(".pbtn").setAttribute("aria-label", playing ? "Pause" : "Play");
+  p.querySelector(".bar i").style.width = ((cur + (playing ? 1 : 0)) / n * 100) + "%";
+  p.querySelector(".pos-l").textContent = `Sentence ${cur + 1} of ${n}`;
+  p.querySelectorAll("[data-rate]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.rate === rate)));
+}
+
+// ═════════════════════════ shell ═════════════════════════
+const NAV = [["read", "Read"], ["dict", "Dictionary"], ["words", "Words"], ["import", "Import"], ["me", "Profile"]];
+function navButtons(cls) {
+  const d = due().length;
+  return NAV.map(([v, label]) => `<button class="navbtn" data-nav="${v}" aria-current="${(view === v || (view === "article" && v === "read")) ? "page" : "false"}">${ICONS[v]}<span>${label}</span>${v === "words" && d ? `<span class="badge">${d}</span>` : ""}</button>`).join("");
+}
+function langPill() {
+  const L = LANGS[S.lang];
+  return `<button class="langpill" data-nav="me" aria-label="Learning ${L.name}. Change language"><span><span class="nat">${h(L.native)}</span><span class="sub">Learning ${L.name}</span></span><span class="chev">▾</span></button>`;
+}
+function render() {
+  aiCtl?.abort();
+  document.body.classList.toggle("reading", view === "article");
+  if (view === "onboard") { root.innerHTML = renderOnboard(); return; }
+  const body = { read: renderFeed, article: renderArticle, dict: renderDict, words: renderWords, import: renderImport, me: renderMe }[view]();
+  root.innerHTML = `
+  <div class="shell">
+    <aside class="side">
+      <button class="logo" data-nav="read"><span class="mark">S</span>Storyling</button>
+      ${langPill()}
+      <nav class="navlist" aria-label="Main">${navButtons()}</nav>
+      <div class="foot">Progress is saved in this browser.</div>
+    </aside>
+    <header class="topbar"><button class="logo" data-nav="read"><span class="mark">S</span>Storyling</button>${langPill()}</header>
+    <main class="content"><div class="content-inner">${body}</div></main>
+    <nav class="tabbar" aria-label="Main">${navButtons()}</nav>
+  </div>`;
+  if (view === "article") { const st = findStory(storyId); paintPlayer(st); renderPanel(st); preload(st); }
+}
+function go(v, id) {
+  stop(); aiOut = {};
+  view = v; if (id !== undefined) storyId = id;
+  sel = null; quiz = null; flip = false; cur = 0;
+  render(); window.scrollTo({ top: 0 });
+}
+
+// ═════════════════════════ onboarding ═════════════════════════
+function renderOnboard() {
+  const dots = `<div class="dots">${[0, 1].map(i => `<i class="${i <= ob.step ? "on" : ""}"></i>`).join("")}</div>`;
+  let inner = "";
+  if (ob.step === 0) {
+    inner = `<h1>Which language do you want to learn?</h1>
+      <p class="lead">Pick one to start. All explanations are in English. You can switch languages anytime from your profile.</p>
+      <div class="langs">${Object.entries(LANGS).map(([k, L]) => `
+        <button class="lang-opt" data-ob-lang="${k}" aria-pressed="${ob.lang === k}">
+          <span class="big" lang="${k}">${h(L.native)}</span>
+          <span class="nm">${L.name}</span>
+          <span class="ct">${STORIES.filter(s => s.lang === k).length} stories · ${L.levels.join(" – ").replace(/ – .* – /, " – ")}</span>
+        </button>`).join("")}</div>`;
+  } else {
+    const L = LANGS[ob.lang];
+    inner = `<h1>How much ${L.name} do you know?</h1>
+      <p class="lead">This sets which words count as known at the start. Reading updates it from there.</p>
+      <div class="opts">${[["0", "Just starting", "I know a few words and can read the script."], ["1", "Some basics", `Simple sentences are OK. Around ${L.levels[0]}.`], ["2", "Intermediate", `${L.levels[0]} stories feel easy.`]].map(([v, t, d]) => `
+        <button class="opt" data-ob-level="${v}" aria-pressed="${ob.level === +v}"><span class="ic">${["A", "B", "C"][v]}</span><span><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div>`;
+  }
+  const canNext = ob.step !== 0 || ob.lang;
+  return `<div class="ob"><div class="ob-card">
+    <div class="ob-top"><span class="logo"><span class="mark">S</span>Storyling</span>${dots}</div>
+    ${inner}
+    <div class="ob-nav">
+      ${ob.step ? `<button class="btn ghost" id="ob-back">Back</button>` : (S.lang ? `<button class="btn ghost" id="ob-cancel">Cancel</button>` : "<span></span>")}
+      <button class="btn primary" id="ob-next" ${canNext ? "" : "disabled"}>${ob.step === 1 ? "Start reading" : "Continue"}</button>
+    </div>
+  </div></div>`;
+}
+
+// ═════════════════════════ feed ═════════════════════════
+function itemRow(st) {
+  const c = coverage(st), [fc, fl] = fit(c.pct);
+  return `<button class="item" data-open="${h(st.id)}">
+    ${art(st.imported ? "mine" : st.cat)}
+    <span style="min-width:0;display:block">
+      <span class="t" lang="${st.lang}" style="display:block">${h(st.title)}</span>
+      <span class="tt" style="display:block">${h(ttOf(st) || (st.imported ? "Your text" : LANGS[st.lang].name + " · " + CATS[st.cat]))}</span>
+      <span class="meta"><span class="lvl">${h(st.level)}</span><span>${st.min ? st.min + " min" : st.date || ""}</span><span class="fit ${fc}">${fl} · ${c.pct}%</span>${S.done[st.id] ? '<span class="read-tag">✓ Read</span>' : ""}</span>
+    </span></button>`;
+}
+function renderFeed() {
+  const L = LANGS[S.lang], all = stories();
+  const levels = ["all", ...L.levels, ...(all.some(s => s.imported) ? ["Your text"] : [])];
+  const cats = ["all", ...new Set(all.map(s => s.imported ? "mine" : s.cat))];
+  const list = all.filter(s => (S.fLevel === "all" || s.level === S.fLevel) && (S.fCat === "all" || (s.imported ? "mine" : s.cat) === S.fCat));
+  const best = all.filter(s => !S.done[s.id]).map(s => ({ s, c: coverage(s) })).sort((a, b) => Math.abs(92 - a.c.pct) - Math.abs(92 - b.c.pct))[0];
+  const done = all.filter(s => S.done[s.id]).length;
+  let feature = "";
+  if (best) {
+    const [fc, fl] = fit(best.c.pct);
+    feature = `<div class="section-h"><h2>Recommended for you</h2></div>
+    <button class="feature" data-open="${h(best.s.id)}">
+      ${art(best.s.imported ? "mine" : best.s.cat)}
+      <span class="fb">
+        <span class="meta" style="margin:0"><span class="lvl">${h(best.s.level)}</span><span>${CATS[best.s.imported ? "mine" : best.s.cat]}</span><span>${best.s.min || 1} min</span></span>
+        <span class="t" lang="${best.s.lang}">${h(best.s.title)}</span>
+        <span class="muted">${h(ttOf(best.s))}</span>
+        <span class="covbar"><i class="k" style="width:${best.c.k / best.c.total * 100}%"></i><i class="l" style="width:${best.c.l / best.c.total * 100}%"></i></span>
+        <span class="meta"><span class="fit ${fc}">${fl}</span><span>You know ${best.c.k} of ${best.c.total} words · ${best.c.n} new</span></span>
+      </span>
+    </button>`;
+  }
+  return `
+  <div class="hello">
+    <div><div class="eyebrow">${h(L.native)} · ${L.name}</div><h1>Today's reading</h1></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${knownCount(S.lang)}</b><span>words known</span></div>
+    <div class="stat"><b>${Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning").length}</b><span>in review</span></div>
+    <div class="stat"><b>${due().length}</b><span>due today</span></div>
+    <div class="stat"><b>${done}/${all.length}</b><span>stories read</span></div>
+  </div>
+  ${feature}
+  <div class="section-h"><h2>All stories</h2></div>
+  <div class="tabs" role="group" aria-label="Level">${levels.map(l => `<button data-flevel="${h(l)}" aria-pressed="${S.fLevel === l}">${l === "all" ? "All levels" : h(l)}</button>`).join("")}</div>
+  <div class="chips" role="group" aria-label="Topic">${cats.map(c => `<button class="chip" data-fcat="${c}" aria-pressed="${S.fCat === c}">${c === "all" ? "All topics" : CATS[c]}</button>`).join("")}</div>
+  <div class="list">${list.map(itemRow).join("") || `<div class="empty"><h2>No stories here</h2><p class="muted">Try another level or topic.</p></div>`}</div>`;
+}
+
+// ═════════════════════════ article ═════════════════════════
+function renderArticle() {
+  const st = findStory(storyId);
+  if (!st) { view = "read"; return renderFeed(); }
+  const c = coverage(st);
+  const text = st.sents.map((se, si) => {
+    const toks = se.tokens.map((t, ti) => {
+      const sp = (ti === 0 || t.p || st.noSpace) ? "" : " ";
+      if (t.p) return h(t.s);
+      const s = stateOf(st.lang, t.l);
+      const cls = s === "new" ? "new" : s === "learning" ? "learn" : "";
+      const isSel = sel && sel.si === si && sel.ti === ti;
+      return `${sp}<button class="w ${cls}${isSel ? " sel" : ""}" data-si="${si}" data-ti="${ti}">${h(t.s)}</button>`;
+    }).join("");
+    return `<span class="sent" data-si="${si}">${toks}${S.showTr && trOf(se) ? `<span class="tr">${h(trOf(se))}</span>` : ""}</span>`;
+  }).join("");
+  return `
+  <button class="btn ghost sm" data-nav="read">← All stories</button>
+  <div class="art-wrap">
+    <div style="min-width:0">
+      ${art(st.imported ? "mine" : st.cat, "banner")}
+      <div class="meta" style="margin-bottom:8px"><span class="lvl">${h(st.level)}</span><span>${CATS[st.imported ? "mine" : st.cat]}</span>${st.date ? `<span>${h(st.date)}</span>` : ""}<span class="fit ${fit(c.pct)[0]}">${fit(c.pct)[1]} · ${c.pct}% known</span></div>
+      <h1 class="a-title" lang="${st.lang}">${h(st.title)}</h1>
+      <div class="a-sub">${h(ttOf(st))}</div>
+      <div class="opts-bar">
+        <div class="row">
+          ${st.sents.some(se => trOf(se)) ? `<button class="toggle" id="t-tr" aria-pressed="${S.showTr}"><i></i>Translation</button>` : ""}
+          <button class="toggle" id="t-hl" aria-pressed="${S.hl}"><i></i>Highlight new words</button>
+        </div>
+      </div>
+      <article class="page">
+        <div class="text ${S.hl ? "hl" : ""}" lang="${st.lang}">${text}</div>
+        <div class="end" id="end">${renderEnd(st, c)}</div>
+      </article>
+    </div>
+    <div class="sheet-bg ${sel ? "on" : ""}" id="sheet-bg"></div>
+    <aside class="panel ${sel ? "" : "idle"}" id="panel" aria-live="polite"></aside>
+  </div>
+  <div class="player" id="player"><div class="in">
+    <button class="ibtn" data-pl="prev" aria-label="Previous sentence">${ICONS.prev}</button>
+    <button class="pbtn" data-pl="play" aria-label="Play">${ICONS.play}</button>
+    <button class="ibtn" data-pl="next" aria-label="Next sentence">${ICONS.next}</button>
+    <div class="prog"><div class="bar"><i style="width:0"></i></div><div class="lbl"><span class="pos-l"></span><span>${AUDIO.stories[st.id] ? "Computer voice · " + h(LANGS[st.lang].voice) : "Browser voice"}</span></div></div>
+    <div class="seg" role="group" aria-label="Speed">${[0.75, 1].map(r => `<button data-rate="${r}" aria-pressed="${rate === r}">${r}×</button>`).join("")}</div>
+  </div></div>`;
+}
+function renderEnd(st, c) {
+  if (quiz) return renderQuiz(st);
+  return `<p>${c.n ? `Finished? The <b>${c.n}</b> highlighted word${c.n > 1 ? "s" : ""} you didn't save will be marked as known.` : "Every word here is known or saved for review."}</p>
+    <div class="row"><button class="btn" id="q-start">Quick check: 5 words</button><button class="btn primary" id="finish">Finish story</button></div>`;
+}
+function buildQuiz(st) {
+  const seen = new Set(), pool = [];
+  for (const [si, se] of st.sents.entries()) for (const t of se.tokens) {
+    if (t.p || seen.has(t.l)) continue;
+    const info = lookup(st, t.l);
+    if (!info?.g || (info.pos === "name")) continue;
+    seen.add(t.l); pool.push({ l: t.l, s: t.s, si, g: info.g, st: stateOf(st.lang, t.l) });
+  }
+  const rank = x => ({ new: 0, learning: 1, known: 2, ignored: 3 })[x.st];
+  const picks = shuffle(pool).sort((a, b) => rank(a) - rank(b)).slice(0, 5);
+  const allG = [...new Set([...Object.values(D[st.lang] || {}).map(e => e[1]), ...Object.values(st.dict || {}).map(e => e[1])])];
+  return { i: 0, score: 0, picked: null, missed: [], qs: picks.map(p => {
+    const wrong = shuffle(allG.filter(g => g && g !== p.g)).slice(0, 3);
+    return { ...p, opts: shuffle([p.g, ...wrong]) };
+  }) };
+}
+function renderQuiz(st) {
+  if (!quiz.qs.length) return `<p>No words to check in this text.</p><div class="row"><button class="btn primary" id="finish">Finish story</button></div>`;
+  if (quiz.i >= quiz.qs.length) {
+    return `<div class="quiz"><div class="eyebrow">Quick check</div><h3 style="font-size:22px">${quiz.score} of ${quiz.qs.length} correct</h3>
+      <p>${quiz.missed.length ? `${quiz.missed.length} word${quiz.missed.length > 1 ? "s" : ""} you missed went to your review deck.` : "Nice work. Nothing to add to review."}</p>
+      <div class="row"><button class="btn" id="q-again">Try again</button><button class="btn primary" id="finish">Finish story</button></div></div>`;
+  }
+  const q = quiz.qs[quiz.i], se = st.sents[q.si];
+  const ctx = se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + (t.l === q.l && !t.p ? `<mark>${h(t.s)}</mark>` : h(t.s))).join("");
+  return `<div class="quiz">
+    <div class="row" style="justify-content:space-between"><span class="eyebrow">Quick check · ${quiz.i + 1}/${quiz.qs.length}</span><button class="btn ghost sm" id="q-close">Close</button></div>
+    <div class="q" lang="${st.lang}">${h(shown(q.l))}</div>
+    <div class="ctx" lang="${st.lang}">${ctx}</div>
+    <div class="choices">${q.opts.map((o, i) => {
+      let cls = "";
+      if (quiz.picked !== null) { if (o === q.g) cls = "ok"; else if (i === quiz.picked) cls = "no"; }
+      return `<button class="choice ${cls}" data-pick="${i}" ${quiz.picked !== null ? "disabled" : ""}>${h(o)}</button>`;
+    }).join("")}</div>
+    ${quiz.picked !== null ? `<div class="row" style="justify-content:flex-end"><button class="btn primary" id="q-next">${quiz.i + 1 < quiz.qs.length ? "Next" : "See result"}</button></div>` : ""}
+  </div>`;
+}
+function renderPanel(st) {
+  const p = $("#panel"); if (!p) return;
+  $("#sheet-bg")?.classList.toggle("on", !!sel);
+  const c = coverage(st);
+  if (!sel) {
+    p.className = "panel idle";
+    p.innerHTML = `<div class="eyebrow">This story</div>
+      <div class="row" style="gap:16px"><div class="ring" style="--p:${c.pct}"><span>${c.pct}%</span></div>
+        <div style="flex:1;display:grid;gap:4px"><div class="kv"><span>Known</span><b>${c.k}</b></div><div class="kv"><span>Learning</span><b>${c.l}</b></div><div class="kv"><span>New</span><b>${c.n}</b></div></div></div>
+      <div class="legend hl">
+        <div><span class="sw w new">new</span>not met yet</div>
+        <div><span class="sw w learn">word</span>saved for review</div>
+        <div><span class="sw">word</span>known</div>
+      </div>
+      <p class="muted small" style="margin:0">Tap any word to look it up.</p>`;
+    return;
+  }
+  const se = st.sents[sel.si], t = se.tokens[sel.ti];
+  const info = lookup(st, t.l), s = stateOf(st.lang, t.l), ai = aiOut[sel.si];
+  p.className = "panel";
+  p.innerHTML = `
+    <span class="grab"></span>
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="lemma" lang="${st.lang}">${h(shown(t.l))}</div>
+      <div class="pos">${info?.r ? `<b class="py">${h(info.r)}</b> · ` : ""}${h(info?.pos || "word")}${t.s !== shown(t.l) ? ` · in text: ${h(t.s)}` : ""}</div></div>
+      <div class="row"><button class="btn sm" id="say-word" aria-label="Hear the word">${ICONS.speaker}</button><button class="btn ghost sm x" id="p-close" aria-label="Close">✕</button></div>
+    </div>
+    <div class="gloss">${info?.g ? h(info.g) : `<span class="muted">Not in the dictionary yet.${sample ? " Try “Explain sentence” below." : ""}</span>`}</div>
+    <div class="wstate" role="group" aria-label="Word status">
+      <button class="s-learning" data-set="learning" aria-pressed="${s === "learning"}">Review</button>
+      <button class="s-known" data-set="known" aria-pressed="${s === "known"}">Known</button>
+      <button class="s-ignored" data-set="ignored" aria-pressed="${s === "ignored"}">Ignore</button>
+    </div>
+    <div class="box">
+      <h4>Sentence ${sel.si + 1}</h4>
+      <div>${trOf(se) ? h(trOf(se)) : '<span class="muted">No translation stored.</span>'}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sm" id="say-sent">${ICONS.speaker} Listen</button>
+        ${sample ? `<button class="btn sm" id="explain">${ai?.busy ? "Stop" : "Explain sentence"}</button>` : ""}
+      </div>
+      ${ai ? `<div class="ai">${h(ai.text)}</div>` : ""}
+    </div>`;
+}
+async function explain(st) {
+  const si = sel.si;
+  if (aiOut[si]?.busy) { aiCtl?.abort(); return; }
+  aiCtl = new AbortController();
+  aiOut[si] = { text: "Thinking…", busy: true }; renderPanel(st);
+  const prompt = `You are a friendly ${LANGS[st.lang].name} teacher. Explain this ${LANGS[st.lang].name} sentence to a learner, writing in simple English.
+Go through the grammar: endings, particles, conjugations and useful patterns. Under 130 words. Plain text, no Markdown.
+
+Sentence: ${sentText(st, st.sents[si])}`;
+  try {
+    await sample(prompt, { modelTier: "quick", signal: aiCtl.signal, onText: ({ text }) => { aiOut[si] = { text, busy: true }; const el = document.querySelector("#panel .ai"); if (el && sel?.si === si) el.textContent = text; } });
+    aiOut[si].busy = false;
+  } catch (e) {
+    const msg = { not_granted: "Claude isn't allowed for this page.", rate_limited: "Too many requests. Try again in a minute.", cancelled: "" }[e.code] ?? "Couldn't get an explanation. Try again.";
+    aiOut[si] = { text: (e.text || "") + (msg ? (e.text ? "\n\n" : "") + msg : ""), busy: false };
+    if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled"].includes(e.code)) sample = null;
+  }
+  if (view === "article") renderPanel(st);
+}
+function setWord(lang, l, s, src) {
+  const k = wkey(lang, l);
+  if (S.words[k]?.s === s) delete S.words[k];
+  else S.words[k] = s === "learning" ? { s, due: Date.now(), ivl: 0, src } : { s };
+  save();
+}
+function refreshText(st) {
+  // repaint word classes without rebuilding the page (keeps scroll and player)
+  document.querySelectorAll(".text .w").forEach(b => {
+    const t = st.sents[b.dataset.si].tokens[b.dataset.ti], s = stateOf(st.lang, t.l);
+    b.classList.toggle("new", s === "new"); b.classList.toggle("learn", s === "learning");
+  });
+  const end = $("#end"); if (end && !quiz) end.innerHTML = renderEnd(st, coverage(st));
+}
+function finish(st) {
+  let n = 0;
+  for (const se of st.sents) for (const t of se.tokens) {
+    if (t.p) continue; const k = wkey(st.lang, t.l);
+    if (!S.words[k]) { S.words[k] = { s: "known" }; n++; }
+  }
+  S.done[st.id] = true; save();
+  toast(n ? `${n} new word${n > 1 ? "s" : ""} marked as known` : "Story finished");
+  go("read");
+}
+
+// ═════════════════════════ dictionary ═════════════════════════
+function renderDict() {
+  const L = LANGS[S.lang];
+  const entries = [];
+  for (const [l, e] of Object.entries(D[S.lang])) entries.push({ l, pos: e[0], g: e[1], r: e[2] || "" });
+  for (const st of stories()) if (st.dict) for (const [l, e] of Object.entries(st.dict)) if (!D[S.lang][l]) entries.push({ l, pos: e[0], g: e[1] });
+  const q = dq.trim().toLowerCase();
+  const res = entries.filter(e => !q || e.l.toLowerCase().includes(q) || e.g.toLowerCase().includes(q)).sort((a, b) => a.l.localeCompare(b.l, S.lang));
+  return `<div class="hello"><div><div class="eyebrow">${h(L.native)} → English</div><h1>Dictionary</h1></div></div>
+    <label class="search" for="dq">${ICONS.dict.replace("<svg", '<svg width="18" height="18"')}<input id="dq" placeholder="Search ${L.name} or English" value="${h(dq)}" autocomplete="off"></label>
+    <p class="muted small">${res.length} of ${entries.length} words from the stories in your library</p>
+    <div class="dlist" id="dres">${dictRows(res)}</div>`;
+}
+function dictRows(res) {
+  return res.slice(0, 150).map(e => {
+    const s = stateOf(S.lang, e.l);
+    return `<div class="drow"><div style="min-width:0"><span class="l" lang="${S.lang}">${h(shown(e.l))}</span> <span class="pos">${e.r ? `<b class="py">${h(e.r)}</b> · ` : ""}${h(e.pos)}</span><div class="g">${h(e.g)}</div></div>
+      <div class="row"><span class="st ${s}">${{ new: "New", learning: "Review", known: "Known", ignored: "Ignored" }[s]}</span>
+      <button class="btn sm" data-say="${h(e.l)}" aria-label="Listen">${ICONS.speaker}</button>
+      ${s !== "learning" ? `<button class="btn sm" data-dadd="${h(e.l)}">+ Review</button>` : ""}</div></div>`;
+  }).join("") || `<div class="drow"><span class="muted">No words match “${h(dq)}”.</span></div>`;
+}
+
+// ═════════════════════════ words / review ═════════════════════════
+const DAY = 864e5;
+const nextIvl = (w, g) => g === "again" ? 6e4 : g === "good" ? (w.ivl ? Math.round(w.ivl * 2.5) : DAY) : (w.ivl ? Math.round(w.ivl * 4) : 4 * DAY);
+const fmt = ms => { const d = Math.round(ms / DAY); return ms < DAY ? "1 min" : d === 1 ? "1 day" : d < 31 ? d + " days" : Math.round(d / 30) + " mo"; };
+function renderWords() {
+  const d = due();
+  const mine = Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning");
+  const tabs = `<div class="tabs" role="group"><button data-wtab="review" aria-pressed="${wordsTab === "review"}">Review${d.length ? ` (${d.length})` : ""}</button><button data-wtab="list" aria-pressed="${wordsTab === "list"}">My words (${mine.length})</button></div>`;
+  const head = `<div class="hello"><div><div class="eyebrow">${h(LANGS[S.lang].native)}</div><h1>Words</h1></div></div>${tabs}`;
+  if (wordsTab === "list") {
+    return head + (mine.length ? `<div class="dlist" style="margin-top:16px">${mine.map(([k, w]) => {
+      const l = k.slice(3), st = findStory(w.src?.id), info = lookup(st || null, l);
+      return `<div class="drow"><div style="min-width:0"><span class="l" lang="${S.lang}">${h(shown(l))}</span><div class="g">${h(info?.g || "")}</div></div>
+        <div class="row"><span class="muted small">${(w.due || 0) <= Date.now() ? "due now" : "in " + fmt(w.due - Date.now())}</span><button class="btn sm" data-wknown="${h(l)}">Mark known</button></div></div>`;
+    }).join("")}</div>` : `<div class="empty"><h2>No saved words yet</h2><p class="muted">Tap a word while reading and choose “Review”.</p></div>`);
+  }
+  if (!d.length) {
+    return head + `<div class="empty"><h2>${mine.length ? "All done for now" : "Nothing to review yet"}</h2>
+      <p class="muted">${mine.length ? `${mine.length} word${mine.length > 1 ? "s are" : " is"} scheduled for later.` : "Words you save while reading come back here, in the sentence where you found them."}</p>
+      <button class="btn primary" data-nav="read">Read a story</button></div>`;
+  }
+  const [k, w] = d[0], l = k.slice(3), st = findStory(w.src?.id), info = lookup(st || null, l);
+  let ctx = "", tr = "";
+  if (st?.sents[w.src.si]) {
+    const se = st.sents[w.src.si];
+    ctx = se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + (t.l === l && !t.p ? `<mark>${h(t.s)}</mark>` : h(t.s))).join("");
+    tr = trOf(se);
+  }
+  return head + `<div class="flash">
+    <div class="eyebrow">${d.length} due</div>
+    <div class="lemma" lang="${S.lang}">${h(shown(l))}</div>
+    ${ctx ? `<div class="ctx" lang="${S.lang}">${ctx}</div>` : ""}
+    ${flip ? `<div><div class="pos">${info?.r ? `<b class="py">${h(info.r)}</b> · ` : ""}${h(info?.pos || "")}</div><div class="gloss" style="font-size:20px">${h(info?.g || "No meaning stored")}</div>${tr ? `<div class="muted" style="margin-top:6px">${h(tr)}</div>` : ""}</div>
+      <div class="grades">
+        <button class="btn" data-grade="again">Again<small>1 min</small></button>
+        <button class="btn" data-grade="good">Good<small>${fmt(nextIvl(w, "good"))}</small></button>
+        <button class="btn primary" data-grade="easy">Easy<small>${fmt(nextIvl(w, "easy"))}</small></button>
+      </div>` : `<div class="row" style="justify-content:center"><button class="btn" data-say="${h(l)}">${ICONS.speaker} Listen</button><button class="btn primary" id="flip">Show meaning</button></div>`}
+  </div>`;
+}
+function grade(g) {
+  const [k, w] = due()[0], ivl = nextIvl(w, g);
+  S.words[k] = (g === "easy" && ivl > 21 * DAY) ? { s: "known" } : { ...w, ivl: g === "again" ? 0 : ivl, due: Date.now() + ivl };
+  save(); flip = false; render();
+}
+
+// ═════════════════════════ import ═════════════════════════
+const SAMPLE_TEXT = { ko: "나는 주말마다 공원에서 산책을 해요. 공원에는 큰 나무가 많아요.", ja: "わたしは しゅうまつに こうえんを さんぽします。", es: "Los domingos paseo por el parque. Hay muchos árboles grandes.", de: "Am Sonntag gehe ich im Park spazieren. Dort gibt es viele große Bäume." };
+function renderImport() {
+  const L = LANGS[S.lang];
+  let draft = null; try { draft = localStorage.getItem("ilgi.draft." + S.lang); } catch {}
+  const mine = S.imports.filter(s => s.lang === S.lang);
+  return `<div class="hello"><div><div class="eyebrow">${h(L.native)}</div><h1>Read your own text</h1></div></div>
+  <form class="form" id="imp-form">
+    <label for="imp-title">Title (optional)<input id="imp-title" placeholder="My article"></label>
+    <label for="imp-text">${L.name} text<textarea id="imp-text" maxlength="1500" lang="${S.lang}">${h(draft ?? SAMPLE_TEXT[S.lang])}</textarea></label>
+    <div class="row">
+      <button type="submit" class="btn primary" id="imp-ai" ${sample ? "" : "hidden"}>Prepare with Claude</button>
+      <button type="button" class="btn" id="imp-basic">Prepare without AI</button>
+    </div>
+    <div class="status" id="imp-status">${sample ? `Claude splits the text into words, finds dictionary forms, and adds English meanings and translations.` : sampleChecked ? "Basic mode: only words in the built-in dictionary will have meanings." : "Checking whether Claude is available…"}</div>
+  </form>
+  <div class="section-h"><h2>Your texts</h2>${mine.length ? `<button class="btn ghost sm" id="imp-clear">Remove all</button>` : ""}</div>
+  <div class="list">${mine.map(itemRow).join("") || `<p class="muted">Texts you import appear here and in your reading list.</p>`}</div>`;
+}
+function newImport(title, sents, dict) {
+  const st = { id: "imp-" + Date.now(), lang: S.lang, level: "Your text", imported: true, cat: "mine", title: title || "Untitled", tt: {}, date: new Date().toLocaleDateString("en", { month: "short", day: "numeric" }), sents, dict, noSpace: S.lang === "ja" && !dict ? true : S.lang === "ja" };
+  S.imports.unshift(st); save();
+  try { localStorage.removeItem("ilgi.draft." + S.lang); } catch {}
+  return st;
+}
+function basicImport(title, text) {
+  if (typeof Intl.Segmenter !== "function") { toast("This browser can't split text into words."); return null; }
+  const tag = LANGS[S.lang].tts, sents = [];
+  const ws = new Intl.Segmenter(tag, { granularity: "word" });
+  for (const { segment } of new Intl.Segmenter(tag, { granularity: "sentence" }).segment(text)) {
+    const tokens = [];
+    for (const w of ws.segment(segment.trim())) {
+      if (!w.segment.trim()) continue;
+      tokens.push(w.isWordLike ? { s: w.segment, l: S.lang === "es" ? w.segment.toLowerCase() : w.segment } : { s: w.segment, p: true });
+    }
+    if (tokens.length) sents.push({ tokens, tr: null });
+  }
+  return sents.length ? newImport(title, sents, null) : null;
+}
+async function aiImport(title, text) {
+  const L = LANGS[S.lang], ex = "English", status = $("#imp-status"), btn = $("#imp-ai");
+  const prompt = `You are preparing a graded reader for a language learner. The text is in ${L.name}. The learner reads explanations in ${ex}.
+Split the TEXT into sentences and each sentence into tokens. A token is a word exactly as written (for Korean keep particles and endings attached, e.g. "학교에"; for Japanese split into words and particles) or one punctuation mark. For each word give its dictionary form (lemma). Give each sentence a natural translation into ${ex}. For every distinct lemma give a short part of speech in English and a short meaning in ${ex}.
+Reply with only JSON in this shape:
+{"title":"short title in ${L.name}","sentences":[{"tokens":[["학교에","학교"],[".",""]],"tr":"translation"}],"glossary":{"학교":["noun","meaning"]}}
+Use "" as the lemma for punctuation.
+
+TEXT:
+"""${text.slice(0, 1500)}"""`;
+  btn.disabled = true; status.textContent = "Claude is reading your text. This can take up to a minute…";
+  try {
+    const r = await sample.json(prompt, { modelTier: "default" });
+    if (!r || !Array.isArray(r.sentences)) throw { code: "invalid_json" };
+    const sents = r.sentences.filter(s => Array.isArray(s?.tokens)).map(s => ({
+      tokens: s.tokens.filter(t => Array.isArray(t) && t[0]).map(([sf, lm]) => (!lm || PUNCT.test(String(sf))) ? { s: String(sf), p: true } : { s: String(sf), l: String(lm) }),
+      tr: s.tr ? String(s.tr) : null,
+    })).filter(s => s.tokens.length);
+    if (!sents.length) throw { code: "invalid_json" };
+    const dict = {};
+    for (const [k, v] of Object.entries(r.glossary || {})) if (Array.isArray(v)) dict[k] = [String(v[0] || ""), String(v[1] || "")];
+    const st = newImport(title || String(r.title || "").slice(0, 60), sents, dict);
+    go("article", st.id);
+  } catch (e) {
+    btn.disabled = false;
+    status.textContent = { not_granted: "Claude isn't allowed for this page. Use “Prepare without AI”.", rate_limited: "Too many requests right now. Try again in a minute.", invalid_json: "Claude's answer couldn't be read. Try again or shorten the text.", refused: "Claude couldn't prepare this text. Try a different one." }[e.code] || "Something went wrong. Try again.";
+    if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled"].includes(e.code)) { sample = null; btn.hidden = true; }
+  }
+}
+
+// ═════════════════════════ profile ═════════════════════════
+function renderMe() {
+  return `<div class="hello"><div><div class="eyebrow">Profile</div><h1>Your languages</h1></div></div>
+  <div class="card"><h3>Learning</h3>
+    <div class="langs">${Object.entries(LANGS).map(([k, L]) => `
+      <button class="lang-opt" data-switch="${k}" aria-pressed="${S.lang === k}" style="min-height:130px">
+        <span class="big" lang="${k}" style="font-size:32px">${h(L.native)}</span><span class="nm">${L.name}</span>
+        <span class="ct">${S.seeded[k] ? knownCount(k) + " words known" : "Not started"}</span>
+      </button>`).join("")}</div></div>
+  <div class="card"><h3>Audio</h3><p class="muted" style="margin:0">Stories and dictionary words are read by a computer voice for each language (for example Yuna for Korean, Thomas for French). It isn't a human recording, and the player always says so.</p></div>
+  <div class="card"><h3>Reset</h3><p class="muted" style="margin:0">Clears known words, review cards and imported texts in this browser.</p>
+    <div><button class="btn" id="reset">Reset all progress</button></div></div>`;
+}
+
+// ═════════════════════════ events ═════════════════════════
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, [data-open]");
+  if (t && (t.dataset.pl || t.dataset.say || t.id === "say-word" || t.id === "say-sent")) unlockAudio();
+  if (!t) { if (e.target.id === "sheet-bg" && sel) { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); renderPanel(findStory(storyId)); } return; }
+  const ds = t.dataset;
+
+  // onboarding
+  if (view === "onboard") {
+    if (ds.obLang) { ob.lang = ds.obLang; root.innerHTML = renderOnboard(); return; }
+    if (ds.obLevel) { ob.level = +ds.obLevel; root.innerHTML = renderOnboard(); return; }
+    if (t.id === "ob-back") { ob.step--; root.innerHTML = renderOnboard(); return; }
+    if (t.id === "ob-cancel") { go("me"); return; }
+    if (t.id === "ob-next") {
+      if (ob.step === 0 && S.seeded[ob.lang]) { S.lang = ob.lang; S.fLevel = "all"; S.fCat = "all"; save(); return go("read"); }
+      if (ob.step < 1) { ob.step++; root.innerHTML = renderOnboard(); return; }
+      S.lang = ob.lang; S.fLevel = "all"; S.fCat = "all"; seedLang(ob.lang, ob.level); save(); return go("read");
+    }
+    return;
+  }
+
+  if (ds.nav) return go(ds.nav);
+  if (ds.open) return go("article", ds.open);
+  if (ds.flevel) { S.fLevel = ds.flevel; save(); return render(); }
+  if (ds.fcat) { S.fCat = ds.fcat; save(); return render(); }
+  if (ds.say) return playWord(S.lang, ds.say);
+  if (ds.switch) {
+    if (S.seeded[ds.switch]) { S.lang = ds.switch; S.fLevel = "all"; S.fCat = "all"; save(); return go("read"); }
+    ob = { step: 1, lang: ds.switch, level: 1 }; view = "onboard"; return render();
+  }
+  if (t.id === "reset") { if (ds.armed) { S = fresh(); save(); ob = { step: 0, lang: null, level: 1 }; view = "onboard"; return render(); } ds.armed = "1"; t.textContent = "Tap again to confirm"; return; }
+
+  if (view === "article") {
+    const st = findStory(storyId);
+    if (t.classList.contains("w")) { sel = { si: +ds.si, ti: +ds.ti }; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); t.classList.add("sel"); return renderPanel(st); }
+    if (t.id === "p-close") { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); return renderPanel(st); }
+    if (ds.set) { setWord(st.lang, st.sents[sel.si].tokens[sel.ti].l, ds.set, { id: st.id, si: sel.si }); refreshText(st); return renderPanel(st); }
+    if (t.id === "say-word") { stop(); paintPlayer(st); const tk = st.sents[sel.si].tokens[sel.ti]; return playWord(st.lang, tk.l, tk.s); }
+    if (t.id === "say-sent") { stop(); paintPlayer(st); return playSentence(st, sel.si); }
+    if (t.id === "explain") return explain(st);
+    if (t.id === "t-tr") { S.showTr = !S.showTr; save(); return render(); }
+    if (t.id === "t-hl") { S.hl = !S.hl; save(); t.setAttribute("aria-pressed", String(S.hl)); document.querySelector(".text").classList.toggle("hl", S.hl); return; }
+    if (ds.pl === "play") return playing ? (stop(), paintPlayer(st)) : playFrom(st, cur);
+    if (ds.pl === "prev") { const i = Math.max(0, cur - 1); return playing ? playFrom(st, i) : (cur = i, paintPlayer(st)); }
+    if (ds.pl === "next") { const i = Math.min(st.sents.length - 1, cur + 1); return playing ? playFrom(st, i) : (cur = i, paintPlayer(st)); }
+    if (ds.rate) { rate = +ds.rate; return paintPlayer(st); }
+    if (t.id === "finish") return finish(st);
+    if (t.id === "q-start" || t.id === "q-again") { quiz = buildQuiz(st); $("#end").innerHTML = renderEnd(st); return; }
+    if (t.id === "q-close") { quiz = null; $("#end").innerHTML = renderEnd(st, coverage(st)); return; }
+    if (ds.pick !== undefined && quiz.picked === null) {
+      quiz.picked = +ds.pick; const q = quiz.qs[quiz.i];
+      if (q.opts[quiz.picked] === q.g) quiz.score++;
+      else { quiz.missed.push(q.l); S.words[wkey(st.lang, q.l)] = { s: "learning", due: Date.now(), ivl: 0, src: { id: st.id, si: q.si } }; save(); refreshText(st); }
+      $("#end").innerHTML = renderEnd(st); return;
+    }
+    if (t.id === "q-next") { quiz.i++; quiz.picked = null; $("#end").innerHTML = renderEnd(st); return; }
+  }
+  if (view === "dict" && ds.dadd) { S.words[wkey(S.lang, ds.dadd)] = { s: "learning", due: Date.now(), ivl: 0, src: null }; save(); toast(`“${shown(ds.dadd)}” added to review`); return render(); }
+  if (view === "words") {
+    if (ds.wtab) { wordsTab = ds.wtab; return render(); }
+    if (t.id === "flip") { flip = true; return render(); }
+    if (ds.grade) return grade(ds.grade);
+    if (ds.wknown) { S.words[wkey(S.lang, ds.wknown)] = { s: "known" }; save(); return render(); }
+  }
+  if (view === "import") {
+    if (t.id === "imp-basic") {
+      const text = $("#imp-text").value.trim();
+      if (!text) { $("#imp-status").textContent = "Paste some text first."; return; }
+      const st = basicImport($("#imp-title").value.trim(), text);
+      if (st) go("article", st.id);
+      return;
+    }
+    if (t.id === "imp-clear") {
+      if (!ds.armed) { ds.armed = "1"; t.textContent = "Tap again to remove"; return; }
+      S.imports = S.imports.filter(s => s.lang !== S.lang); save(); return render();
+    }
+  }
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id !== "imp-form" || !sample) return;
+  const text = $("#imp-text").value.trim();
+  if (!text) { $("#imp-status").textContent = "Paste some text first."; return; }
+  aiImport($("#imp-title").value.trim(), text);
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "imp-text") { try { localStorage.setItem("ilgi.draft." + S.lang, e.target.value); } catch {} }
+  if (e.target.id === "dq") {
+    dq = e.target.value;
+    const entries = [];
+    for (const [l, en] of Object.entries(D[S.lang])) entries.push({ l, pos: en[0], g: en[1], r: en[2] || "" });
+    for (const st of stories()) if (st.dict) for (const [l, en] of Object.entries(st.dict)) if (!D[S.lang][l]) entries.push({ l, pos: en[0], g: en[1] });
+    const q = dq.trim().toLowerCase();
+    const res = entries.filter(x => !q || x.l.toLowerCase().includes(q) || x.g.toLowerCase().includes(q)).sort((a, b) => a.l.localeCompare(b.l, S.lang));
+    $("#dres").innerHTML = dictRows(res);
+    const c = document.querySelector("#dres")?.previousElementSibling; if (c) c.textContent = `${res.length} of ${entries.length} words from the stories in your library`;
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && view === "article" && sel) { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); renderPanel(findStory(storyId)); } });
+
+render();
+(async () => {
+  try { sample = (await window.claude?.use?.("sample")) || null; } catch { sample = null; }
+  sampleChecked = true;
+  if (view === "import") render();
+  else if (view === "article" && sel) renderPanel(findStory(storyId));
+})();
+</script>

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+.turbo/
+.expo/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# prototype build cache
+prototype/src/.clips/

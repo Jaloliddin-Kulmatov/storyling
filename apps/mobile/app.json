@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Storyling",
+    "slug": "storyling",
+    "scheme": "storyling",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "app.storyling", "supportsTablet": true },
+    "android": { "package": "app.storyling" },
+    "plugins": ["expo-router", "expo-sqlite", "expo-audio"],
+    "experiments": { "typedRoutes": true }
+  }
+}

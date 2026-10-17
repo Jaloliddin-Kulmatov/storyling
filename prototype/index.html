@@ -1,0 +1,1371 @@
+<title>Storyling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Gowun+Batang:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell. Desktop = left sidebar + content (+ word panel in articles). Phone = top bar + bottom tab bar; word lookup is a bottom sheet. */
+:root {
+  --bg: #f4f7f6;
+  --surface: #ffffff;
+  --surface-2: #edf2f0;
+  --ink: #10201b;
+  --muted: #5a6b65;
+  --line: #dce5e1;
+  --primary: #0b8a6a;
+  --primary-ink: #ffffff;
+  --primary-soft: #daf2ea;
+  --new: #e9a800;
+  --new-soft: #ffefbd;
+  --learn: #2b6de0;
+  --learn-soft: #e1eaff;
+  --bad: #d9480f;
+  --bad-soft: #fde6dc;
+  --shadow: 0 1px 2px rgba(16,32,27,.05), 0 6px 20px rgba(16,32,27,.07);
+  --f-ui: "Plus Jakarta Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --f-read: "Newsreader", "Gowun Batang", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --side: 232px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #93a7a0; --line: #24372f;
+    --primary: #36c89d; --primary-ink: #04140f; --primary-soft: #12382d;
+    --new: #f3c344; --new-soft: #3b3010; --learn: #77a2ff; --learn-soft: #172644; --bad: #ff8a5c; --bad-soft: #3a1d12;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #13201b; --surface-2: #1a2a24; --ink: #e3eeea; --muted: #93a7a0; --line: #24372f;
+  --primary: #36c89d; --primary-ink: #04140f; --primary-soft: #12382d;
+  --new: #f3c344; --new-soft: #3b3010; --learn: #77a2ff; --learn-soft: #172644; --bad: #ff8a5c; --bad-soft: #3a1d12;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15.5px; line-height: 1.55; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ── shell ── */
+.shell { min-height: 100vh; }
+.side { position: fixed; top: 0; bottom: 0; left: 0; width: var(--side); background: var(--surface); border-right: 1px solid var(--line); padding: calc(env(safe-area-inset-top, 0px) + 20px) 14px 20px; display: flex; flex-direction: column; gap: 18px; z-index: 20; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 21px; letter-spacing: -.03em; background: none; border: 0; padding: 0 6px; }
+.logo .mark { width: 32px; height: 32px; border-radius: 9px; background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; font-family: var(--f-read); font-size: 20px; font-weight: 500; }
+.langpill { display: flex; align-items: center; gap: 10px; width: 100%; border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 9px 12px; text-align: left; }
+.langpill .nat { font-family: var(--f-read); font-size: 19px; font-weight: 500; }
+.langpill .sub { font-size: 12px; color: var(--muted); display: block; line-height: 1.2; }
+.langpill .chev { margin-left: auto; color: var(--muted); }
+.navlist { display: grid; gap: 2px; }
+.navbtn { display: flex; align-items: center; gap: 12px; border: 0; background: none; padding: 10px 12px; border-radius: 10px; font-weight: 600; color: var(--muted); text-align: left; }
+.navbtn svg { width: 20px; height: 20px; flex: none; }
+.navbtn:hover { background: var(--surface-2); color: var(--ink); }
+.navbtn[aria-current="page"] { background: var(--primary-soft); color: var(--primary); }
+.navbtn .badge { margin-left: auto; }
+.badge { font-family: var(--f-mono); font-size: 11px; min-width: 20px; padding: 1px 6px; border-radius: 99px; background: var(--bad); color: #fff; text-align: center; line-height: 1.5; }
+.side .foot { margin-top: auto; font-size: 12px; color: var(--muted); padding: 0 6px; }
+.content { margin-left: var(--side); padding: 28px 32px 120px; }
+.content-inner { max-width: 940px; margin: 0 auto; }
+.topbar, .tabbar { display: none; }
+
+@media (max-width: 899px) {
+  .side { display: none; }
+  .content { margin-left: 0; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  .topbar .langpill { width: auto; padding: 6px 10px; }
+  .topbar .langpill .nat { font-size: 16px; }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar .navbtn { flex-direction: column; gap: 2px; font-size: 11px; padding: 6px 2px; position: relative; justify-content: center; }
+  .tabbar .navbtn .badge { position: absolute; top: 0; left: 55%; margin: 0; }
+  .tabbar .navbtn[aria-current="page"] { background: none; }
+  body.reading .tabbar { display: none; }
+}
+
+/* ── buttons & chips ── */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 10px 16px; border-radius: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { background: none; border-color: transparent; }
+.btn.sm { padding: 6px 11px; font-size: 13.5px; border-radius: 9px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 10px 14px; font-weight: 700; color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-pressed="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-block: 12px; }
+.chip { border: 1px solid var(--line); background: var(--surface); padding: 5px 12px; border-radius: 99px; font-size: 13.5px; font-weight: 600; white-space: nowrap; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; padding: 3px; background: var(--surface-2); gap: 2px; }
+.seg button { border: 0; background: none; padding: 5px 11px; border-radius: 7px; font-size: 13.5px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+/* ── onboarding ── */
+.ob { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+.ob-card { width: 100%; max-width: 760px; }
+.ob-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 26px; height: 5px; border-radius: 99px; background: var(--line); }
+.dots i.on { background: var(--primary); }
+.ob h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; line-height: 1.1; }
+.ob p.lead { color: var(--muted); font-size: 17px; margin: 10px 0 26px; }
+.langs { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.lang-opt { border: 2px solid var(--line); background: var(--surface); border-radius: 18px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 4px; min-height: 140px; transition: border-color .15s, transform .15s; }
+.lang-opt:hover { transform: translateY(-2px); border-color: var(--muted); }
+.lang-opt[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.lang-opt .big { font-family: var(--f-read); font-size: 34px; line-height: 1.1; font-weight: 500; margin-bottom: auto; }
+.lang-opt .nm { font-weight: 800; font-size: 16px; }
+.lang-opt .ct { font-size: 12.5px; color: var(--muted); }
+.opts { display: grid; gap: 10px; }
+.opt { border: 2px solid var(--line); background: var(--surface); border-radius: 14px; padding: 14px 18px; text-align: left; display: flex; align-items: center; gap: 14px; }
+.opt[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.opt .ic { width: 42px; height: 42px; border-radius: 11px; background: var(--surface-2); display: grid; place-items: center; font-weight: 800; flex: none; font-family: var(--f-mono); font-size: 13px; }
+.opt b { display: block; }
+.opt span.d { font-size: 13.5px; color: var(--muted); }
+.ob-nav { display: flex; justify-content: space-between; margin-top: 28px; gap: 10px; }
+
+/* ── feed ── */
+.hello { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 14px; margin-bottom: 18px; }
+.hello h1 { font-size: 28px; font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; display: block; line-height: 1.2; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 560px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.feature { display: grid; grid-template-columns: 260px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; text-align: left; padding: 0; width: 100%; margin-bottom: 8px; box-shadow: var(--shadow); }
+.feature .art { min-height: 180px; }
+.feature .fb { padding: 20px 22px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.feature .t { font-family: var(--f-read); font-size: 28px; line-height: 1.2; font-weight: 500; }
+@media (max-width: 640px) { .feature { grid-template-columns: 1fr; } .feature .art { min-height: 140px; } }
+.list { display: grid; gap: 10px; }
+.item { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: left; width: 100%; }
+.item:hover { border-color: var(--muted); }
+.item .art { height: 84px; border-radius: 11px; }
+.item .t { font-family: var(--f-read); font-size: 19px; font-weight: 500; line-height: 1.25; }
+.item .tt { font-size: 13.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.lvl { font-family: var(--f-mono); font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--surface-2); color: var(--ink); }
+.fit { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+.fit.easy { background: var(--primary-soft); color: var(--primary); }
+.fit.right { background: var(--primary); color: var(--primary-ink); }
+.fit.stretch { background: var(--new-soft); color: color-mix(in srgb, var(--new) 50%, var(--ink)); }
+.fit.hard { background: var(--bad-soft); color: var(--bad); }
+.read-tag { color: var(--primary); font-weight: 700; }
+.covbar { display: flex; height: 5px; border-radius: 99px; overflow: hidden; background: var(--new-soft); margin-top: 6px; }
+.covbar i { display: block; height: 100%; }
+.covbar .k { background: var(--primary); } .covbar .l { background: var(--learn); }
+.section-h { display: flex; justify-content: space-between; align-items: center; margin: 26px 0 4px; }
+.section-h h2 { font-size: 19px; font-weight: 800; }
+
+/* article art */
+.art { position: relative; overflow: hidden; display: block; background: var(--surface-2); }
+.art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art.a-food { background: #ffe7c7; } .art.a-daily { background: #dff1ff; } .art.a-work { background: #e6e6fb; } .art.a-weather { background: #d9ecf2; }
+.art.a-animals { background: #fbe3ea; } .art.a-travel { background: #fff1c9; } .art.a-city { background: #dcf3e8; } .art.a-home { background: #f1e7dc; } .art.a-mine { background: #ebe7f5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .art { filter: saturate(.8) brightness(.62); } }
+:root[data-theme="dark"] .art { filter: saturate(.8) brightness(.62); }
+
+/* ── article ── */
+.art-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 24px; align-items: start; }
+@media (max-width: 1099px) { .art-wrap { grid-template-columns: minmax(0, 1fr); } }
+.banner { height: 170px; border-radius: 18px; margin: 12px 0 18px; }
+.a-title { font-family: var(--f-read); font-size: clamp(28px, 4vw, 38px); font-weight: 500; line-height: 1.15; letter-spacing: 0; }
+.a-sub { color: var(--muted); margin-top: 4px; }
+.opts-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 16px 0; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; font-size: 13.5px; font-weight: 600; padding: 4px 6px; }
+.toggle i { width: 34px; height: 20px; border-radius: 99px; background: var(--line); position: relative; transition: background .15s; }
+.toggle i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle[aria-pressed="true"] i { background: var(--primary); }
+.toggle[aria-pressed="true"] i::after { left: 16px; }
+.page { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: clamp(18px, 4vw, 34px); }
+.text { font-family: var(--f-read); font-size: clamp(20px, 2.4vw, 24px); line-height: 2; }
+.sent { display: block; padding: 4px 8px; margin: 0 -8px; border-radius: 8px; transition: background .2s; }
+.sent + .sent { margin-top: 6px; }
+.sent.cur { background: var(--primary-soft); }
+.sent .tr { display: block; font-family: var(--f-ui); font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 2px 0 6px; }
+.w { background: none; border: 0; padding: 0 1px; margin: 0; font: inherit; line-height: inherit; color: inherit; border-radius: 4px; }
+.hl .w.new { background: linear-gradient(transparent 60%, var(--new-soft) 60%); }
+.hl .w.learn { background: var(--learn-soft); box-shadow: inset 0 -2px 0 var(--learn); }
+.w:hover { background: var(--surface-2); }
+.w.sel { outline: 2px solid var(--primary); outline-offset: 1px; }
+.end { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+.end p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+.panel { position: sticky; top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.lemma { font-family: var(--f-read); font-size: 34px; font-weight: 500; line-height: 1.15; }
+.pos { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+.pos .py { font-family: var(--f-ui); font-size: 14px; color: var(--primary); font-weight: 700; }
+.gloss { font-size: 17px; font-weight: 500; }
+.wstate { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.wstate button { border: 1px solid var(--line); background: var(--surface-2); border-radius: 9px; padding: 8px 4px; font-size: 12.5px; font-weight: 700; }
+.wstate button[aria-pressed="true"].s-learning { background: var(--learn); border-color: var(--learn); color: #fff; }
+.wstate button[aria-pressed="true"].s-known { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.wstate button[aria-pressed="true"].s-ignored { background: var(--muted); border-color: var(--muted); color: var(--surface); }
+.box { background: var(--surface-2); border-radius: 12px; padding: 12px; font-size: 14.5px; }
+.box h4 { margin: 0 0 6px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ai { white-space: pre-wrap; margin-top: 10px; }
+.ring { --p: 80; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--primary) calc(var(--p) * 1%), var(--new-soft) 0); }
+.ring span { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-weight: 800; font-size: 19px; }
+.kv { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+.kv b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.legend { display: grid; gap: 6px; font-size: 13.5px; }
+.legend .sw { display: inline-block; font-family: var(--f-read); font-size: 16px; padding: 0 5px; margin-right: 6px; }
+.sheet-bg { display: none; }
+@media (max-width: 1099px) {
+  .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 40; border-radius: 20px 20px 0 0; max-height: 70vh; overflow-y: auto; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -12px 40px rgba(0,0,0,.2); max-width: 640px; margin: 0 auto; }
+  .panel.idle { display: none; }
+  .sheet-bg.on { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.25); z-index: 35; }
+  .panel .grab { width: 40px; height: 4px; border-radius: 99px; background: var(--line); align-self: center; }
+}
+@media (min-width: 1100px) { .panel .grab, .panel .x { display: none; } }
+
+/* audio bar */
+.player { position: fixed; left: var(--side); right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+.player .in { max-width: 940px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.player .pbtn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; flex: none; }
+.player .ibtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.player .prog { flex: 1; min-width: 0; }
+.player .bar { height: 5px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.player .bar i { display: block; height: 100%; background: var(--primary); transition: width .25s; }
+.player .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; justify-content: space-between; gap: 8px; }
+@media (max-width: 899px) { .player { left: 0; } }
+
+/* quiz */
+.quiz { background: var(--surface-2); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.quiz .q { font-family: var(--f-read); font-size: 26px; }
+.quiz .ctx { font-family: var(--f-read); font-size: 17px; color: var(--muted); }
+.quiz .ctx mark { background: var(--new-soft); color: var(--ink); border-radius: 3px; padding: 0 2px; }
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .choices { grid-template-columns: 1fr; } }
+.choice { border: 2px solid var(--line); background: var(--surface); border-radius: 11px; padding: 10px 12px; text-align: left; font-weight: 600; }
+.choice.ok { border-color: var(--primary); background: var(--primary-soft); }
+.choice.no { border-color: var(--bad); background: var(--bad-soft); }
+
+/* dictionary & words */
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; margin: 14px 0; }
+.search input { border: 0; background: none; padding: 10px 0; width: 100%; outline: none; font-size: 16px; }
+.search:focus-within { border-color: var(--primary); }
+.dlist { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.drow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.drow:last-child { border-bottom: 0; }
+.drow .l { font-family: var(--f-read); font-size: 21px; font-weight: 500; }
+.drow .g { font-size: 14px; color: var(--muted); }
+.st { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); }
+.st.learning { background: var(--learn-soft); color: var(--learn); }
+.st.known { background: var(--primary-soft); color: var(--primary); }
+.st.new { background: var(--new-soft); color: color-mix(in srgb, var(--new) 50%, var(--ink)); }
+.flash { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px 22px; text-align: center; display: grid; gap: 16px; box-shadow: var(--shadow); max-width: 600px; margin: 18px auto 0; }
+.flash .lemma { font-size: 46px; }
+.flash .ctx { font-family: var(--f-read); font-size: 20px; line-height: 1.7; }
+.flash .ctx mark { background: var(--learn-soft); color: inherit; box-shadow: inset 0 -2px 0 var(--learn); border-radius: 3px; padding: 0 2px; }
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grades .btn { flex-direction: column; gap: 0; }
+.grades .btn small { font-weight: 500; font-size: 11.5px; opacity: .75; }
+.empty { text-align: center; padding: 44px 20px; background: var(--surface); border: 1px dashed var(--line); border-radius: 18px; margin-top: 18px; }
+.empty h2 { font-size: 21px; margin-bottom: 6px; }
+
+/* forms */
+.form { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+.form label { font-size: 13px; font-weight: 700; color: var(--muted); display: grid; gap: 6px; }
+.form textarea, .form input { border: 1px solid var(--line); border-radius: 11px; background: var(--surface-2); padding: 10px 12px; width: 100%; }
+.form textarea { min-height: 190px; resize: vertical; font-family: var(--f-read); font-size: 18px; line-height: 1.6; }
+.status { font-size: 14px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+.card + .card { margin-top: 12px; }
+.card h3 { font-size: 16px; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 11px; font-size: 14.5px; z-index: 60; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="root"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Storyling content. Explanations are in English.
+// Dictionary entry: [part of speech, meaning] or, for Chinese, [part of speech, meaning, pinyin].
+// Sentence: ["surface=lemma tokens separated by spaces", "English translation"]; punctuation is its own token.
+const LANGS = {
+  en: { name: "English", native: "English", tts: "en-US", voice: "Samantha", levels: ["A1", "A2"] },
+  es: { name: "Spanish", native: "Español", tts: "es-ES", voice: "Mónica", levels: ["A1", "A2", "B1"] },
+  fr: { name: "French", native: "Français", tts: "fr-FR", voice: "Thomas", levels: ["A1", "A2"] },
+  de: { name: "German", native: "Deutsch", tts: "de-DE", voice: "Anna", levels: ["A1", "A2", "B1"] },
+  zh: { name: "Chinese", native: "中文", tts: "zh-CN", voice: "Tingting", levels: ["HSK 1", "HSK 2"], noSpace: true },
+  ja: { name: "Japanese", native: "日本語", tts: "ja-JP", voice: "Kyoko", levels: ["N5", "N4"] },
+  ko: { name: "Korean", native: "한국어", tts: "ko-KR", voice: "Yuna", levels: ["Level 1", "Level 2", "Level 3"] },
+  it: { name: "Italian", native: "Italiano", tts: "it-IT", voice: "Alice", levels: ["A1", "A2"] },
+  pt: { name: "Portuguese", native: "Português", tts: "pt-BR", voice: "Luciana", levels: ["A1", "A2"] },
+  ru: { name: "Russian", native: "Русский", tts: "ru-RU", voice: "Milena", levels: ["A1", "A2"] },
+};
+
+const D = {
+  en: {
+    "every": ["determiner", "each one of a group"], "morning": ["noun", "the early part of the day"], "Sam": ["name", "Sam (a name)"],
+    "walk": ["verb", "to go on foot; to take a dog out"], "his": ["determiner", "belonging to him"], "dog": ["noun", "an animal people keep as a pet"],
+    "in": ["preposition", "inside"], "park": ["noun", "a public garden in a town"], "the": ["article", "used before a specific thing"],
+    "be": ["verb", "is / am / are / was"], "small": ["adjective", "little; not big"], "but": ["conjunction", "used to add something different"],
+    "very": ["adverb", "really; a lot"], "fast": ["adjective", "quick"], "today": ["noun", "this day"], "it": ["pronoun", "a thing or animal already mentioned"],
+    "see": ["verb", "to notice with your eyes"], "a": ["article", "one; any"], "cat": ["noun", "a small furry pet"], "and": ["conjunction", "also; plus"],
+    "run": ["verb", "to move quickly on foot"], "after": ["preposition", "behind; following"], "laugh": ["verb", "to make sounds because something is funny"],
+    "too": ["adverb", "also"], "new": ["adjective", "recently made; not old"], "café": ["noun", "a small place to buy coffee and food"],
+    "open": ["verb", "to start doing business"], "on": ["preposition", "at; on top of"], "our": ["determiner", "belonging to us"],
+    "street": ["noun", "a road in a town"], "last": ["adjective", "the one before this"], "week": ["noun", "seven days"],
+    "owner": ["noun", "the person something belongs to"], "bake": ["verb", "to cook in an oven"], "fresh": ["adjective", "just made"],
+    "bread": ["noun", "a food made from flour and baked"], "day": ["noun", "24 hours"], "my": ["determiner", "belonging to me"],
+    "sister": ["noun", "a girl with the same parents as you"], "go": ["verb", "to move to a place (past: went)"], "there": ["adverb", "in that place"],
+    "Saturday": ["noun", "the day after Friday"], "order": ["verb", "to ask for food or drinks"], "hot": ["adjective", "very warm"],
+    "chocolate": ["noun", "a sweet brown food or drink"], "she": ["pronoun", "a woman or girl already mentioned"], "say": ["verb", "to tell with words"],
+    "best": ["adjective", "better than all others"], "have": ["verb", "to own; helper verb (has tasted)"], "ever": ["adverb", "at any time"],
+    "taste": ["verb", "to try food or drink"],
+  },
+  es: {
+    "Ana": ["name", "Ana (a name)"], "tener": ["verb", "to have"], "un": ["article", "a; one"], "teléfono": ["noun", "phone"], "nuevo": ["adjective", "new"],
+    "ser": ["verb", "to be"], "rojo": ["adjective", "red"], "y": ["conjunction", "and"], "muy": ["adverb", "very"], "bonito": ["adjective", "pretty"],
+    "hacer": ["verb", "to do; to make (hacer fotos: take photos; hace calor: it's hot)"], "mucho": ["adjective", "many; a lot of"], "foto": ["noun", "photo"],
+    "de": ["preposition", "of; from"], "su": ["determiner", "his; her; their"], "perro": ["noun", "dog"], "el": ["article", "the"], "no": ["adverb", "not; no"],
+    "querer": ["verb", "to want"], "posar": ["verb", "to pose (for a photo)"], "cada": ["adjective", "every; each"], "sábado": ["noun", "Saturday"],
+    "Lucía": ["name", "Lucía (a name)"], "ir": ["verb", "to go"], "al": ["contraction", "to the (a + el)"], "mercado": ["noun", "market"],
+    "con": ["preposition", "with"], "abuelo": ["noun", "grandfather"], "comprar": ["verb", "to buy"], "tomate": ["noun", "tomato"], "pan": ["noun", "bread"],
+    "queso": ["noun", "cheese"], "fresco": ["adjective", "fresh"], "vendedor": ["noun", "seller"], "siempre": ["adverb", "always"],
+    "le": ["pronoun", "(to) him; (to) her"], "regalar": ["verb", "to give as a gift"], "naranja": ["noun", "orange"], "después": ["adverb", "afterwards"],
+    "desayunar": ["verb", "to have breakfast"], "junto": ["adjective", "together"], "en": ["preposition", "in; at"], "cafetería": ["noun", "café"],
+    "pequeño": ["adjective", "small"], "verano": ["noun", "summer"], "pasado": ["adjective", "last; past"], "viajar": ["verb", "to travel"],
+    "a": ["preposition", "to"], "Granada": ["name", "Granada (a city in Spain)"], "mi": ["determiner", "my"], "amigo": ["noun", "friend"],
+    "visitar": ["verb", "to visit"], "Alhambra": ["name", "the Alhambra (a palace in Granada)"], "palacio": ["noun", "palace"],
+    "antiguo": ["adjective", "old; ancient"], "enorme": ["adjective", "huge"], "tanto": ["adjective", "so much"], "calor": ["noun", "heat"],
+    "que": ["conjunction", "that"], "beber": ["verb", "to drink"], "agua": ["noun", "water"], "hora": ["noun", "hour"],
+    "aun": ["adverb", "even (aun así: even so)"], "así": ["adverb", "like this; so"], "mejor": ["adjective", "best; better"], "viaje": ["noun", "trip"],
+    "vida": ["noun", "life"],
+  },
+  fr: {
+    "Paul": ["name", "Paul (a name)"], "habiter": ["verb", "to live (somewhere)"], "à": ["preposition", "in; at; to"], "Paris": ["name", "Paris"],
+    "chaque": ["determiner", "every; each"], "matin": ["noun", "morning"], "il": ["pronoun", "he"], "acheter": ["verb", "to buy"], "un": ["article", "a; one"],
+    "croissant": ["noun", "croissant"], "le": ["article", "the (le, la, les)"], "boulangère": ["noun", "baker (woman)"], "lui": ["pronoun", "(to) him; (to) her"],
+    "dire": ["verb", "to say"], "bonjour": ["interjection", "hello; good morning"], "manger": ["verb", "to eat"], "son": ["determiner", "his; her (son, sa, ses)"],
+    "dans": ["preposition", "in"], "parc": ["noun", "park"], "samedi": ["noun", "Saturday"], "Claire": ["name", "Claire (a name)"],
+    "avoir": ["verb", "to have; helper verb for the past (a pris: took)"], "prendre": ["verb", "to take (past: pris)"], "train": ["noun", "train"],
+    "pour": ["preposition", "for; to"], "Lyon": ["name", "Lyon (a city in France)"], "voyage": ["noun", "journey; trip"], "durer": ["verb", "to last"],
+    "deux": ["number", "two"], "heure": ["noun", "hour"], "elle": ["pronoun", "she"], "regarder": ["verb", "to look at; to watch"], "champ": ["noun", "field"],
+    "par": ["preposition", "through; by"], "fenêtre": ["noun", "window"], "grand-mère": ["noun", "grandmother"],
+    "attendre": ["verb", "to wait for (l'attendait: was waiting for her)"], "gare": ["noun", "train station"],
+  },
+  de: {
+    "Lena": ["name", "Lena (a name)"], "gehen": ["verb", "to go; to walk"], "jeder": ["determiner", "every"], "Morgen": ["noun", "morning"],
+    "in": ["preposition", "in; into"], "der": ["article", "the (der, die, das)"], "Bäckerei": ["noun", "bakery"], "sie": ["pronoun", "she; her"],
+    "kaufen": ["verb", "to buy"], "zwei": ["number", "two"], "Brötchen": ["noun", "bread roll"], "und": ["conjunction", "and"], "ein": ["article", "a; one"],
+    "Kaffee": ["noun", "coffee"], "Bäcker": ["noun", "baker"], "kennen": ["verb", "to know (a person)"], "schon": ["adverb", "already"],
+    "er": ["pronoun", "he; it"], "sagen": ["verb", "to say"], "immer": ["adverb", "always"], "gut": ["adjective", "good (Guten Morgen: good morning)"],
+    "Tom": ["name", "Tom (a name)"], "suchen": ["verb", "to look for"], "seit": ["preposition", "since; for (a period of time)"], "Stunde": ["noun", "hour"],
+    "sein": ["determiner", "his; its"], "sein#v": ["verb", "to be (war: was)"], "Schlüssel": ["noun", "key"], "schauen": ["verb", "to look"],
+    "unter": ["preposition", "under"], "Sofa": ["noun", "sofa"], "all": ["determiner", "all"], "Tasche": ["noun", "pocket; bag"], "dann": ["adverb", "then"],
+    "klingeln": ["verb", "to ring"], "es": ["pronoun", "it"], "an": ["preposition", "at; on"], "Tür": ["noun", "door"], "Nachbarin": ["noun", "neighbor (woman)"],
+    "lächeln": ["verb", "to smile"], "halten": ["verb", "to hold"], "Hand": ["noun", "hand"], "ganz": ["adjective", "whole; entire"], "Zeit": ["noun", "time"],
+    "April": ["noun", "April"], "fahren": ["verb", "to ride; to drive"], "Jonas": ["name", "Jonas (a name)"], "mit": ["preposition", "with; by"],
+    "Fahrrad": ["noun", "bicycle"], "zu": ["preposition", "to (zur = zu der)"], "Arbeit": ["noun", "work"], "Weg": ["noun", "way; route"],
+    "dauern": ["verb", "to last; to take (time)"], "zwanzig": ["number", "twenty"], "Minute": ["noun", "minute"], "lang": ["adjective", "long (länger: longer)"],
+    "als": ["conjunction", "than"], "Auto": ["noun", "car"], "trotzdem": ["adverb", "still; nevertheless"],
+    "ankommen": ["verb", "to arrive (separable: kommt … an)"], "entspannt": ["adjective", "relaxed"], "Büro": ["noun", "office"],
+    "bei": ["preposition", "at; in case of"], "Regen": ["noun", "rain"], "nehmen": ["verb", "to take"], "aber": ["conjunction", "but; though"],
+    "gern": ["adverb", "gladly (lieber: rather, prefer)"], "Bahn": ["noun", "train"],
+  },
+  zh: {
+    "我": ["pronoun", "I; me", "wǒ"], "喜欢": ["verb", "to like", "xǐhuan"], "喝": ["verb", "to drink", "hē"], "茶": ["noun", "tea", "chá"],
+    "每天": ["adverb", "every day", "měitiān"], "早上": ["noun", "morning", "zǎoshang"], "一": ["number", "one", "yī"],
+    "杯": ["measure word", "cup (of)", "bēi"], "绿茶": ["noun", "green tea", "lǜchá"], "的": ["particle", "possessive / describing particle ('s)", "de"],
+    "朋友": ["noun", "friend", "péngyou"], "咖啡": ["noun", "coffee", "kāfēi"], "我们": ["pronoun", "we; us", "wǒmen"], "常常": ["adverb", "often", "chángcháng"],
+    "一起": ["adverb", "together", "yìqǐ"], "去": ["verb", "to go", "qù"], "茶馆": ["noun", "teahouse", "cháguǎn"], "熊猫": ["noun", "panda", "xióngmāo"],
+    "是": ["verb", "to be", "shì"], "中国": ["name", "China", "Zhōngguó"], "动物": ["noun", "animal", "dòngwù"], "它们": ["pronoun", "they (animals, things)", "tāmen"],
+    "很": ["adverb", "very", "hěn"], "吃": ["verb", "to eat", "chī"], "竹子": ["noun", "bamboo", "zhúzi"], "睡觉": ["verb", "to sleep", "shuìjiào"],
+    "时间": ["noun", "time", "shíjiān"], "长": ["adjective", "long", "cháng"], "很多": ["adjective", "many; a lot of", "hěn duō"], "人": ["noun", "person; people", "rén"],
+    "动物园": ["noun", "zoo", "dòngwùyuán"], "看": ["verb", "to look; to see; to watch", "kàn"],
+  },
+  ja: {
+    "わたし": ["pronoun", "I; me"], "いえ": ["noun", "house; home"], "ねこ": ["noun", "cat"], "いる": ["verb", "to be (living things)"], "なまえ": ["noun", "name"],
+    "タマ": ["name", "Tama (a cat's name)"], "です": ["copula", "is; am; are (polite)"], "まいにち": ["adverb", "every day"], "よく": ["adverb", "often; a lot; well"],
+    "ねる": ["verb", "to sleep"], "でも": ["conjunction", "but"], "あさ": ["noun", "morning"], "はやい": ["adjective", "early; fast"],
+    "おきる": ["verb", "to wake up; to get up"], "ごはん": ["noun", "meal; cooked rice"], "まつ": ["verb", "to wait"], "えき": ["noun", "station"],
+    "まえ": ["noun", "front; before"], "ちいさい": ["adjective", "small"], "ラーメンや": ["noun", "ramen shop"], "ある": ["verb", "to be (things)"],
+    "きんようび": ["noun", "Friday"], "ともだち": ["noun", "friend"], "いく": ["verb", "to go"], "ラーメン": ["noun", "ramen"], "あつい": ["adjective", "hot"],
+    "とても": ["adverb", "very"], "おいしい": ["adjective", "tasty"], "みせ": ["noun", "shop; restaurant"], "ひと": ["noun", "person"], "いつも": ["adverb", "always"],
+    "げんき": ["adjective", "lively; healthy"], "けさ": ["noun", "this morning"], "でんしゃ": ["noun", "train"], "こむ": ["verb", "to be crowded"],
+    "すわる": ["verb", "to sit down"], "ずっと": ["adverb", "the whole time"], "たつ": ["verb", "to stand"], "となり": ["noun", "next to; neighbor"],
+    "おばあさん": ["noun", "old woman; grandmother"], "にもつ": ["noun", "luggage; bag"], "もつ": ["verb", "to hold; to carry"],
+    "くれる": ["verb", "to do (something) for me"], "うれしい": ["adjective", "happy; glad"],
+  },
+  ko: {
+    "민지": ["name", "Minji (a name)"], "매일": ["adverb", "every day"], "아침": ["noun", "morning; breakfast"], "편의점": ["noun", "convenience store"],
+    "가다": ["verb", "to go"], "오늘": ["noun", "today"], "삼각김밥": ["noun", "triangle rice ball (gimbap)"], "다": ["adverb", "all; completely"],
+    "팔리다": ["verb", "to be sold"], "점원": ["noun", "store clerk"], "웃다": ["verb", "to smile; to laugh"], "말하다": ["verb", "to say; to speak"],
+    "내일": ["noun", "tomorrow"], "일찍": ["adverb", "early"], "오다": ["verb", "to come; (rain) to fall"], "비": ["noun", "rain"], "많이": ["adverb", "a lot"],
+    "준호": ["name", "Junho (a name)"], "우산": ["noun", "umbrella"], "없다": ["adjective", "to not exist; to not have"], "그래서": ["adverb", "so; therefore"],
+    "버스": ["noun", "bus"], "정류장": ["noun", "stop (bus)"], "뛰어가다": ["verb", "to run (to a place)"], "옆": ["noun", "side; next to"],
+    "있다": ["verb", "to be (somewhere); to have"], "할머니": ["noun", "grandmother; elderly woman"], "같이": ["adverb", "together"],
+    "쓰다": ["verb", "to use; to hold (an umbrella); to write"], "하다": ["verb", "to do; to say (after a quote)"], "고맙다": ["adjective", "to be thankful"],
+    "기분": ["noun", "mood; feeling"], "좋다": ["adjective", "to be good"], "지수": ["name", "Jisu (a name)"], "처음": ["noun", "the first time; the beginning"],
+    "회사": ["noun", "company; office"], "출근하다": ["verb", "to go to work"], "너무": ["adverb", "too; so (very)"], "긴장하다": ["verb", "to be nervous"],
+    "지하철": ["noun", "subway"], "내리다": ["verb", "to get off (a vehicle)"], "역": ["noun", "station"], "놓치다": ["verb", "to miss"],
+    "뻔하다": ["pattern", "-ㄹ 뻔하다: almost did (but didn't)"], "팀장님": ["noun", "team leader (polite)"], "커피": ["noun", "coffee"],
+    "한": ["number", "one (before a counter)"], "잔": ["counter", "cup (counter for drinks)"], "사다": ["verb", "to buy"], "주다": ["verb", "to give; to do for someone"],
+    "동료": ["noun", "coworker"], "친절하다": ["adjective", "to be kind"], "일": ["noun", "work; task"], "가르치다": ["verb", "to teach"],
+    "퇴근길": ["noun", "the way home from work"], "기대되다": ["verb", "to look forward to"], "생각하다": ["verb", "to think"],
+  },
+  it: {
+    "Marco": ["name", "Marco (a name)"], "lavorare": ["verb", "to work"], "in": ["preposition", "in"], "uno": ["article", "a; one (un, una)"],
+    "pizzeria": ["noun", "pizzeria"], "a": ["preposition", "in; at; to"], "Napoli": ["name", "Naples"], "ogni": ["determiner", "every"], "sera": ["noun", "evening"],
+    "preparare": ["verb", "to prepare; to make"], "cento": ["number", "a hundred"], "pizza": ["noun", "pizza"], "il": ["article", "the (il, la, l')"],
+    "suo": ["determiner", "his; her"], "preferito": ["adjective", "favorite"], "essere": ["verb", "to be (è: is)"],
+    "margherita": ["noun", "margherita (pizza with tomato, mozzarella and basil)"], "semplice": ["adjective", "simple"], "ma": ["conjunction", "but"],
+    "buono": ["adjective", "good (buonissimo: very good)"], "Giulia": ["name", "Giulia (a name)"], "aspettare": ["verb", "to wait (for)"],
+    "autobus": ["noun", "bus"], "da": ["preposition", "for; since; from"], "venti": ["number", "twenty"], "minuto": ["noun", "minute"],
+    "piovere": ["verb", "to rain"], "e": ["conjunction", "and"], "lei": ["pronoun", "she"], "non": ["adverb", "not"], "avere": ["verb", "to have"],
+    "ombrello": ["noun", "umbrella"], "finalmente": ["adverb", "finally"], "arrivare": ["verb", "to arrive"], "pieno": ["adjective", "full"],
+    "ridere": ["verb", "to laugh"], "decidere": ["verb", "to decide"], "di": ["preposition", "of; to (before a verb)"], "camminare": ["verb", "to walk"],
+  },
+  pt: {
+    "Ana": ["name", "Ana (a name)"], "e": ["conjunction", "and"], "Pedro": ["name", "Pedro (a name)"], "ir": ["verb", "to go"],
+    "a": ["preposition", "to (à = a + a: to the)"], "praia": ["noun", "beach"], "em": ["preposition", "in; on (no = em + o, num = em + um)"],
+    "domingo": ["noun", "Sunday"], "sábado": ["noun", "Saturday"], "o": ["article", "the (o, a, os, as)"], "sol": ["noun", "sun"], "estar": ["verb", "to be (a state)"],
+    "forte": ["adjective", "strong"], "mar": ["noun", "sea"], "calmo": ["adjective", "calm"], "eles": ["pronoun", "they"], "comer": ["verb", "to eat"],
+    "peixe": ["noun", "fish"], "restaurante": ["noun", "restaurant"], "pequeno": ["adjective", "small"], "tarde": ["noun", "afternoon"],
+    "nadar": ["verb", "to swim"], "descansar": ["verb", "to rest"], "todo": ["determiner", "every; all"], "meu": ["determiner", "my (meu, minha)"],
+    "avó": ["noun", "grandmother"], "feira": ["noun", "street market"], "ela": ["pronoun", "she"], "comprar": ["verb", "to buy"], "fruta": ["noun", "fruit"],
+    "verdura": ["noun", "vegetable; greens"], "flor": ["noun", "flower"], "vendedor": ["noun", "seller"], "já": ["adverb", "already"],
+    "conhecer": ["verb", "to know (a person)"], "vez": ["noun", "time, occasion (às vezes: sometimes)"], "dar": ["verb", "to give"],
+    "um": ["article", "a; one (um, uma)"], "manga": ["noun", "mango"], "de": ["preposition", "of; as (de presente: as a gift)"], "presente": ["noun", "gift"],
+  },
+  ru: {
+    "у": ["preposition", "at; by (у меня есть: I have)"], "я": ["pronoun", "I (меня: me)"], "есть": ["verb", "there is (у меня есть: I have)"],
+    "кот": ["noun", "cat (male)"], "он": ["pronoun", "he (его: him)"], "звать": ["verb", "to call (его зовут: his name is)"], "Барсик": ["name", "Barsik (a cat's name)"],
+    "любить": ["verb", "to love; to like"], "спать": ["verb", "to sleep"], "на": ["preposition", "on; to; by"], "диван": ["noun", "sofa"],
+    "утро": ["noun", "morning (утром: in the morning)"], "просить": ["verb", "to ask for"], "молоко": ["noun", "milk"], "каждый": ["determiner", "every"],
+    "день": ["noun", "day"], "Анна": ["name", "Anna (a name)"], "ездить": ["verb", "to travel, go (regularly, by transport)"], "работа": ["noun", "work"],
+    "метро": ["noun", "metro; subway"], "московский": ["adjective", "Moscow (as in 'Moscow metro')"], "очень": ["adverb", "very"],
+    "красивый": ["adjective", "beautiful"], "станция": ["noun", "station"], "картина": ["noun", "painting"], "и": ["conjunction", "and"],
+    "люстра": ["noun", "chandelier"], "всегда": ["adverb", "always"], "читать": ["verb", "to read"], "книга": ["noun", "book"], "в": ["preposition", "in"],
+    "поезд": ["noun", "train"],
+  },
+};
+
+const STORIES = [
+  { id: "en-park", lang: "en", level: "A1", cat: "animals", min: 1, date: "Oct 4", title: "Sam and the Fast Dog", tt: "", sents: [
+    ["Every=every morning , Sam walks=walk his dog in the park ."],
+    ["The=the dog is=be small but very fast ."],
+    ["Today=today it sees=see a cat and runs=run after it ."],
+    ["Sam laughs=laugh and runs=run too !"],
+  ] },
+  { id: "en-cafe", lang: "en", level: "A2", cat: "food", min: 2, date: "Oct 1", title: "The New Café", tt: "", sents: [
+    ["A=a new café opened=open on our street last week ."],
+    ["The=the owner bakes=bake fresh bread every day ."],
+    ["My=my sister went=go there on Saturday and ordered=order a hot chocolate ."],
+    ["She=she says=say it was=be the best she has=have ever tasted=taste ."],
+  ] },
+  { id: "es-phone", lang: "es", level: "A1", cat: "daily", min: 1, date: "Oct 4", title: "El teléfono de Ana", tt: "Ana's Phone", sents: [
+    ["Ana tiene=tener un teléfono nuevo .", "Ana has a new phone."],
+    ["Es=ser rojo y muy bonito .", "It is red and very pretty."],
+    ["Ana hace=hacer muchas=mucho fotos=foto de su perro .", "Ana takes lots of photos of her dog."],
+    ["El=el perro no quiere=querer posar !", "The dog doesn't want to pose!"],
+  ] },
+  { id: "es-market", lang: "es", level: "A2", cat: "food", min: 2, date: "Oct 2", title: "El mercado del sábado", tt: "The Saturday Market", sents: [
+    ["Cada=cada sábado , Lucía va=ir al mercado con su abuelo .", "Every Saturday, Lucía goes to the market with her grandfather."],
+    ["Compran=comprar tomates=tomate , pan y queso fresco .", "They buy tomatoes, bread and fresh cheese."],
+    ["El=el vendedor siempre le regala=regalar una=un naranja .", "The seller always gives her an orange."],
+    ["Después=después , desayunan=desayunar juntos=junto en una=un cafetería pequeña=pequeño .", "Afterwards, they have breakfast together in a small café."],
+  ] },
+  { id: "es-trip", lang: "es", level: "B1", cat: "travel", min: 3, date: "Sep 28", title: "Un viaje a Granada", tt: "A Trip to Granada", sents: [
+    ["El=el verano pasado , viajé=viajar a Granada con mis=mi amigos=amigo .", "Last summer I traveled to Granada with my friends."],
+    ["Visitamos=visitar la=el Alhambra , un palacio antiguo y enorme .", "We visited the Alhambra, a huge old palace."],
+    ["Hacía=hacer tanto calor que bebíamos=beber agua cada hora .", "It was so hot that we drank water every hour."],
+    ["Aun=aun así , fue=ser el mejor viaje de mi vida .", "Even so, it was the best trip of my life."],
+  ] },
+  { id: "fr-croissant", lang: "fr", level: "A1", cat: "food", min: 1, date: "Oct 3", title: "Le croissant de Paul", tt: "Paul's Croissant", sents: [
+    ["Paul habite=habiter à Paris .", "Paul lives in Paris."],
+    ["Chaque=chaque matin , il achète=acheter un croissant .", "Every morning, he buys a croissant."],
+    ["La=le boulangère lui dit=dire bonjour .", "The baker says hello to him."],
+    ["Paul mange=manger son croissant dans le parc .", "Paul eats his croissant in the park."],
+  ] },
+  { id: "fr-train", lang: "fr", level: "A2", cat: "travel", min: 2, date: "Sep 30", title: "Le train pour Lyon", tt: "The Train to Lyon", sents: [
+    ["Samedi=samedi , Claire a=avoir pris=prendre le train pour Lyon .", "On Saturday, Claire took the train to Lyon."],
+    ["Le=le voyage a=avoir duré=durer deux heures=heure .", "The journey took two hours."],
+    ["Elle=elle a=avoir regardé=regarder les=le champs=champ par la=le fenêtre .", "She looked at the fields through the window."],
+    ["Sa=son grand-mère l'attendait=attendre à la=le gare .", "Her grandmother was waiting for her at the station."],
+  ] },
+  { id: "de-bakery", lang: "de", level: "A1", cat: "food", min: 1, date: "Oct 4", title: "In der Bäckerei", tt: "At the Bakery", sents: [
+    ["Lena geht=gehen jeden=jeder Morgen in die=der Bäckerei .", "Lena goes to the bakery every morning."],
+    ["Sie=sie kauft=kaufen zwei Brötchen und einen=ein Kaffee .", "She buys two bread rolls and a coffee."],
+    ["Der=der Bäcker kennt=kennen sie schon .", "The baker already knows her."],
+    ["Er=er sagt=sagen immer : Guten=gut Morgen , Lena !", "He always says: Good morning, Lena!"],
+  ] },
+  { id: "de-key", lang: "de", level: "A2", cat: "home", min: 2, date: "Oct 1", title: "Der verlorene Schlüssel", tt: "The Lost Key", sents: [
+    ["Tom sucht=suchen seit einer=ein Stunde seinen=sein Schlüssel .", "Tom has been looking for his key for an hour."],
+    ["Er=er schaut=schauen unter das=der Sofa und in alle=all Taschen=Tasche .", "He looks under the sofa and in all his pockets."],
+    ["Dann=dann klingelt=klingeln es an der Tür .", "Then the doorbell rings."],
+    ["Seine=sein Nachbarin lächelt=lächeln und hält=halten den=der Schlüssel in der Hand .", "His neighbor smiles, holding the key in her hand."],
+    ["Er=er war=sein#v die=der ganze=ganz Zeit in der Tür !", "It was in the door the whole time!"],
+  ] },
+  { id: "de-bike", lang: "de", level: "B1", cat: "city", min: 3, date: "Sep 27", title: "Mit dem Fahrrad zur Arbeit", tt: "Cycling to Work", sents: [
+    ["Seit=seit April fährt=fahren Jonas mit dem=der Fahrrad zur=zu Arbeit .", "Since April, Jonas has been cycling to work."],
+    ["Der=der Weg dauert=dauern zwanzig Minuten=Minute länger=lang als mit dem=der Auto .", "The trip takes twenty minutes longer than by car."],
+    ["Trotzdem=trotzdem kommt=ankommen er entspannter=entspannt im=in Büro an=ankommen .", "Still, he arrives at the office more relaxed."],
+    ["Bei=bei Regen nimmt=nehmen er aber lieber=gern die=der Bahn .", "When it rains, though, he prefers to take the train."],
+  ] },
+  { id: "zh-tea", lang: "zh", level: "HSK 1", cat: "food", min: 1, date: "Oct 4", title: "我喜欢喝茶", tt: "I Like Drinking Tea", sents: [
+    ["我 喜欢 喝 茶 。", "I like drinking tea."],
+    ["我 每天 早上 喝 一 杯 绿茶 。", "I drink a cup of green tea every morning."],
+    ["我 的 朋友 喜欢 喝 咖啡 。", "My friend likes drinking coffee."],
+    ["我们 常常 一起 去 茶馆 。", "We often go to the teahouse together."],
+  ] },
+  { id: "zh-panda", lang: "zh", level: "HSK 2", cat: "animals", min: 2, date: "Oct 1", title: "熊猫", tt: "Pandas", sents: [
+    ["熊猫 是 中国 的 动物 。", "Pandas are animals from China."],
+    ["它们 很 喜欢 吃 竹子 。", "They really like eating bamboo."],
+    ["熊猫 每天 睡觉 的 时间 很 长 。", "Pandas sleep for a long time every day."],
+    ["很多 人 去 动物园 看 熊猫 。", "Many people go to the zoo to see pandas."],
+  ] },
+  { id: "ja-cat", lang: "ja", level: "N5", cat: "animals", min: 2, date: "Oct 4", title: "ねこの タマ", tt: "Tama the Cat", sents: [
+    ["わたしの=わたし いえには=いえ ねこが=ねこ います=いる 。", "There is a cat in my house."],
+    ["なまえは=なまえ タマ です 。", "Her name is Tama."],
+    ["タマは=タマ まいにち よく ねます=ねる 。", "Tama sleeps a lot every day."],
+    ["でも あさは=あさ はやく=はやい おきて=おきる 、 ごはんを=ごはん まちます=まつ 。", "But in the morning she gets up early and waits for her food."],
+  ] },
+  { id: "ja-ramen", lang: "ja", level: "N5", cat: "food", min: 2, date: "Oct 1", title: "えきの まえの ラーメンや", tt: "The Ramen Shop by the Station", sents: [
+    ["えきの=えき まえに=まえ ちいさい ラーメンやが=ラーメンや あります=ある 。", "There is a small ramen shop in front of the station."],
+    ["わたしは=わたし きんようびに=きんようび ともだちと=ともだち いきます=いく 。", "I go there with friends on Fridays."],
+    ["ラーメンは=ラーメン あつくて=あつい とても おいしい です 。", "The ramen is hot and very tasty."],
+    ["みせの=みせ ひとは=ひと いつも げんき です 。", "The people at the shop are always cheerful."],
+  ] },
+  { id: "ja-train", lang: "ja", level: "N4", cat: "city", min: 3, date: "Sep 29", title: "まんいん でんしゃ", tt: "The Crowded Train", sents: [
+    ["けさ 、 でんしゃが=でんしゃ とても こんでいました=こむ 。", "This morning the train was very crowded."],
+    ["わたしは=わたし すわれなくて=すわる 、 ずっと たっていました=たつ 。", "I couldn't get a seat, so I stood the whole time."],
+    ["となりの=となり おばあさんが=おばあさん わたしの=わたし にもつを=にもつ もって=もつ くれました=くれる 。", "The old woman next to me held my bag for me."],
+    ["とても うれしかった=うれしい です 。", "I was very happy."],
+  ] },
+  { id: "ko-store", lang: "ko", level: "Level 1", cat: "daily", min: 2, date: "Oct 4", title: "편의점에서", tt: "At the Convenience Store", sents: [
+    ["민지는=민지 매일 아침 편의점에=편의점 가요=가다 .", "Minji goes to the convenience store every morning."],
+    ["오늘은=오늘 삼각김밥이=삼각김밥 다 팔렸어요=팔리다 .", "Today the rice triangles were all sold out."],
+    ["점원이=점원 웃으면서=웃다 말했어요=말하다 .", "The clerk said with a smile:"],
+    ["내일은=내일 일찍 오세요=오다 !", "Come early tomorrow!"],
+    ["민지도=민지 웃었어요=웃다 .", "Minji smiled too."],
+  ] },
+  { id: "ko-rain", lang: "ko", level: "Level 2", cat: "weather", min: 3, date: "Oct 2", title: "비 오는 날", tt: "A Rainy Day", sents: [
+    ["아침부터=아침 비가=비 많이 왔어요=오다 .", "It had been raining hard since morning."],
+    ["준호는=준호 우산이=우산 없었어요=없다 .", "Junho didn't have an umbrella."],
+    ["그래서 버스 정류장까지=정류장 뛰어갔어요=뛰어가다 .", "So he ran all the way to the bus stop."],
+    ["옆에=옆 있던=있다 할머니가=할머니 우산을=우산 같이 쓰자고=쓰다 했어요=하다 .", "A grandmother standing next to him offered to share her umbrella."],
+    ["준호는=준호 고마워서=고맙다 기분이=기분 좋았어요=좋다 .", "Junho was grateful, and it put him in a good mood."],
+  ] },
+  { id: "ko-work", lang: "ko", level: "Level 3", cat: "work", min: 4, date: "Sep 30", title: "첫 출근", tt: "First Day at Work", sents: [
+    ["지수는=지수 오늘 처음으로=처음 회사에=회사 출근했어요=출근하다 .", "Today Jisu went to work at her company for the first time."],
+    ["너무 긴장해서=긴장하다 지하철에서=지하철 내릴=내리다 역을=역 놓칠=놓치다 뻔했어요=뻔하다 .", "She was so nervous that she almost missed her subway stop."],
+    ["팀장님은=팀장님 지수에게=지수 커피를=커피 한 잔 사=사다 주셨어요=주다 .", "The team leader bought Jisu a cup of coffee."],
+    ["동료들도=동료 친절하게=친절하다 일을=일 가르쳐=가르치다 줬어요=주다 .", "Her coworkers also kindly showed her the work."],
+    ["퇴근길에=퇴근길 지수는=지수 내일이=내일 기대된다고=기대되다 생각했어요=생각하다 .", "On the way home, Jisu thought that she was looking forward to tomorrow."],
+  ] },
+  { id: "it-pizza", lang: "it", level: "A1", cat: "food", min: 1, date: "Oct 3", title: "La pizza di Marco", tt: "Marco's Pizza", sents: [
+    ["Marco lavora=lavorare in una=uno pizzeria a Napoli .", "Marco works in a pizzeria in Naples."],
+    ["Ogni=ogni sera prepara=preparare cento pizze=pizza .", "Every evening he makes a hundred pizzas."],
+    ["La=il sua=suo pizza preferita=preferito è=essere la=il margherita .", "His favorite pizza is the margherita."],
+    ["È=essere semplice ma buonissima=buono !", "It's simple but delicious!"],
+  ] },
+  { id: "it-bus", lang: "it", level: "A2", cat: "city", min: 2, date: "Sep 29", title: "L'autobus in ritardo", tt: "The Late Bus", sents: [
+    ["Giulia aspetta=aspettare l'autobus=autobus da venti minuti=minuto .", "Giulia has been waiting for the bus for twenty minutes."],
+    ["Piove=piovere e lei non ha=avere l'ombrello=ombrello .", "It's raining and she doesn't have her umbrella."],
+    ["Finalmente=finalmente arriva=arrivare l'autobus=autobus , ma è=essere pieno .", "Finally the bus arrives, but it's full."],
+    ["Giulia ride=ridere e decide=decidere di camminare .", "Giulia laughs and decides to walk."],
+  ] },
+  { id: "pt-beach", lang: "pt", level: "A1", cat: "travel", min: 1, date: "Oct 3", title: "Um dia na praia", tt: "A Day at the Beach", sents: [
+    ["Ana e Pedro vão=ir à=a praia no=em domingo .", "Ana and Pedro go to the beach on Sunday."],
+    ["O=o sol está=estar forte e o mar está=estar calmo .", "The sun is strong and the sea is calm."],
+    ["Eles=eles comem=comer peixe num=em restaurante pequeno .", "They eat fish in a small restaurant."],
+    ["À=a tarde , eles nadam=nadar e descansam=descansar .", "In the afternoon, they swim and rest."],
+  ] },
+  { id: "pt-market", lang: "pt", level: "A2", cat: "food", min: 2, date: "Sep 30", title: "A feira de sábado", tt: "The Saturday Market", sents: [
+    ["Todo=todo sábado , minha=meu avó vai=ir à=a feira .", "Every Saturday, my grandmother goes to the street market."],
+    ["Ela=ela compra=comprar frutas=fruta , verduras=verdura e flores=flor .", "She buys fruit, vegetables and flowers."],
+    ["Os=o vendedores=vendedor já conhecem=conhecer minha=meu avó .", "The sellers already know my grandmother."],
+    ["Às=a vezes=vez , eles dão=dar uma=um manga de presente .", "Sometimes they give her a mango as a gift."],
+  ] },
+  { id: "ru-cat", lang: "ru", level: "A1", cat: "animals", min: 1, date: "Oct 3", title: "Кот Барсик", tt: "Barsik the Cat", sents: [
+    ["У=у меня=я есть кот .", "I have a cat."],
+    ["Его=он зовут=звать Барсик .", "His name is Barsik."],
+    ["Барсик любит=любить спать на диване=диван .", "Barsik loves sleeping on the sofa."],
+    ["Утром=утро он просит=просить молоко .", "In the morning he asks for milk."],
+  ] },
+  { id: "ru-metro", lang: "ru", level: "A2", cat: "city", min: 2, date: "Sep 29", title: "В метро", tt: "On the Metro", sents: [
+    ["Каждый=каждый день Анна ездит=ездить на работу=работа на метро .", "Every day Anna goes to work by metro."],
+    ["Московское=московский метро очень красивое=красивый .", "The Moscow metro is very beautiful."],
+    ["На=на станциях=станция есть картины=картина и люстры=люстра .", "The stations have paintings and chandeliers."],
+    ["Анна всегда читает=читать книгу=книга в поезде=поезд .", "Anna always reads a book on the train."],
+  ] },
+];
+
+// starter vocabulary (first 8 for "just starting"; all for "some basics")
+const SEED = {
+  en: ["the", "a", "and", "in", "it", "be", "very", "my", "dog", "cat", "day", "morning", "today", "see", "go", "she", "his", "small", "on", "say", "have", "every", "Sam", "too", "new"],
+  es: ["el", "un", "y", "en", "de", "no", "ser", "muy", "cada", "ir", "al", "con", "su", "pan", "tomate", "siempre", "después", "sábado", "Lucía", "mercado", "comprar", "Ana", "tener", "perro", "nuevo"],
+  fr: ["le", "un", "à", "il", "elle", "Paul", "Paris", "dans", "manger", "bonjour", "deux", "avoir", "son", "chaque", "Claire", "train", "pour"],
+  de: ["der", "ein", "und", "in", "er", "es", "sie", "an", "dann", "Tom", "sein", "sein#v", "Hand", "Zeit", "Sofa", "Tür", "all", "Stunde", "Lena", "gehen", "Kaffee", "zwei", "gut", "Morgen", "mit", "immer", "Auto"],
+  zh: ["我", "喜欢", "喝", "茶", "一", "的", "朋友", "我们", "去", "是", "很", "吃", "人", "看", "中国"],
+  ja: ["わたし", "いえ", "ねこ", "いる", "なまえ", "タマ", "です", "まいにち", "あさ", "でも", "ごはん", "いく", "ともだち", "とても", "ある", "ひと", "まえ", "えき"],
+  ko: ["민지", "매일", "아침", "가다", "오늘", "다", "웃다", "말하다", "내일", "오다", "편의점", "점원", "일찍", "준호", "지수", "많이", "있다", "하다", "좋다", "버스", "커피", "한", "사다", "주다", "일", "회사", "너무", "비", "같이", "할머니"],
+  it: ["il", "uno", "in", "a", "e", "essere", "avere", "Marco", "Giulia", "pizza", "ma", "non", "lei", "buono", "ogni", "Napoli"],
+  pt: ["o", "um", "e", "em", "a", "ir", "Ana", "Pedro", "ela", "eles", "sol", "mar", "comer", "meu", "de", "comprar"],
+  ru: ["у", "я", "есть", "кот", "он", "и", "на", "в", "очень", "день", "Анна", "утро", "работа", "метро", "всегда", "читать"],
+};
+
+const CATS = { daily: "Daily life", food: "Food", work: "Work", weather: "Weather", animals: "Animals", travel: "Travel", city: "City", home: "Home", mine: "My texts" };
+const PUNCT = /^[\p{P}\p{S}]+$/u;
+STORIES.forEach(st => {
+  st.noSpace = !!LANGS[st.lang].noSpace;
+  st.sents = st.sents.map(([str, tr]) => ({
+    tokens: str.split(" ").map(t => {
+      if (PUNCT.test(t)) return { s: t, p: true };
+      const [s, l] = t.split("=");
+      return { s, l: l || s };
+    }),
+    tr: tr || null,
+  }));
+});
+const AUDIO = {"stories":{"en-park":{"f":"audio/en-park.mp4","s":[[0.2,3.387],[3.837,6.075],[6.525,9.064],[9.514,11.279]]},"en-cafe":{"f":"audio/en-cafe.mp4","s":[[0.2,3.062],[3.512,5.866],[6.316,9.847],[10.297,13.16]]},"es-phone":{"f":"audio/es-phone.mp4","s":[[0.2,1.879],[2.329,3.716],[4.166,6.159],[6.609,8.124]]},"es-market":{"f":"audio/es-market.mp4","s":[[0.2,3.174],[3.624,6.134],[6.584,8.97],[9.42,13.084]]},"es-trip":{"f":"audio/es-trip.mp4","s":[[0.2,3.457],[3.907,7.199],[7.649,10.176],[10.626,13.186]]},"fr-croissant":{"f":"audio/fr-croissant.mp4","s":[[0.2,1.458],[1.908,4.515],[4.965,7.179],[7.629,10.083]]},"fr-train":{"f":"audio/fr-train.mp4","s":[[0.2,3.073],[3.523,5.62],[6.07,8.563],[9.013,11.271]]},"de-bakery":{"f":"audio/de-bakery.mp4","s":[[0.2,2.706],[3.156,5.99],[6.44,8.2],[8.65,11.586]]},"de-key":{"f":"audio/de-key.mp4","s":[[0.2,3.055],[3.505,6.499],[6.949,8.929],[9.379,13.037],[13.487,15.692]]},"de-bike":{"f":"audio/de-bike.mp4","s":[[0.2,3.845],[4.295,8.238],[8.688,11.671],[12.121,14.694]]},"zh-tea":{"f":"audio/zh-tea.mp4","s":[[0.2,1.723],[2.173,4.903],[5.353,7.735],[8.185,10.671]]},"zh-panda":{"f":"audio/zh-panda.mp4","s":[[0.2,2.29],[2.74,4.888],[5.338,8.497],[8.947,11.784]]},"ja-cat":{"f":"audio/ja-cat.mp4","s":[[0.2,2.811],[3.261,4.776],[5.226,7.523],[7.973,11.399]]},"ja-ramen":{"f":"audio/ja-ramen.mp4","s":[[0.2,3.411],[3.861,7.296],[7.746,10.904],[11.354,13.716]]},"ja-train":{"f":"audio/ja-train.mp4","s":[[0.2,3.34],[3.79,7.445],[7.895,12.143],[12.593,14.729]]},"ko-store":{"f":"audio/ko-store.mp4","s":[[0.2,2.836],[3.286,5.999],[6.449,8.707],[9.157,10.929],[11.379,12.977]]},"ko-rain":{"f":"audio/ko-rain.mp4","s":[[0.2,2.483],[2.933,5.025],[5.475,8.724],[9.174,12.873],[13.323,16.1]]},"ko-work":{"f":"audio/ko-work.mp4","s":[[0.2,3.515],[3.965,8.094],[8.544,12.318],[12.768,16.12],[16.57,20.438]]},"it-pizza":{"f":"audio/it-pizza.mp4","s":[[0.2,2.692],[3.142,5.471],[5.921,8.331],[8.781,10.716]]},"it-bus":{"f":"audio/it-bus.mp4","s":[[0.2,2.913],[3.363,5.122],[5.572,8.52],[8.97,11.161]]},"pt-beach":{"f":"audio/pt-beach.mp4","s":[[0.2,3.023],[3.473,6.466],[6.916,10.052],[10.502,13.369]]},"pt-market":{"f":"audio/pt-market.mp4","s":[[0.2,3.254],[3.704,7.116],[7.566,10.455],[10.905,14.272]]},"ru-cat":{"f":"audio/ru-cat.mp4","s":[[0.2,1.542],[1.992,3.543],[3.993,6.182],[6.632,8.497]]},"ru-metro":{"f":"audio/ru-metro.mp4","s":[[0.2,3.02],[3.47,5.973],[6.423,8.879],[9.329,11.972]]}},"words":{"en":{"f":"audio/w-en.mp4","w":{"every":[0.2,0.857],"morning":[1.307,2.017],"Sam":[2.467,3.199],"walk":[3.649,4.334],"his":[4.784,5.388],"dog":[5.838,6.417],"in":[6.867,7.432],"park":[7.882,8.562],"the":[9.012,9.63],"be":[10.08,10.61],"small":[11.06,11.803],"but":[12.253,12.841],"very":[13.291,13.944],"fast":[14.394,15.206],"today":[15.656,16.407],"it":[16.857,17.317],"see":[17.767,18.417],"a":[18.867,19.431],"cat":[19.881,20.543],"and":[20.993,21.603],"run":[22.053,22.696],"after":[23.146,23.896],"laugh":[24.346,25.009],"too":[25.459,26.063],"new":[26.513,27.134],"café":[27.584,28.45],"open":[28.9,29.588],"on":[30.038,30.646],"our":[31.096,31.647],"street":[32.097,32.922],"last":[33.372,34.105],"week":[34.555,35.229],"owner":[35.679,36.297],"bake":[36.747,37.37],"fresh":[37.82,38.586],"bread":[39.036,39.624],"day":[40.074,40.673],"my":[41.123,41.776],"sister":[42.226,43.039],"go":[43.489,44.092],"there":[44.542,45.108],"Saturday":[45.558,46.487],"order":[46.937,47.601],"hot":[48.051,48.681],"chocolate":[49.131,49.951],"she":[50.401,51.037],"say":[51.487,52.195],"best":[52.645,53.326],"have":[53.776,54.383],"ever":[54.833,55.42],"taste":[55.87,56.659]}},"es":{"f":"audio/w-es.mp4","w":{"Ana":[0.2,0.717],"tener":[1.167,1.733],"un":[2.183,2.701],"teléfono":[3.151,3.973],"nuevo":[4.423,5.066],"ser":[5.516,6.051],"rojo":[6.501,7.251],"y":[7.701,8.463],"muy":[8.913,9.476],"bonito":[9.926,10.687],"hacer":[11.137,11.759],"mucho":[12.209,12.911],"foto":[13.361,13.993],"de":[14.443,14.891],"su":[15.341,15.841],"perro":[16.291,16.838],"el":[17.288,17.76],"no":[18.21,18.647],"querer":[19.097,19.645],"posar":[20.095,20.746],"cada":[21.196,21.756],"sábado":[22.206,22.961],"Lucía":[23.411,24.159],"ir":[24.609,25.058],"al":[25.508,25.979],"mercado":[26.429,27.247],"con":[27.697,28.222],"abuelo":[28.672,29.363],"comprar":[29.813,30.535],"tomate":[30.985,31.655],"pan":[32.105,32.618],"queso":[33.068,33.685],"fresco":[34.135,34.906],"vendedor":[35.356,36.152],"siempre":[36.602,37.404],"le":[37.854,38.291],"regalar":[38.741,39.526],"naranja":[39.976,40.806],"después":[41.256,42.052],"desayunar":[42.502,43.496],"junto":[43.946,44.648],"en":[45.098,45.616],"cafetería":[46.066,47.02],"pequeño":[47.47,48.226],"verano":[48.676,49.403],"pasado":[49.853,50.574],"viajar":[51.024,51.844],"a":[52.294,52.695],"Granada":[53.145,53.954],"mi":[54.404,54.862],"amigo":[55.312,55.969],"visitar":[56.419,57.285],"Alhambra":[57.735,58.473],"palacio":[58.923,59.702],"antiguo":[60.152,60.937],"enorme":[61.387,62.113],"tanto":[62.563,63.186],"calor":[63.636,64.23],"que":[64.68,65.077],"beber":[65.527,66.161],"agua":[66.611,67.186],"hora":[67.636,68.154],"aun":[68.604,69.226],"así":[69.676,70.251],"mejor":[70.701,71.426],"viaje":[71.876,72.637],"vida":[73.087,73.719]}},"fr":{"f":"audio/w-fr.mp4","w":{"Paul":[0.2,0.845],"habiter":[1.295,2.058],"à":[2.508,3.758],"Paris":[4.208,4.777],"chaque":[5.227,6.033],"matin":[6.483,7.199],"il":[7.649,8.18],"acheter":[8.63,9.299],"un":[9.749,10.14],"croissant":[10.59,11.374],"le":[11.824,12.389],"boulangère":[12.839,14.019],"lui":[14.469,15.103],"dire":[15.553,16.294],"bonjour":[16.744,17.75],"manger":[18.2,18.939],"son":[19.389,19.94],"dans":[20.39,20.887],"parc":[21.337,22.179],"samedi":[22.629,23.424],"Claire":[23.874,24.611],"avoir":[25.061,25.974],"prendre":[26.424,27.293],"train":[27.743,28.306],"pour":[28.756,29.506],"Lyon":[29.956,30.601],"voyage":[31.051,32.083],"durer":[32.533,33.228],"deux":[33.678,34.152],"heure":[34.602,35.189],"elle":[35.639,36.17],"regarder":[36.62,37.579],"champ":[38.029,38.592],"par":[39.042,39.768],"fenêtre":[40.218,41.142],"grand-mère":[41.592,42.656],"attendre":[43.106,44.008],"gare":[44.458,45.231]}},"de":{"f":"audio/w-de.mp4","w":{"Lena":[0.2,0.939],"gehen":[1.389,2.067],"jeder":[2.517,3.152],"Morgen":[3.602,4.387],"in":[4.837,5.301],"der":[5.751,6.286],"Bäckerei":[6.736,7.544],"sie":[7.994,8.483],"kaufen":[8.933,9.717],"zwei":[10.167,10.721],"Brötchen":[11.171,12.037],"und":[12.487,13.029],"ein":[13.479,14.012],"Kaffee":[14.462,15.176],"Bäcker":[15.626,16.271],"kennen":[16.721,17.389],"schon":[17.839,18.477],"er":[18.927,19.388],"sagen":[19.838,20.604],"immer":[21.054,21.596],"gut":[22.046,22.661],"Tom":[23.111,23.669],"suchen":[24.119,24.851],"seit":[25.301,25.941],"Stunde":[26.391,27.11],"sein":[27.56,28.177],"sein#v":[28.627,29.244],"Schlüssel":[29.694,30.483],"schauen":[30.933,31.664],"unter":[32.114,32.761],"Sofa":[33.211,33.989],"all":[34.439,34.937],"Tasche":[35.387,36.013],"dann":[36.463,37.009],"klingeln":[37.459,38.301],"es":[38.751,39.224],"an":[39.674,40.149],"Tür":[40.599,41.111],"Nachbarin":[41.561,42.629],"lächeln":[43.079,43.969],"halten":[44.419,45.127],"Hand":[45.577,46.169],"ganz":[46.619,47.28],"Zeit":[47.73,48.378],"April":[48.828,49.524],"fahren":[49.974,50.762],"Jonas":[51.212,52.067],"mit":[52.517,53.071],"Fahrrad":[53.521,54.449],"zu":[54.899,55.418],"Arbeit":[55.868,56.657],"Weg":[57.107,57.707],"dauern":[58.157,58.942],"zwanzig":[59.392,60.399],"Minute":[60.849,61.672],"lang":[62.122,62.71],"als":[63.16,63.671],"Auto":[64.121,64.828],"trotzdem":[65.278,66.252],"ankommen":[66.702,67.595],"entspannt":[68.045,68.959],"Büro":[69.409,70.078],"bei":[70.528,70.98],"Regen":[71.43,72.196],"nehmen":[72.646,73.366],"aber":[73.816,74.395],"gern":[74.845,75.449],"Bahn":[75.899,76.48]}},"zh":{"f":"audio/w-zh.mp4","w":{"我":[0.2,0.713],"喜欢":[1.163,2.022],"喝":[2.472,3.03],"茶":[3.48,4.021],"每天":[4.471,5.332],"早上":[5.782,6.619],"一":[7.069,7.545],"杯":[7.995,8.445],"绿茶":[8.895,9.65],"的":[10.1,10.456],"朋友":[10.906,11.684],"咖啡":[12.134,12.903],"我们":[13.353,14.005],"常常":[14.455,15.355],"一起":[15.805,16.55],"去":[17.0,17.516],"茶馆":[17.966,18.832],"熊猫":[19.282,20.13],"是":[20.58,21.138],"中国":[21.588,22.303],"动物":[22.753,23.427],"它们":[23.877,24.516],"很":[24.966,25.518],"吃":[25.968,26.544],"竹子":[26.994,27.639],"睡觉":[28.089,28.935],"时间":[29.385,30.232],"长":[30.682,31.292],"很多":[31.742,32.532],"人":[32.982,33.541],"动物园":[33.991,34.967],"看":[35.417,35.977]}},"ja":{"f":"audio/w-ja.mp4","w":{"わたし":[0.2,0.954],"いえ":[1.404,1.844],"ねこ":[2.294,2.892],"いる":[3.342,3.806],"なまえ":[4.256,4.958],"タマ":[5.408,5.987],"です":[6.437,6.985],"まいにち":[7.435,8.323],"よく":[8.773,9.371],"ねる":[9.821,10.326],"でも":[10.776,11.333],"あさ":[11.783,12.304],"はやい":[12.754,13.391],"おきる":[13.841,14.466],"ごはん":[14.916,15.577],"まつ":[16.027,16.625],"えき":[17.075,17.593],"まえ":[18.043,18.571],"ちいさい":[19.021,19.888],"ラーメンや":[20.338,21.279],"ある":[21.729,22.192],"きんようび":[22.642,23.703],"ともだち":[24.153,25.151],"いく":[25.601,26.134],"ラーメン":[26.584,27.367],"あつい":[27.817,28.454],"とても":[28.904,29.693],"おいしい":[30.143,30.931],"みせ":[31.381,31.933],"ひと":[32.383,32.916],"いつも":[33.366,34.073],"げんき":[34.523,35.242],"けさ":[35.692,36.336],"でんしゃ":[36.786,37.471],"こむ":[37.921,38.529],"すわる":[38.979,39.67],"ずっと":[40.12,40.851],"たつ":[41.301,41.985],"となり":[42.435,43.154],"おばあさん":[43.604,44.532],"にもつ":[44.982,45.742],"もつ":[46.192,46.778],"くれる":[47.228,47.929],"うれしい":[48.379,49.203]}},"ko":{"f":"audio/w-ko.mp4","w":{"민지":[0.2,0.997],"매일":[1.447,2.116],"아침":[2.566,3.305],"편의점":[3.755,4.691],"가다":[5.141,5.828],"오늘":[6.278,6.866],"삼각김밥":[7.316,8.426],"다":[8.876,9.389],"팔리다":[9.839,10.671],"점원":[11.121,11.882],"웃다":[12.332,13.036],"말하다":[13.486,14.306],"내일":[14.756,15.413],"일찍":[15.863,16.602],"오다":[17.052,17.722],"비":[18.172,18.673],"많이":[19.123,19.803],"준호":[20.253,21.002],"우산":[21.452,22.157],"없다":[22.607,23.311],"그래서":[23.761,24.526],"버스":[24.976,25.725],"정류장":[26.175,27.203],"뛰어가다":[27.653,28.563],"옆":[29.013,29.472],"있다":[29.922,30.638],"할머니":[31.088,31.976],"같이":[32.426,33.136],"쓰다":[33.586,34.279],"하다":[34.729,35.397],"고맙다":[35.847,36.76],"기분":[37.21,37.874],"좋다":[38.324,39.096],"지수":[39.546,40.272],"처음":[40.722,41.418],"회사":[41.868,42.592],"출근하다":[43.042,44.086],"너무":[44.536,45.159],"긴장하다":[45.609,46.668],"지하철":[47.118,48.064],"내리다":[48.514,49.276],"역":[49.726,50.186],"놓치다":[50.636,51.525],"뻔하다":[51.975,52.78],"팀장님":[53.23,54.283],"커피":[54.733,55.496],"한":[55.946,56.509],"잔":[56.959,57.532],"사다":[57.982,58.685],"주다":[59.135,59.802],"동료":[60.252,61.062],"친절하다":[61.512,62.568],"일":[63.018,63.547],"가르치다":[63.997,64.998],"퇴근길":[65.448,66.454],"기대되다":[66.904,67.87],"생각하다":[68.32,69.441]}},"it":{"f":"audio/w-it.mp4","w":{"Marco":[0.2,1.009],"lavorare":[1.459,2.336],"in":[2.786,3.316],"uno":[3.766,4.32],"pizzeria":[4.77,5.561],"a":[6.011,6.402],"Napoli":[6.852,7.673],"ogni":[8.123,8.781],"sera":[9.231,9.886],"preparare":[10.336,11.243],"cento":[11.693,12.496],"pizza":[12.946,13.644],"il":[14.094,14.623],"suo":[15.073,15.702],"preferito":[16.152,17.083],"essere":[17.533,18.318],"margherita":[18.768,19.716],"semplice":[20.166,21.215],"ma":[21.665,22.137],"buono":[22.587,23.314],"Giulia":[23.764,24.456],"aspettare":[24.906,25.889],"autobus":[26.339,27.311],"da":[27.761,28.221],"venti":[28.671,29.468],"minuto":[29.918,30.703],"piovere":[31.153,31.932],"e":[32.382,32.773],"lei":[33.223,33.787],"non":[34.237,34.884],"avere":[35.334,36.015],"ombrello":[36.465,37.401],"finalmente":[37.851,38.942],"arrivare":[39.392,40.247],"pieno":[40.697,41.325],"ridere":[41.775,42.491],"decidere":[42.941,43.889],"di":[44.339,44.799],"camminare":[45.249,46.12]}},"pt":{"f":"audio/w-pt.mp4","w":{"Ana":[0.2,0.828],"e":[1.278,1.777],"Pedro":[2.227,2.915],"ir":[3.365,3.782],"a":[4.232,4.73],"praia":[5.18,5.915],"em":[6.365,6.921],"domingo":[7.371,8.299],"sábado":[8.749,9.793],"o":[10.243,10.762],"sol":[11.212,11.812],"estar":[12.262,13.038],"forte":[13.488,14.4],"mar":[14.85,15.394],"calmo":[15.844,16.602],"eles":[17.052,17.923],"comer":[18.373,19.036],"peixe":[19.486,20.243],"restaurante":[20.693,21.924],"pequeno":[22.374,23.172],"tarde":[23.622,24.357],"nadar":[24.807,25.523],"descansar":[25.973,27.087],"todo":[27.537,28.19],"meu":[28.64,29.208],"avó":[29.658,30.319],"feira":[30.769,31.53],"ela":[31.98,32.642],"comprar":[33.092,33.882],"fruta":[34.332,35.198],"verdura":[35.648,36.543],"flor":[36.993,37.672],"vendedor":[38.122,39.052],"já":[39.502,40.073],"conhecer":[40.523,41.465],"vez":[41.915,42.693],"dar":[43.143,43.7],"um":[44.15,44.671],"manga":[45.121,45.874],"de":[46.324,46.881],"presente":[47.331,48.304]}},"ru":{"f":"audio/w-ru.mp4","w":{"у":[0.2,0.706],"я":[1.156,1.767],"есть":[2.217,2.978],"кот":[3.428,3.996],"он":[4.446,4.999],"звать":[5.449,6.203],"Барсик":[6.653,7.542],"любить":[7.992,8.742],"спать":[9.192,9.917],"на":[10.367,10.954],"диван":[11.404,12.172],"утро":[12.622,13.267],"просить":[13.717,14.527],"молоко":[14.977,15.843],"каждый":[16.293,17.023],"день":[17.473,18.112],"Анна":[18.562,19.255],"ездить":[19.705,20.524],"работа":[20.974,21.806],"метро":[22.256,23.005],"московский":[23.455,24.542],"очень":[24.992,25.684],"красивый":[26.134,27.027],"станция":[27.477,28.516],"картина":[28.966,29.778],"и":[30.228,30.757],"люстра":[31.207,31.981],"всегда":[32.431,33.258],"читать":[33.708,34.511],"книга":[34.961,35.656],"в":[36.106,36.729],"поезд":[37.179,37.86]}}}};
+
+const ART = {
+  food: `<circle cx="60" cy="58" r="30" fill="#f08a4b"/><rect x="26" y="50" width="68" height="10" rx="5" fill="#c4572a"/><path d="M48 26c-4-6 4-8 0-14M60 28c-4-6 4-8 0-14M72 26c-4-6 4-8 0-14" stroke="#c4572a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  daily: `<rect x="40" y="16" width="40" height="64" rx="8" fill="#2f6fd6"/><rect x="45" y="24" width="30" height="44" rx="3" fill="#bcd9ff"/><circle cx="60" cy="74" r="3" fill="#bcd9ff"/><circle cx="90" cy="24" r="8" fill="#ffb84d"/>`,
+  work: `<rect x="34" y="20" width="52" height="64" rx="3" fill="#5a5fc8"/><g fill="#dcdcff"><rect x="42" y="28" width="10" height="9"/><rect x="56" y="28" width="10" height="9"/><rect x="70" y="28" width="10" height="9"/><rect x="42" y="42" width="10" height="9"/><rect x="56" y="42" width="10" height="9"/><rect x="70" y="42" width="10" height="9"/><rect x="42" y="56" width="10" height="9"/><rect x="70" y="56" width="10" height="9"/></g><rect x="54" y="66" width="12" height="18" fill="#2e317d"/>`,
+  weather: `<ellipse cx="60" cy="38" rx="30" ry="16" fill="#5b8fa8"/><circle cx="48" cy="32" r="13" fill="#5b8fa8"/><circle cx="68" cy="28" r="15" fill="#5b8fa8"/><g stroke="#2d6f8c" stroke-width="3" stroke-linecap="round"><path d="M42 62l-4 10M58 62l-4 10M74 62l-4 10M50 76l-3 7M66 76l-3 7"/></g>`,
+  animals: `<circle cx="60" cy="54" r="24" fill="#e0779a"/><path d="M40 40l2-22 14 14zM80 40l-2-22-14 14z" fill="#e0779a"/><circle cx="51" cy="52" r="3" fill="#5a1f33"/><circle cx="69" cy="52" r="3" fill="#5a1f33"/><path d="M56 62q4 4 8 0" stroke="#5a1f33" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+  travel: `<circle cx="84" cy="26" r="11" fill="#f2a200"/><path d="M8 86l34-46 20 26 14-16 36 36z" fill="#d48a1e"/><path d="M8 86l34-46 10 13-14 33z" fill="#b06b0c"/>`,
+  city: `<rect x="22" y="30" width="76" height="40" rx="10" fill="#1f9e74"/><g fill="#d6f5e8"><rect x="30" y="38" width="16" height="13" rx="2"/><rect x="52" y="38" width="16" height="13" rx="2"/><rect x="74" y="38" width="16" height="13" rx="2"/></g><circle cx="40" cy="74" r="6" fill="#145c45"/><circle cx="80" cy="74" r="6" fill="#145c45"/><rect x="10" y="80" width="100" height="3" fill="#145c45"/>`,
+  home: `<path d="M24 50L60 22l36 28v34H24z" fill="#b5835a"/><rect x="52" y="60" width="16" height="24" fill="#6e4628"/><circle cx="92" cy="70" r="7" fill="none" stroke="#e5a400" stroke-width="3.5"/><path d="M99 70h12M106 70v6" stroke="#e5a400" stroke-width="3.5" stroke-linecap="round"/>`,
+  mine: `<rect x="30" y="18" width="52" height="64" rx="5" fill="#8a7cc6"/><g stroke="#ece8fb" stroke-width="3" stroke-linecap="round"><path d="M40 32h32M40 42h32M40 52h22"/></g><path d="M78 56l16-16 6 6-16 16-8 2z" fill="#4c3f8a"/>`,
+};
+const art = (cat, cls = "") => `<span class="art a-${cat} ${cls}" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">${ART[cat] || ART.mine}</svg></span>`;
+
+const ICONS = {
+  read: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>`,
+  dict: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>`,
+  words: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>`,
+  import: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3 3 3-3"/></svg>`,
+  me: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>`,
+  play: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>`,
+  pause: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`,
+  prev: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 5L8 12l10 7zM6 5h2v14H6z"/></svg>`,
+  next: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 5l10 7-10 7zM16 5h2v14h-2z"/></svg>`,
+  speaker: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>`,
+};
+
+// ═════════════════════════ state ═════════════════════════
+const KEY = "ilgi.v2";
+const fresh = () => ({ lang: null, words: {}, imports: [], done: {}, seeded: {}, fLevel: "all", fCat: "all", showTr: false, hl: true });
+let S;
+try { S = { ...fresh(), ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch { S = fresh(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+
+let view = S.lang ? "read" : "onboard";
+let ob = { step: 0, lang: S.lang, level: 1 };
+let storyId = null, sel = null, cur = 0, playing = false, rate = 1;
+let quiz = null, flip = false, wordsTab = "review", dq = "";
+let sample = null, sampleChecked = false, aiCtl = null, aiOut = {};
+
+const $ = s => document.querySelector(s);
+const root = $("#root");
+const h = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shown = l => l.split("#")[0];
+const wkey = (lang, l) => lang + "|" + l;
+const stateOf = (lang, l) => S.words[wkey(lang, l)]?.s || "new";
+const stories = (lang = S.lang) => [...S.imports.filter(s => s.lang === lang), ...STORIES.filter(s => s.lang === lang)];
+const findStory = id => [...STORIES, ...S.imports].find(s => s.id === id);
+
+function lookup(story, l) {
+  const d = story?.dict?.[l];
+  if (d) return { pos: d[0], g: d[1] };
+  const lang = story ? story.lang : S.lang;
+  const e = D[lang]?.[l] || D[lang]?.[l.toLowerCase()];
+  return e ? { pos: e[0], g: e[1], r: e[2] || "" } : null;
+}
+const trOf = se => typeof se.tr === "string" ? se.tr : (se.tr?.en || (se.tr ? Object.values(se.tr)[0] : "") || "");
+const ttOf = st => typeof st.tt === "string" ? st.tt : (st.tt?.en || "");
+function coverage(st) {
+  let k = 0, l = 0, n = 0;
+  for (const se of st.sents) for (const t of se.tokens) {
+    if (t.p) continue;
+    const s = stateOf(st.lang, t.l);
+    if (s === "known" || s === "ignored") k++; else if (s === "learning") l++; else n++;
+  }
+  const total = k + l + n || 1;
+  return { k, l, n, total, pct: Math.round(k / total * 100) };
+}
+function fit(p) {
+  if (p >= 97) return ["easy", "Easy"];
+  if (p >= 85) return ["right", "Just right"];
+  if (p >= 70) return ["stretch", "Stretch"];
+  return ["hard", "Hard"];
+}
+const due = () => Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning" && (w.due || 0) <= Date.now());
+const knownCount = lang => Object.entries(S.words).filter(([k, w]) => k.startsWith(lang + "|") && w.s === "known").length;
+function toast(m) { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function seedLang(lang, level) {
+  if (S.seeded[lang]) return;
+  let list = SEED[lang];
+  if (level === 0) list = list.slice(0, 8);
+  if (level === 2) {
+    const first = LANGS[lang].levels[0];
+    list = [...list, ...STORIES.filter(s => s.lang === lang && s.level === first).flatMap(s => s.sents.flatMap(se => se.tokens.filter(t => !t.p).map(t => t.l)))];
+  }
+  for (const l of list) S.words[wkey(lang, l)] ||= { s: "known" };
+  S.seeded[lang] = true;
+}
+
+// ═════════════════════════ audio ═════════════════════════
+// Stories and dictionary words play from recorded files: one file per story and one per language,
+// with the start/end time of every clip in AUDIO. Imported texts fall back to the browser's speech engine.
+const synth = window.speechSynthesis;
+const srcCache = {};
+let actx = null, curEl = null, curNode = null, poll = 0, token = 0;
+function unlockAudio() {
+  // called synchronously inside a click so later playback is allowed
+  try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch {}
+}
+function waitMeta(el) { return new Promise((ok, bad) => { if (el.readyState >= 1) return ok(); el.onloadedmetadata = ok; el.onerror = bad; setTimeout(bad, 8000); }); }
+function loadSource(file) {
+  return srcCache[file] ||= (async () => {
+    let ab = null;
+    try { const r = await fetch(file); if (r.ok) ab = await r.arrayBuffer(); } catch {}
+    if (ab) {
+      try { // media element keeps the pitch natural at 0.75×
+        const el = new Audio(); el.preload = "auto"; el.src = URL.createObjectURL(new Blob([ab], { type: "audio/mp4" }));
+        await waitMeta(el); return { el };
+      } catch {}
+      try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); return { buf: await actx.decodeAudioData(ab.slice(0)) }; } catch {}
+    }
+    const el = new Audio(); el.preload = "auto"; el.src = file;
+    await waitMeta(el); return { el };
+  })().catch(e => { delete srcCache[file]; throw e; });
+}
+function stopClip() {
+  token++; clearInterval(poll);
+  if (curEl) { curEl.pause(); curEl = null; }
+  if (curNode) { try { curNode.stop(); } catch {} curNode = null; }
+  synth?.cancel();
+}
+async function playClip(file, span, onend) {
+  stopClip(); const my = token;
+  let src;
+  try { src = await loadSource(file); } catch { if (my === token) { toast("Couldn't load the audio. Try again."); onend?.(false); } return; }
+  if (my !== token) return;
+  const [start, end] = span, from = Math.max(0, start - 0.04);
+  if (src.el) {
+    const el = src.el; curEl = el;
+    el.playbackRate = rate; el.currentTime = from;
+    try { await el.play(); } catch { if (my === token) { curEl = null; toast("Tap play again to start the audio."); onend?.(false); } return; }
+    poll = setInterval(() => {
+      if (my !== token) return clearInterval(poll);
+      if (el.currentTime >= end + 0.06 || el.ended) { clearInterval(poll); el.pause(); curEl = null; onend?.(true); }
+    }, 40);
+  } else {
+    if (actx.state === "suspended") await actx.resume();
+    const n = actx.createBufferSource(); n.buffer = src.buf; n.playbackRate.value = rate; n.connect(actx.destination);
+    n.onended = () => { if (my === token && curNode === n) { curNode = null; onend?.(true); } };
+    curNode = n; n.start(0, from, end - from + 0.08);
+  }
+}
+function speakTTS(text, lang, onend) {
+  stopClip();
+  if (!synth) { toast("Audio for your own texts isn't available in this browser."); onend?.(false); return; }
+  const u = new SpeechSynthesisUtterance(text); u.lang = LANGS[lang].tts; u.rate = rate;
+  const c = LANGS[lang].tts.slice(0, 2), v = synth.getVoices().find(v => v.lang?.toLowerCase().startsWith(c)); if (v) u.voice = v;
+  let done = false; const fin = ok => { if (!done) { done = true; onend?.(ok); } };
+  u.onend = () => fin(true); u.onerror = () => fin(false);
+  synth.speak(u);
+}
+const sentText = (st, se) => se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + t.s).join("");
+function playSentence(st, i, onend) {
+  const a = AUDIO.stories[st.id];
+  if (a?.s[i]) playClip(a.f, a.s[i], onend); else speakTTS(sentText(st, st.sents[i]), st.lang, onend);
+}
+function playWord(lang, lemma, surface) {
+  const a = AUDIO.words[lang], span = a?.w[lemma] || a?.w[lemma.toLowerCase?.()];
+  if (span) playClip(a.f, span); else speakTTS(surface || shown(lemma), lang);
+}
+function preload(st) {
+  const a = AUDIO.stories[st.id]; if (a) loadSource(a.f).catch(() => {});
+  const w = AUDIO.words[st.lang]; if (w) loadSource(w.f).catch(() => {});
+}
+function stop() { playing = false; stopClip(); }
+function playFrom(st, i) {
+  stop(); playing = true; cur = i; paintPlayer(st);
+  const step = j => {
+    if (!playing || j >= st.sents.length) { playing = false; if (j >= st.sents.length) cur = 0; paintPlayer(st); return; }
+    cur = j; paintPlayer(st);
+    playSentence(st, j, ok => { if (!playing) return; if (ok === false) { playing = false; paintPlayer(st); return; } setTimeout(() => playing && step(j + 1), 250); });
+  };
+  step(i);
+}
+function paintPlayer(st) {
+  document.querySelectorAll(".sent.cur").forEach(e => e.classList.remove("cur"));
+  if (playing) document.querySelector(`.sent[data-si="${cur}"]`)?.classList.add("cur");
+  const p = $("#player"); if (!p) return;
+  const n = st.sents.length;
+  p.querySelector(".pbtn").innerHTML = playing ? ICONS.pause : ICONS.play;
+  p.querySelector(".pbtn").setAttribute("aria-label", playing ? "Pause" : "Play");
+  p.querySelector(".bar i").style.width = ((cur + (playing ? 1 : 0)) / n * 100) + "%";
+  p.querySelector(".pos-l").textContent = `Sentence ${cur + 1} of ${n}`;
+  p.querySelectorAll("[data-rate]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.rate === rate)));
+}
+
+// ═════════════════════════ shell ═════════════════════════
+const NAV = [["read", "Read"], ["dict", "Dictionary"], ["words", "Words"], ["import", "Import"], ["me", "Profile"]];
+function navButtons(cls) {
+  const d = due().length;
+  return NAV.map(([v, label]) => `<button class="navbtn" data-nav="${v}" aria-current="${(view === v || (view === "article" && v === "read")) ? "page" : "false"}">${ICONS[v]}<span>${label}</span>${v === "words" && d ? `<span class="badge">${d}</span>` : ""}</button>`).join("");
+}
+function langPill() {
+  const L = LANGS[S.lang];
+  return `<button class="langpill" data-nav="me" aria-label="Learning ${L.name}. Change language"><span><span class="nat">${h(L.native)}</span><span class="sub">Learning ${L.name}</span></span><span class="chev">▾</span></button>`;
+}
+function render() {
+  aiCtl?.abort();
+  document.body.classList.toggle("reading", view === "article");
+  if (view === "onboard") { root.innerHTML = renderOnboard(); return; }
+  const body = { read: renderFeed, article: renderArticle, dict: renderDict, words: renderWords, import: renderImport, me: renderMe }[view]();
+  root.innerHTML = `
+  <div class="shell">
+    <aside class="side">
+      <button class="logo" data-nav="read"><span class="mark">S</span>Storyling</button>
+      ${langPill()}
+      <nav class="navlist" aria-label="Main">${navButtons()}</nav>
+      <div class="foot">Progress is saved in this browser.</div>
+    </aside>
+    <header class="topbar"><button class="logo" data-nav="read"><span class="mark">S</span>Storyling</button>${langPill()}</header>
+    <main class="content"><div class="content-inner">${body}</div></main>
+    <nav class="tabbar" aria-label="Main">${navButtons()}</nav>
+  </div>`;
+  if (view === "article") { const st = findStory(storyId); paintPlayer(st); renderPanel(st); preload(st); }
+}
+function go(v, id) {
+  stop(); aiOut = {};
+  view = v; if (id !== undefined) storyId = id;
+  sel = null; quiz = null; flip = false; cur = 0;
+  render(); window.scrollTo({ top: 0 });
+}
+
+// ═════════════════════════ onboarding ═════════════════════════
+function renderOnboard() {
+  const dots = `<div class="dots">${[0, 1].map(i => `<i class="${i <= ob.step ? "on" : ""}"></i>`).join("")}</div>`;
+  let inner = "";
+  if (ob.step === 0) {
+    inner = `<h1>Which language do you want to learn?</h1>
+      <p class="lead">Pick one to start. All explanations are in English. You can switch languages anytime from your profile.</p>
+      <div class="langs">${Object.entries(LANGS).map(([k, L]) => `
+        <button class="lang-opt" data-ob-lang="${k}" aria-pressed="${ob.lang === k}">
+          <span class="big" lang="${k}">${h(L.native)}</span>
+          <span class="nm">${L.name}</span>
+          <span class="ct">${STORIES.filter(s => s.lang === k).length} stories · ${L.levels.join(" – ").replace(/ – .* – /, " – ")}</span>
+        </button>`).join("")}</div>`;
+  } else {
+    const L = LANGS[ob.lang];
+    inner = `<h1>How much ${L.name} do you know?</h1>
+      <p class="lead">This sets which words count as known at the start. Reading updates it from there.</p>
+      <div class="opts">${[["0", "Just starting", "I know a few words and can read the script."], ["1", "Some basics", `Simple sentences are OK. Around ${L.levels[0]}.`], ["2", "Intermediate", `${L.levels[0]} stories feel easy.`]].map(([v, t, d]) => `
+        <button class="opt" data-ob-level="${v}" aria-pressed="${ob.level === +v}"><span class="ic">${["A", "B", "C"][v]}</span><span><b>${t}</b><span class="d">${d}</span></span></button>`).join("")}</div>`;
+  }
+  const canNext = ob.step !== 0 || ob.lang;
+  return `<div class="ob"><div class="ob-card">
+    <div class="ob-top"><span class="logo"><span class="mark">S</span>Storyling</span>${dots}</div>
+    ${inner}
+    <div class="ob-nav">
+      ${ob.step ? `<button class="btn ghost" id="ob-back">Back</button>` : (S.lang ? `<button class="btn ghost" id="ob-cancel">Cancel</button>` : "<span></span>")}
+      <button class="btn primary" id="ob-next" ${canNext ? "" : "disabled"}>${ob.step === 1 ? "Start reading" : "Continue"}</button>
+    </div>
+  </div></div>`;
+}
+
+// ═════════════════════════ feed ═════════════════════════
+function itemRow(st) {
+  const c = coverage(st), [fc, fl] = fit(c.pct);
+  return `<button class="item" data-open="${h(st.id)}">
+    ${art(st.imported ? "mine" : st.cat)}
+    <span style="min-width:0;display:block">
+      <span class="t" lang="${st.lang}" style="display:block">${h(st.title)}</span>
+      <span class="tt" style="display:block">${h(ttOf(st) || (st.imported ? "Your text" : LANGS[st.lang].name + " · " + CATS[st.cat]))}</span>
+      <span class="meta"><span class="lvl">${h(st.level)}</span><span>${st.min ? st.min + " min" : st.date || ""}</span><span class="fit ${fc}">${fl} · ${c.pct}%</span>${S.done[st.id] ? '<span class="read-tag">✓ Read</span>' : ""}</span>
+    </span></button>`;
+}
+function renderFeed() {
+  const L = LANGS[S.lang], all = stories();
+  const levels = ["all", ...L.levels, ...(all.some(s => s.imported) ? ["Your text"] : [])];
+  const cats = ["all", ...new Set(all.map(s => s.imported ? "mine" : s.cat))];
+  const list = all.filter(s => (S.fLevel === "all" || s.level === S.fLevel) && (S.fCat === "all" || (s.imported ? "mine" : s.cat) === S.fCat));
+  const best = all.filter(s => !S.done[s.id]).map(s => ({ s, c: coverage(s) })).sort((a, b) => Math.abs(92 - a.c.pct) - Math.abs(92 - b.c.pct))[0];
+  const done = all.filter(s => S.done[s.id]).length;
+  let feature = "";
+  if (best) {
+    const [fc, fl] = fit(best.c.pct);
+    feature = `<div class="section-h"><h2>Recommended for you</h2></div>
+    <button class="feature" data-open="${h(best.s.id)}">
+      ${art(best.s.imported ? "mine" : best.s.cat)}
+      <span class="fb">
+        <span class="meta" style="margin:0"><span class="lvl">${h(best.s.level)}</span><span>${CATS[best.s.imported ? "mine" : best.s.cat]}</span><span>${best.s.min || 1} min</span></span>
+        <span class="t" lang="${best.s.lang}">${h(best.s.title)}</span>
+        <span class="muted">${h(ttOf(best.s))}</span>
+        <span class="covbar"><i class="k" style="width:${best.c.k / best.c.total * 100}%"></i><i class="l" style="width:${best.c.l / best.c.total * 100}%"></i></span>
+        <span class="meta"><span class="fit ${fc}">${fl}</span><span>You know ${best.c.k} of ${best.c.total} words · ${best.c.n} new</span></span>
+      </span>
+    </button>`;
+  }
+  return `
+  <div class="hello">
+    <div><div class="eyebrow">${h(L.native)} · ${L.name}</div><h1>Today's reading</h1></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${knownCount(S.lang)}</b><span>words known</span></div>
+    <div class="stat"><b>${Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning").length}</b><span>in review</span></div>
+    <div class="stat"><b>${due().length}</b><span>due today</span></div>
+    <div class="stat"><b>${done}/${all.length}</b><span>stories read</span></div>
+  </div>
+  ${feature}
+  <div class="section-h"><h2>All stories</h2></div>
+  <div class="tabs" role="group" aria-label="Level">${levels.map(l => `<button data-flevel="${h(l)}" aria-pressed="${S.fLevel === l}">${l === "all" ? "All levels" : h(l)}</button>`).join("")}</div>
+  <div class="chips" role="group" aria-label="Topic">${cats.map(c => `<button class="chip" data-fcat="${c}" aria-pressed="${S.fCat === c}">${c === "all" ? "All topics" : CATS[c]}</button>`).join("")}</div>
+  <div class="list">${list.map(itemRow).join("") || `<div class="empty"><h2>No stories here</h2><p class="muted">Try another level or topic.</p></div>`}</div>`;
+}
+
+// ═════════════════════════ article ═════════════════════════
+function renderArticle() {
+  const st = findStory(storyId);
+  if (!st) { view = "read"; return renderFeed(); }
+  const c = coverage(st);
+  const text = st.sents.map((se, si) => {
+    const toks = se.tokens.map((t, ti) => {
+      const sp = (ti === 0 || t.p || st.noSpace) ? "" : " ";
+      if (t.p) return h(t.s);
+      const s = stateOf(st.lang, t.l);
+      const cls = s === "new" ? "new" : s === "learning" ? "learn" : "";
+      const isSel = sel && sel.si === si && sel.ti === ti;
+      return `${sp}<button class="w ${cls}${isSel ? " sel" : ""}" data-si="${si}" data-ti="${ti}">${h(t.s)}</button>`;
+    }).join("");
+    return `<span class="sent" data-si="${si}">${toks}${S.showTr && trOf(se) ? `<span class="tr">${h(trOf(se))}</span>` : ""}</span>`;
+  }).join("");
+  return `
+  <button class="btn ghost sm" data-nav="read">← All stories</button>
+  <div class="art-wrap">
+    <div style="min-width:0">
+      ${art(st.imported ? "mine" : st.cat, "banner")}
+      <div class="meta" style="margin-bottom:8px"><span class="lvl">${h(st.level)}</span><span>${CATS[st.imported ? "mine" : st.cat]}</span>${st.date ? `<span>${h(st.date)}</span>` : ""}<span class="fit ${fit(c.pct)[0]}">${fit(c.pct)[1]} · ${c.pct}% known</span></div>
+      <h1 class="a-title" lang="${st.lang}">${h(st.title)}</h1>
+      <div class="a-sub">${h(ttOf(st))}</div>
+      <div class="opts-bar">
+        <div class="row">
+          ${st.sents.some(se => trOf(se)) ? `<button class="toggle" id="t-tr" aria-pressed="${S.showTr}"><i></i>Translation</button>` : ""}
+          <button class="toggle" id="t-hl" aria-pressed="${S.hl}"><i></i>Highlight new words</button>
+        </div>
+      </div>
+      <article class="page">
+        <div class="text ${S.hl ? "hl" : ""}" lang="${st.lang}">${text}</div>
+        <div class="end" id="end">${renderEnd(st, c)}</div>
+      </article>
+    </div>
+    <div class="sheet-bg ${sel ? "on" : ""}" id="sheet-bg"></div>
+    <aside class="panel ${sel ? "" : "idle"}" id="panel" aria-live="polite"></aside>
+  </div>
+  <div class="player" id="player"><div class="in">
+    <button class="ibtn" data-pl="prev" aria-label="Previous sentence">${ICONS.prev}</button>
+    <button class="pbtn" data-pl="play" aria-label="Play">${ICONS.play}</button>
+    <button class="ibtn" data-pl="next" aria-label="Next sentence">${ICONS.next}</button>
+    <div class="prog"><div class="bar"><i style="width:0"></i></div><div class="lbl"><span class="pos-l"></span><span>${AUDIO.stories[st.id] ? "Computer voice · " + h(LANGS[st.lang].voice) : "Browser voice"}</span></div></div>
+    <div class="seg" role="group" aria-label="Speed">${[0.75, 1].map(r => `<button data-rate="${r}" aria-pressed="${rate === r}">${r}×</button>`).join("")}</div>
+  </div></div>`;
+}
+function renderEnd(st, c) {
+  if (quiz) return renderQuiz(st);
+  return `<p>${c.n ? `Finished? The <b>${c.n}</b> highlighted word${c.n > 1 ? "s" : ""} you didn't save will be marked as known.` : "Every word here is known or saved for review."}</p>
+    <div class="row"><button class="btn" id="q-start">Quick check: 5 words</button><button class="btn primary" id="finish">Finish story</button></div>`;
+}
+function buildQuiz(st) {
+  const seen = new Set(), pool = [];
+  for (const [si, se] of st.sents.entries()) for (const t of se.tokens) {
+    if (t.p || seen.has(t.l)) continue;
+    const info = lookup(st, t.l);
+    if (!info?.g || (info.pos === "name")) continue;
+    seen.add(t.l); pool.push({ l: t.l, s: t.s, si, g: info.g, st: stateOf(st.lang, t.l) });
+  }
+  const rank = x => ({ new: 0, learning: 1, known: 2, ignored: 3 })[x.st];
+  const picks = shuffle(pool).sort((a, b) => rank(a) - rank(b)).slice(0, 5);
+  const allG = [...new Set([...Object.values(D[st.lang] || {}).map(e => e[1]), ...Object.values(st.dict || {}).map(e => e[1])])];
+  return { i: 0, score: 0, picked: null, missed: [], qs: picks.map(p => {
+    const wrong = shuffle(allG.filter(g => g && g !== p.g)).slice(0, 3);
+    return { ...p, opts: shuffle([p.g, ...wrong]) };
+  }) };
+}
+function renderQuiz(st) {
+  if (!quiz.qs.length) return `<p>No words to check in this text.</p><div class="row"><button class="btn primary" id="finish">Finish story</button></div>`;
+  if (quiz.i >= quiz.qs.length) {
+    return `<div class="quiz"><div class="eyebrow">Quick check</div><h3 style="font-size:22px">${quiz.score} of ${quiz.qs.length} correct</h3>
+      <p>${quiz.missed.length ? `${quiz.missed.length} word${quiz.missed.length > 1 ? "s" : ""} you missed went to your review deck.` : "Nice work. Nothing to add to review."}</p>
+      <div class="row"><button class="btn" id="q-again">Try again</button><button class="btn primary" id="finish">Finish story</button></div></div>`;
+  }
+  const q = quiz.qs[quiz.i], se = st.sents[q.si];
+  const ctx = se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + (t.l === q.l && !t.p ? `<mark>${h(t.s)}</mark>` : h(t.s))).join("");
+  return `<div class="quiz">
+    <div class="row" style="justify-content:space-between"><span class="eyebrow">Quick check · ${quiz.i + 1}/${quiz.qs.length}</span><button class="btn ghost sm" id="q-close">Close</button></div>
+    <div class="q" lang="${st.lang}">${h(shown(q.l))}</div>
+    <div class="ctx" lang="${st.lang}">${ctx}</div>
+    <div class="choices">${q.opts.map((o, i) => {
+      let cls = "";
+      if (quiz.picked !== null) { if (o === q.g) cls = "ok"; else if (i === quiz.picked) cls = "no"; }
+      return `<button class="choice ${cls}" data-pick="${i}" ${quiz.picked !== null ? "disabled" : ""}>${h(o)}</button>`;
+    }).join("")}</div>
+    ${quiz.picked !== null ? `<div class="row" style="justify-content:flex-end"><button class="btn primary" id="q-next">${quiz.i + 1 < quiz.qs.length ? "Next" : "See result"}</button></div>` : ""}
+  </div>`;
+}
+function renderPanel(st) {
+  const p = $("#panel"); if (!p) return;
+  $("#sheet-bg")?.classList.toggle("on", !!sel);
+  const c = coverage(st);
+  if (!sel) {
+    p.className = "panel idle";
+    p.innerHTML = `<div class="eyebrow">This story</div>
+      <div class="row" style="gap:16px"><div class="ring" style="--p:${c.pct}"><span>${c.pct}%</span></div>
+        <div style="flex:1;display:grid;gap:4px"><div class="kv"><span>Known</span><b>${c.k}</b></div><div class="kv"><span>Learning</span><b>${c.l}</b></div><div class="kv"><span>New</span><b>${c.n}</b></div></div></div>
+      <div class="legend hl">
+        <div><span class="sw w new">new</span>not met yet</div>
+        <div><span class="sw w learn">word</span>saved for review</div>
+        <div><span class="sw">word</span>known</div>
+      </div>
+      <p class="muted small" style="margin:0">Tap any word to look it up.</p>`;
+    return;
+  }
+  const se = st.sents[sel.si], t = se.tokens[sel.ti];
+  const info = lookup(st, t.l), s = stateOf(st.lang, t.l), ai = aiOut[sel.si];
+  p.className = "panel";
+  p.innerHTML = `
+    <span class="grab"></span>
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="lemma" lang="${st.lang}">${h(shown(t.l))}</div>
+      <div class="pos">${info?.r ? `<b class="py">${h(info.r)}</b> · ` : ""}${h(info?.pos || "word")}${t.s !== shown(t.l) ? ` · in text: ${h(t.s)}` : ""}</div></div>
+      <div class="row"><button class="btn sm" id="say-word" aria-label="Hear the word">${ICONS.speaker}</button><button class="btn ghost sm x" id="p-close" aria-label="Close">✕</button></div>
+    </div>
+    <div class="gloss">${info?.g ? h(info.g) : `<span class="muted">Not in the dictionary yet.${sample ? " Try “Explain sentence” below." : ""}</span>`}</div>
+    <div class="wstate" role="group" aria-label="Word status">
+      <button class="s-learning" data-set="learning" aria-pressed="${s === "learning"}">Review</button>
+      <button class="s-known" data-set="known" aria-pressed="${s === "known"}">Known</button>
+      <button class="s-ignored" data-set="ignored" aria-pressed="${s === "ignored"}">Ignore</button>
+    </div>
+    <div class="box">
+      <h4>Sentence ${sel.si + 1}</h4>
+      <div>${trOf(se) ? h(trOf(se)) : '<span class="muted">No translation stored.</span>'}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sm" id="say-sent">${ICONS.speaker} Listen</button>
+        ${sample ? `<button class="btn sm" id="explain">${ai?.busy ? "Stop" : "Explain sentence"}</button>` : ""}
+      </div>
+      ${ai ? `<div class="ai">${h(ai.text)}</div>` : ""}
+    </div>`;
+}
+async function explain(st) {
+  const si = sel.si;
+  if (aiOut[si]?.busy) { aiCtl?.abort(); return; }
+  aiCtl = new AbortController();
+  aiOut[si] = { text: "Thinking…", busy: true }; renderPanel(st);
+  const prompt = `You are a friendly ${LANGS[st.lang].name} teacher. Explain this ${LANGS[st.lang].name} sentence to a learner, writing in simple English.
+Go through the grammar: endings, particles, conjugations and useful patterns. Under 130 words. Plain text, no Markdown.
+
+Sentence: ${sentText(st, st.sents[si])}`;
+  try {
+    await sample(prompt, { modelTier: "quick", signal: aiCtl.signal, onText: ({ text }) => { aiOut[si] = { text, busy: true }; const el = document.querySelector("#panel .ai"); if (el && sel?.si === si) el.textContent = text; } });
+    aiOut[si].busy = false;
+  } catch (e) {
+    const msg = { not_granted: "Claude isn't allowed for this page.", rate_limited: "Too many requests. Try again in a minute.", cancelled: "" }[e.code] ?? "Couldn't get an explanation. Try again.";
+    aiOut[si] = { text: (e.text || "") + (msg ? (e.text ? "\n\n" : "") + msg : ""), busy: false };
+    if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled"].includes(e.code)) sample = null;
+  }
+  if (view === "article") renderPanel(st);
+}
+function setWord(lang, l, s, src) {
+  const k = wkey(lang, l);
+  if (S.words[k]?.s === s) delete S.words[k];
+  else S.words[k] = s === "learning" ? { s, due: Date.now(), ivl: 0, src } : { s };
+  save();
+}
+function refreshText(st) {
+  // repaint word classes without rebuilding the page (keeps scroll and player)
+  document.querySelectorAll(".text .w").forEach(b => {
+    const t = st.sents[b.dataset.si].tokens[b.dataset.ti], s = stateOf(st.lang, t.l);
+    b.classList.toggle("new", s === "new"); b.classList.toggle("learn", s === "learning");
+  });
+  const end = $("#end"); if (end && !quiz) end.innerHTML = renderEnd(st, coverage(st));
+}
+function finish(st) {
+  let n = 0;
+  for (const se of st.sents) for (const t of se.tokens) {
+    if (t.p) continue; const k = wkey(st.lang, t.l);
+    if (!S.words[k]) { S.words[k] = { s: "known" }; n++; }
+  }
+  S.done[st.id] = true; save();
+  toast(n ? `${n} new word${n > 1 ? "s" : ""} marked as known` : "Story finished");
+  go("read");
+}
+
+// ═════════════════════════ dictionary ═════════════════════════
+function renderDict() {
+  const L = LANGS[S.lang];
+  const entries = [];
+  for (const [l, e] of Object.entries(D[S.lang])) entries.push({ l, pos: e[0], g: e[1], r: e[2] || "" });
+  for (const st of stories()) if (st.dict) for (const [l, e] of Object.entries(st.dict)) if (!D[S.lang][l]) entries.push({ l, pos: e[0], g: e[1] });
+  const q = dq.trim().toLowerCase();
+  const res = entries.filter(e => !q || e.l.toLowerCase().includes(q) || e.g.toLowerCase().includes(q)).sort((a, b) => a.l.localeCompare(b.l, S.lang));
+  return `<div class="hello"><div><div class="eyebrow">${h(L.native)} → English</div><h1>Dictionary</h1></div></div>
+    <label class="search" for="dq">${ICONS.dict.replace("<svg", '<svg width="18" height="18"')}<input id="dq" placeholder="Search ${L.name} or English" value="${h(dq)}" autocomplete="off"></label>
+    <p class="muted small">${res.length} of ${entries.length} words from the stories in your library</p>
+    <div class="dlist" id="dres">${dictRows(res)}</div>`;
+}
+function dictRows(res) {
+  return res.slice(0, 150).map(e => {
+    const s = stateOf(S.lang, e.l);
+    return `<div class="drow"><div style="min-width:0"><span class="l" lang="${S.lang}">${h(shown(e.l))}</span> <span class="pos">${e.r ? `<b class="py">${h(e.r)}</b> · ` : ""}${h(e.pos)}</span><div class="g">${h(e.g)}</div></div>
+      <div class="row"><span class="st ${s}">${{ new: "New", learning: "Review", known: "Known", ignored: "Ignored" }[s]}</span>
+      <button class="btn sm" data-say="${h(e.l)}" aria-label="Listen">${ICONS.speaker}</button>
+      ${s !== "learning" ? `<button class="btn sm" data-dadd="${h(e.l)}">+ Review</button>` : ""}</div></div>`;
+  }).join("") || `<div class="drow"><span class="muted">No words match “${h(dq)}”.</span></div>`;
+}
+
+// ═════════════════════════ words / review ═════════════════════════
+const DAY = 864e5;
+const nextIvl = (w, g) => g === "again" ? 6e4 : g === "good" ? (w.ivl ? Math.round(w.ivl * 2.5) : DAY) : (w.ivl ? Math.round(w.ivl * 4) : 4 * DAY);
+const fmt = ms => { const d = Math.round(ms / DAY); return ms < DAY ? "1 min" : d === 1 ? "1 day" : d < 31 ? d + " days" : Math.round(d / 30) + " mo"; };
+function renderWords() {
+  const d = due();
+  const mine = Object.entries(S.words).filter(([k, w]) => k.startsWith(S.lang + "|") && w.s === "learning");
+  const tabs = `<div class="tabs" role="group"><button data-wtab="review" aria-pressed="${wordsTab === "review"}">Review${d.length ? ` (${d.length})` : ""}</button><button data-wtab="list" aria-pressed="${wordsTab === "list"}">My words (${mine.length})</button></div>`;
+  const head = `<div class="hello"><div><div class="eyebrow">${h(LANGS[S.lang].native)}</div><h1>Words</h1></div></div>${tabs}`;
+  if (wordsTab === "list") {
+    return head + (mine.length ? `<div class="dlist" style="margin-top:16px">${mine.map(([k, w]) => {
+      const l = k.slice(3), st = findStory(w.src?.id), info = lookup(st || null, l);
+      return `<div class="drow"><div style="min-width:0"><span class="l" lang="${S.lang}">${h(shown(l))}</span><div class="g">${h(info?.g || "")}</div></div>
+        <div class="row"><span class="muted small">${(w.due || 0) <= Date.now() ? "due now" : "in " + fmt(w.due - Date.now())}</span><button class="btn sm" data-wknown="${h(l)}">Mark known</button></div></div>`;
+    }).join("")}</div>` : `<div class="empty"><h2>No saved words yet</h2><p class="muted">Tap a word while reading and choose “Review”.</p></div>`);
+  }
+  if (!d.length) {
+    return head + `<div class="empty"><h2>${mine.length ? "All done for now" : "Nothing to review yet"}</h2>
+      <p class="muted">${mine.length ? `${mine.length} word${mine.length > 1 ? "s are" : " is"} scheduled for later.` : "Words you save while reading come back here, in the sentence where you found them."}</p>
+      <button class="btn primary" data-nav="read">Read a story</button></div>`;
+  }
+  const [k, w] = d[0], l = k.slice(3), st = findStory(w.src?.id), info = lookup(st || null, l);
+  let ctx = "", tr = "";
+  if (st?.sents[w.src.si]) {
+    const se = st.sents[w.src.si];
+    ctx = se.tokens.map((t, i) => (i && !t.p && !st.noSpace ? " " : "") + (t.l === l && !t.p ? `<mark>${h(t.s)}</mark>` : h(t.s))).join("");
+    tr = trOf(se);
+  }
+  return head + `<div class="flash">
+    <div class="eyebrow">${d.length} due</div>
+    <div class="lemma" lang="${S.lang}">${h(shown(l))}</div>
+    ${ctx ? `<div class="ctx" lang="${S.lang}">${ctx}</div>` : ""}
+    ${flip ? `<div><div class="pos">${info?.r ? `<b class="py">${h(info.r)}</b> · ` : ""}${h(info?.pos || "")}</div><div class="gloss" style="font-size:20px">${h(info?.g || "No meaning stored")}</div>${tr ? `<div class="muted" style="margin-top:6px">${h(tr)}</div>` : ""}</div>
+      <div class="grades">
+        <button class="btn" data-grade="again">Again<small>1 min</small></button>
+        <button class="btn" data-grade="good">Good<small>${fmt(nextIvl(w, "good"))}</small></button>
+        <button class="btn primary" data-grade="easy">Easy<small>${fmt(nextIvl(w, "easy"))}</small></button>
+      </div>` : `<div class="row" style="justify-content:center"><button class="btn" data-say="${h(l)}">${ICONS.speaker} Listen</button><button class="btn primary" id="flip">Show meaning</button></div>`}
+  </div>`;
+}
+function grade(g) {
+  const [k, w] = due()[0], ivl = nextIvl(w, g);
+  S.words[k] = (g === "easy" && ivl > 21 * DAY) ? { s: "known" } : { ...w, ivl: g === "again" ? 0 : ivl, due: Date.now() + ivl };
+  save(); flip = false; render();
+}
+
+// ═════════════════════════ import ═════════════════════════
+const SAMPLE_TEXT = { ko: "나는 주말마다 공원에서 산책을 해요. 공원에는 큰 나무가 많아요.", ja: "わたしは しゅうまつに こうえんを さんぽします。", es: "Los domingos paseo por el parque. Hay muchos árboles grandes.", de: "Am Sonntag gehe ich im Park spazieren. Dort gibt es viele große Bäume." };
+function renderImport() {
+  const L = LANGS[S.lang];
+  let draft = null; try { draft = localStorage.getItem("ilgi.draft." + S.lang); } catch {}
+  const mine = S.imports.filter(s => s.lang === S.lang);
+  return `<div class="hello"><div><div class="eyebrow">${h(L.native)}</div><h1>Read your own text</h1></div></div>
+  <form class="form" id="imp-form">
+    <label for="imp-title">Title (optional)<input id="imp-title" placeholder="My article"></label>
+    <label for="imp-text">${L.name} text<textarea id="imp-text" maxlength="1500" lang="${S.lang}">${h(draft ?? SAMPLE_TEXT[S.lang])}</textarea></label>
+    <div class="row">
+      <button type="submit" class="btn primary" id="imp-ai" ${sample ? "" : "hidden"}>Prepare with Claude</button>
+      <button type="button" class="btn" id="imp-basic">Prepare without AI</button>
+    </div>
+    <div class="status" id="imp-status">${sample ? `Claude splits the text into words, finds dictionary forms, and adds English meanings and translations.` : sampleChecked ? "Basic mode: only words in the built-in dictionary will have meanings." : "Checking whether Claude is available…"}</div>
+  </form>
+  <div class="section-h"><h2>Your texts</h2>${mine.length ? `<button class="btn ghost sm" id="imp-clear">Remove all</button>` : ""}</div>
+  <div class="list">${mine.map(itemRow).join("") || `<p class="muted">Texts you import appear here and in your reading list.</p>`}</div>`;
+}
+function newImport(title, sents, dict) {
+  const st = { id: "imp-" + Date.now(), lang: S.lang, level: "Your text", imported: true, cat: "mine", title: title || "Untitled", tt: {}, date: new Date().toLocaleDateString("en", { month: "short", day: "numeric" }), sents, dict, noSpace: S.lang === "ja" && !dict ? true : S.lang === "ja" };
+  S.imports.unshift(st); save();
+  try { localStorage.removeItem("ilgi.draft." + S.lang); } catch {}
+  return st;
+}
+function basicImport(title, text) {
+  if (typeof Intl.Segmenter !== "function") { toast("This browser can't split text into words."); return null; }
+  const tag = LANGS[S.lang].tts, sents = [];
+  const ws = new Intl.Segmenter(tag, { granularity: "word" });
+  for (const { segment } of new Intl.Segmenter(tag, { granularity: "sentence" }).segment(text)) {
+    const tokens = [];
+    for (const w of ws.segment(segment.trim())) {
+      if (!w.segment.trim()) continue;
+      tokens.push(w.isWordLike ? { s: w.segment, l: S.lang === "es" ? w.segment.toLowerCase() : w.segment } : { s: w.segment, p: true });
+    }
+    if (tokens.length) sents.push({ tokens, tr: null });
+  }
+  return sents.length ? newImport(title, sents, null) : null;
+}
+async function aiImport(title, text) {
+  const L = LANGS[S.lang], ex = "English", status = $("#imp-status"), btn = $("#imp-ai");
+  const prompt = `You are preparing a graded reader for a language learner. The text is in ${L.name}. The learner reads explanations in ${ex}.
+Split the TEXT into sentences and each sentence into tokens. A token is a word exactly as written (for Korean keep particles and endings attached, e.g. "학교에"; for Japanese split into words and particles) or one punctuation mark. For each word give its dictionary form (lemma). Give each sentence a natural translation into ${ex}. For every distinct lemma give a short part of speech in English and a short meaning in ${ex}.
+Reply with only JSON in this shape:
+{"title":"short title in ${L.name}","sentences":[{"tokens":[["학교에","학교"],[".",""]],"tr":"translation"}],"glossary":{"학교":["noun","meaning"]}}
+Use "" as the lemma for punctuation.
+
+TEXT:
+"""${text.slice(0, 1500)}"""`;
+  btn.disabled = true; status.textContent = "Claude is reading your text. This can take up to a minute…";
+  try {
+    const r = await sample.json(prompt, { modelTier: "default" });
+    if (!r || !Array.isArray(r.sentences)) throw { code: "invalid_json" };
+    const sents = r.sentences.filter(s => Array.isArray(s?.tokens)).map(s => ({
+      tokens: s.tokens.filter(t => Array.isArray(t) && t[0]).map(([sf, lm]) => (!lm || PUNCT.test(String(sf))) ? { s: String(sf), p: true } : { s: String(sf), l: String(lm) }),
+      tr: s.tr ? String(s.tr) : null,
+    })).filter(s => s.tokens.length);
+    if (!sents.length) throw { code: "invalid_json" };
+    const dict = {};
+    for (const [k, v] of Object.entries(r.glossary || {})) if (Array.isArray(v)) dict[k] = [String(v[0] || ""), String(v[1] || "")];
+    const st = newImport(title || String(r.title || "").slice(0, 60), sents, dict);
+    go("article", st.id);
+  } catch (e) {
+    btn.disabled = false;
+    status.textContent = { not_granted: "Claude isn't allowed for this page. Use “Prepare without AI”.", rate_limited: "Too many requests right now. Try again in a minute.", invalid_json: "Claude's answer couldn't be read. Try again or shorten the text.", refused: "Claude couldn't prepare this text. Try a different one." }[e.code] || "Something went wrong. Try again.";
+    if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled"].includes(e.code)) { sample = null; btn.hidden = true; }
+  }
+}
+
+// ═════════════════════════ profile ═════════════════════════
+function renderMe() {
+  return `<div class="hello"><div><div class="eyebrow">Profile</div><h1>Your languages</h1></div></div>
+  <div class="card"><h3>Learning</h3>
+    <div class="langs">${Object.entries(LANGS).map(([k, L]) => `
+      <button class="lang-opt" data-switch="${k}" aria-pressed="${S.lang === k}" style="min-height:130px">
+        <span class="big" lang="${k}" style="font-size:32px">${h(L.native)}</span><span class="nm">${L.name}</span>
+        <span class="ct">${S.seeded[k] ? knownCount(k) + " words known" : "Not started"}</span>
+      </button>`).join("")}</div></div>
+  <div class="card"><h3>Audio</h3><p class="muted" style="margin:0">Stories and dictionary words are read by a computer voice for each language (for example Yuna for Korean, Thomas for French). It isn't a human recording, and the player always says so.</p></div>
+  <div class="card"><h3>Reset</h3><p class="muted" style="margin:0">Clears known words, review cards and imported texts in this browser.</p>
+    <div><button class="btn" id="reset">Reset all progress</button></div></div>`;
+}
+
+// ═════════════════════════ events ═════════════════════════
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, [data-open]");
+  if (t && (t.dataset.pl || t.dataset.say || t.id === "say-word" || t.id === "say-sent")) unlockAudio();
+  if (!t) { if (e.target.id === "sheet-bg" && sel) { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); renderPanel(findStory(storyId)); } return; }
+  const ds = t.dataset;
+
+  // onboarding
+  if (view === "onboard") {
+    if (ds.obLang) { ob.lang = ds.obLang; root.innerHTML = renderOnboard(); return; }
+    if (ds.obLevel) { ob.level = +ds.obLevel; root.innerHTML = renderOnboard(); return; }
+    if (t.id === "ob-back") { ob.step--; root.innerHTML = renderOnboard(); return; }
+    if (t.id === "ob-cancel") { go("me"); return; }
+    if (t.id === "ob-next") {
+      if (ob.step === 0 && S.seeded[ob.lang]) { S.lang = ob.lang; S.fLevel = "all"; S.fCat = "all"; save(); return go("read"); }
+      if (ob.step < 1) { ob.step++; root.innerHTML = renderOnboard(); return; }
+      S.lang = ob.lang; S.fLevel = "all"; S.fCat = "all"; seedLang(ob.lang, ob.level); save(); return go("read");
+    }
+    return;
+  }
+
+  if (ds.nav) return go(ds.nav);
+  if (ds.open) return go("article", ds.open);
+  if (ds.flevel) { S.fLevel = ds.flevel; save(); return render(); }
+  if (ds.fcat) { S.fCat = ds.fcat; save(); return render(); }
+  if (ds.say) return playWord(S.lang, ds.say);
+  if (ds.switch) {
+    if (S.seeded[ds.switch]) { S.lang = ds.switch; S.fLevel = "all"; S.fCat = "all"; save(); return go("read"); }
+    ob = { step: 1, lang: ds.switch, level: 1 }; view = "onboard"; return render();
+  }
+  if (t.id === "reset") { if (ds.armed) { S = fresh(); save(); ob = { step: 0, lang: null, level: 1 }; view = "onboard"; return render(); } ds.armed = "1"; t.textContent = "Tap again to confirm"; return; }
+
+  if (view === "article") {
+    const st = findStory(storyId);
+    if (t.classList.contains("w")) { sel = { si: +ds.si, ti: +ds.ti }; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); t.classList.add("sel"); return renderPanel(st); }
+    if (t.id === "p-close") { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); return renderPanel(st); }
+    if (ds.set) { setWord(st.lang, st.sents[sel.si].tokens[sel.ti].l, ds.set, { id: st.id, si: sel.si }); refreshText(st); return renderPanel(st); }
+    if (t.id === "say-word") { stop(); paintPlayer(st); const tk = st.sents[sel.si].tokens[sel.ti]; return playWord(st.lang, tk.l, tk.s); }
+    if (t.id === "say-sent") { stop(); paintPlayer(st); return playSentence(st, sel.si); }
+    if (t.id === "explain") return explain(st);
+    if (t.id === "t-tr") { S.showTr = !S.showTr; save(); return render(); }
+    if (t.id === "t-hl") { S.hl = !S.hl; save(); t.setAttribute("aria-pressed", String(S.hl)); document.querySelector(".text").classList.toggle("hl", S.hl); return; }
+    if (ds.pl === "play") return playing ? (stop(), paintPlayer(st)) : playFrom(st, cur);
+    if (ds.pl === "prev") { const i = Math.max(0, cur - 1); return playing ? playFrom(st, i) : (cur = i, paintPlayer(st)); }
+    if (ds.pl === "next") { const i = Math.min(st.sents.length - 1, cur + 1); return playing ? playFrom(st, i) : (cur = i, paintPlayer(st)); }
+    if (ds.rate) { rate = +ds.rate; return paintPlayer(st); }
+    if (t.id === "finish") return finish(st);
+    if (t.id === "q-start" || t.id === "q-again") { quiz = buildQuiz(st); $("#end").innerHTML = renderEnd(st); return; }
+    if (t.id === "q-close") { quiz = null; $("#end").innerHTML = renderEnd(st, coverage(st)); return; }
+    if (ds.pick !== undefined && quiz.picked === null) {
+      quiz.picked = +ds.pick; const q = quiz.qs[quiz.i];
+      if (q.opts[quiz.picked] === q.g) quiz.score++;
+      else { quiz.missed.push(q.l); S.words[wkey(st.lang, q.l)] = { s: "learning", due: Date.now(), ivl: 0, src: { id: st.id, si: q.si } }; save(); refreshText(st); }
+      $("#end").innerHTML = renderEnd(st); return;
+    }
+    if (t.id === "q-next") { quiz.i++; quiz.picked = null; $("#end").innerHTML = renderEnd(st); return; }
+  }
+  if (view === "dict" && ds.dadd) { S.words[wkey(S.lang, ds.dadd)] = { s: "learning", due: Date.now(), ivl: 0, src: null }; save(); toast(`“${shown(ds.dadd)}” added to review`); return render(); }
+  if (view === "words") {
+    if (ds.wtab) { wordsTab = ds.wtab; return render(); }
+    if (t.id === "flip") { flip = true; return render(); }
+    if (ds.grade) return grade(ds.grade);
+    if (ds.wknown) { S.words[wkey(S.lang, ds.wknown)] = { s: "known" }; save(); return render(); }
+  }
+  if (view === "import") {
+    if (t.id === "imp-basic") {
+      const text = $("#imp-text").value.trim();
+      if (!text) { $("#imp-status").textContent = "Paste some text first."; return; }
+      const st = basicImport($("#imp-title").value.trim(), text);
+      if (st) go("article", st.id);
+      return;
+    }
+    if (t.id === "imp-clear") {
+      if (!ds.armed) { ds.armed = "1"; t.textContent = "Tap again to remove"; return; }
+      S.imports = S.imports.filter(s => s.lang !== S.lang); save(); return render();
+    }
+  }
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id !== "imp-form" || !sample) return;
+  const text = $("#imp-text").value.trim();
+  if (!text) { $("#imp-status").textContent = "Paste some text first."; return; }
+  aiImport($("#imp-title").value.trim(), text);
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "imp-text") { try { localStorage.setItem("ilgi.draft." + S.lang, e.target.value); } catch {} }
+  if (e.target.id === "dq") {
+    dq = e.target.value;
+    const entries = [];
+    for (const [l, en] of Object.entries(D[S.lang])) entries.push({ l, pos: en[0], g: en[1], r: en[2] || "" });
+    for (const st of stories()) if (st.dict) for (const [l, en] of Object.entries(st.dict)) if (!D[S.lang][l]) entries.push({ l, pos: en[0], g: en[1] });
+    const q = dq.trim().toLowerCase();
+    const res = entries.filter(x => !q || x.l.toLowerCase().includes(q) || x.g.toLowerCase().includes(q)).sort((a, b) => a.l.localeCompare(b.l, S.lang));
+    $("#dres").innerHTML = dictRows(res);
+    const c = document.querySelector("#dres")?.previousElementSibling; if (c) c.textContent = `${res.length} of ${entries.length} words from the stories in your library`;
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && view === "article" && sel) { sel = null; document.querySelectorAll(".w.sel").forEach(x => x.classList.remove("sel")); renderPanel(findStory(storyId)); } });
+
+render();
+(async () => {
+  try { sample = (await window.claude?.use?.("sample")) || null; } catch { sample = null; }
+  sampleChecked = true;
+  if (view === "import") render();
+  else if (view === "article" && sel) renderPanel(findStory(storyId));
+})();
+</script>
