@@ -38,7 +38,8 @@ export function textOf(story: AnyStory, sentence: Sentence): string {
 
 export const TOPIC_LABEL: Record<string, string> = {
   daily: "Daily life", food: "Food", work: "Work", weather: "Weather", animals: "Animals",
-  travel: "Travel", city: "City", home: "Home", mine: "My texts",
+  travel: "Travel", city: "City", home: "Home", history: "History", people: "People",
+  nature: "Nature", science: "Science", culture: "Culture", mine: "My texts",
 };
 
 const minutesFor = (words: number) => Math.max(1, Math.round(words / 80));

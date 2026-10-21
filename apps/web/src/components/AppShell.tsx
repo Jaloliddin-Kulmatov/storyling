@@ -6,19 +6,18 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
-import { Icon } from "./ui";
+import { Icon, Logo } from "./ui";
 
 const NAV = [
-  { href: "", label: "Today", icon: Icon.today },
-  { href: "/library", label: "Library", icon: Icon.library },
-  { href: "/words", label: "Words", icon: Icon.words },
+  { href: "", label: "Home", icon: Icon.home },
+  { href: "/words", label: "Notebook", icon: Icon.notebook },
+  { href: "/practice", label: "Practice", icon: Icon.practice },
   { href: "/dictionary", label: "Dictionary", icon: Icon.dict },
-  { href: "/progress", label: "Progress", icon: Icon.progress },
-  { href: "/add", label: "Add text", icon: Icon.add },
+  { href: "/progress", label: "Me", icon: Icon.me },
 ] as const;
 
-// Phones get five tabs; Dictionary moves into the Words page there.
-const TABS = NAV.filter((n) => n.href !== "/dictionary");
+// Phones get the same five tabs at the bottom.
+const TABS = NAV;
 
 export function AppShell({ lang, children }: { lang: LangCode; children: ReactNode }) {
   const path = usePathname();
@@ -36,12 +35,13 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
     else if (hydrated) learner.select();
   }, [hydrated, learner.started, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isActive = (href: string) => (href === "" ? path === `/${lang}` : path.startsWith(`/${lang}${href}`));
+  const isActive = (href: string) =>
+    href === "" ? path === `/${lang}` || path.startsWith(`/${lang}/library`) || path.startsWith(`/${lang}/add`) : path.startsWith(`/${lang}${href}`);
   const link = (n: (typeof NAV)[number]) => (
     <Link key={n.label} href={`/${lang}${n.href}`} aria-current={isActive(n.href) ? "page" : undefined}>
       {n.icon}
       <span>{n.label}</span>
-      {n.href === "/words" && due > 0 && <span className="badge">{due}</span>}
+      {n.href === "/practice" && due > 0 && <span className="badge">{due}</span>}
     </Link>
   );
   const langPill = (
@@ -56,7 +56,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   return (
     <div className={`shell${reading ? " reading" : ""}`}>
       <aside className="side">
-        <Link href={`/${lang}`} className="logo"><span className="mark">S</span>Storyling</Link>
+        <Link href={`/${lang}`} className="logo"><Logo />Storyling</Link>
         {langPill}
         <nav className="nav" aria-label="Main">{NAV.map(link)}</nav>
         <div className="side-foot">
@@ -66,7 +66,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
         </div>
       </aside>
       <header className="topbar">
-        <Link href={`/${lang}`} className="logo"><span className="mark">S</span>Storyling</Link>
+        <Link href={`/${lang}`} className="logo"><Logo />Storyling</Link>
         <div className="row">
           {langPill}
           <button className="icon-btn" aria-label="Settings" onClick={() => settingsRef.current?.showModal()}>
@@ -134,7 +134,7 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
             router.replace("/start");
           }}
         />
-        <p className="muted small" style={{ margin: 0 }}>Your progress is saved in this browser only.</p>
+        <p className="muted small" style={{ margin: 0 }}>Your progress is saved in this browser only. <Link href="/credits">Photo credits</Link></p>
       </div>
     </dialog>
   );

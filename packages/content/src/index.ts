@@ -1,7 +1,16 @@
 import type { LangCode, Sentence, Story, Token } from "@storyling/core";
 import audioIndex from "./audio.json";
-import { DICT, LANGS, SEED, STORIES } from "./data";
-import type { RawSentence } from "./raw";
+import coverIndex from "./covers.json";
+import { DICT as BASE_DICT, LANGS, SEED, STORIES as BASE_STORIES } from "./data";
+import { EVERYDAY_LANGS, MORE_DICT, MORE_STORIES } from "./more";
+
+export { EVERYDAY_LANGS };
+import type { RawEntry, RawSentence } from "./raw";
+
+const DICT: Record<string, Record<string, RawEntry>> = Object.fromEntries(
+  Object.keys(LANGS).map((l) => [l, { ...MORE_DICT[l], ...BASE_DICT[l] }]),
+);
+const STORIES = [...BASE_STORIES, ...MORE_STORIES];
 
 export type { RawLang } from "./raw";
 
@@ -59,10 +68,13 @@ export function language(code: LangCode): Language {
   return l;
 }
 
+const NUMBER = /^\p{N}+([.,:]\p{N}+)*\.?$/u;
+
 /** Parse "surface=lemma surface …" into tokens. A token with no "=" is its own lemma. */
 export function parseSentence(lang: LangCode, [text, translation]: RawSentence): Sentence {
   const tokens: Token[] = text.split(" ").map((raw) => {
-    if (PUNCT.test(raw)) return { surface: raw };
+    // Punctuation and numbers ("1889", "15.") are shown but are not words to learn.
+    if (PUNCT.test(raw) || NUMBER.test(raw)) return { surface: raw };
     const [surface, lemma] = raw.split("=") as [string, string | undefined];
     const l = lemma ?? surface;
     return { surface, lemma: l, isName: DICT[lang]?.[l]?.[0] === "name" };
@@ -113,4 +125,26 @@ export function sentenceText(lang: LangCode, sentence: Sentence): string {
   return sentence.tokens
     .map((t, i) => (i > 0 && !noSpace && !PUNCT.test(t.surface) ? " " : "") + t.surface)
     .join("");
+}
+
+// ── cover photos (Wikimedia Commons, free licenses; see the Credits page) ──
+export interface CoverCredit {
+  file: string;
+  page: string;
+  author: string;
+  license: string;
+}
+export const coverCredits = coverIndex as Record<string, CoverCredit>;
+
+/** Seed stories whose cover slug differs from the id suffix. */
+const COVER_ALIAS: Record<string, string> = {
+  "es-phone": "phone", "es-market": "market", "es-trip": "trip", "ja-train": "crowded", "ko-store": "store", "ko-rain": "rain",
+  "ko-work": "work", "it-bus": "bus", "pt-market": "feira", "ru-cat": "sofa", "ru-metro": "metro", "ja-cat": "cat",
+  "de-key": "key", "de-bike": "bike", "fr-train": "train",
+};
+
+/** Cover photo path for a story, or undefined (the app then draws a topic picture). */
+export function coverOf(id: string): string | undefined {
+  const slug = COVER_ALIAS[id] ?? id.slice(id.indexOf("-") + 1);
+  return coverCredits[slug] ? `/covers/${slug}.jpg` : undefined;
 }

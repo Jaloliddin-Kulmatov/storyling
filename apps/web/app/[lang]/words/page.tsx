@@ -1,10 +1,11 @@
 import type { LangCode } from "@storyling/core";
 import type { Metadata } from "next";
-import { Words } from "@/views/Words";
+import { Suspense } from "react";
+import { Notebook } from "@/views/Notebook";
 
-export const metadata: Metadata = { title: "Words" };
+export const metadata: Metadata = { title: "Notebook" };
 
-export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
+export default async function NotebookPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  return <Words lang={lang as LangCode} />;
+  return <Suspense><Notebook lang={lang as LangCode} /></Suspense>;
 }

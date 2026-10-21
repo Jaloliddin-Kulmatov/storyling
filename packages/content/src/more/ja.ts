@@ -1,0 +1,117 @@
+import type { RawEntry, RawStory } from "../raw";
+
+/* eslint-disable */
+// Japanese stories are written in kana (with katakana loanwords), split into phrases like the seed stories.
+export const dict: Record<string, RawEntry> = {
+  "はな": ["name", "Hana (a name)"], "ゆき": ["name", "Yuki, \"Snow\" (the cat's name)"], "けんた": ["name", "Kenta (a name)"], "さくら": ["name", "Sakura (a name)"],
+  "ちいさい": ["adjective", "small"], "ちいさな": ["adjective", "small; little"], "しろい": ["adjective", "white"], "ねこ": ["noun", "cat"], "かう": ["verb", "to keep (a pet); to buy"],
+  "なまえ": ["noun", "name"], "です": ["copula", "is; am; are (polite)"], "ある": ["verb", "to be; to exist (things); ある ひ = one day"], "ひ": ["noun", "day"],
+  "いえ": ["noun", "house; home"], "いる": ["verb", "to be; to exist (people, animals)"], "にわ": ["noun", "garden"], "みち": ["noun", "street; road"],
+  "さがす": ["verb", "to look for"], "よる": ["noun", "night; evening"], "だいどころ": ["noun", "kitchen"], "はこ": ["noun", "box"], "なか": ["noun", "inside; なかが いい = get along well"],
+  "ねる": ["verb", "to sleep"], "わらう": ["verb", "to laugh"], "わたし": ["pronoun", "I; me"], "しちじ": ["noun", "seven o'clock"], "おきる": ["verb", "to get up"],
+  "みず": ["noun", "water"], "のむ": ["verb", "to drink"], "パン": ["noun", "bread"], "たまご": ["noun", "egg"], "たべる": ["verb", "to eat"], "それから": ["conjunction", "and then"],
+  "バス": ["noun", "bus"], "がっこう": ["noun", "school"], "いく": ["verb", "to go"], "ともだち": ["noun", "friend"], "となり": ["noun", "next to; next door"],
+  "すわる": ["verb", "to sit"], "わたしたち": ["pronoun", "we; us"], "はなす": ["verb", "to talk"], "にちようび": ["noun", "Sunday"], "いちにちじゅう": ["adverb", "all day long"],
+  "あめ": ["noun", "rain"], "ちち": ["noun", "(my) father"], "あたたかい": ["adjective", "warm"], "スープ": ["noun", "soup"], "つくる": ["verb", "to make"],
+  "あね": ["noun", "(my) older sister"], "トランプ": ["noun", "playing cards"], "する": ["verb", "to do; to play (a game)"], "おと": ["noun", "sound"],
+  "おおきい": ["adjective", "big; loud"], "おおきな": ["adjective", "big"], "きょう": ["noun", "today"], "どうぶつえん": ["noun", "zoo"], "ライオン": ["noun", "lion"],
+  "サル": ["noun", "monkey"], "ゾウ": ["noun", "elephant"], "みる": ["verb", "to see; to look at"], "バナナ": ["noun", "banana"], "おとうと": ["noun", "(my) younger brother"],
+  "つれる": ["verb", "to take along"], "かえる": ["verb", "to go home; to return"], "と": ["particle", "and; (quote marker)"], "いう": ["verb", "to say"],
+  "あした": ["noun", "tomorrow"], "はは": ["noun", "(my) mother"], "たんじょうび": ["noun", "birthday"], "あに": ["noun", "(my) older brother"], "ケーキ": ["noun", "cake"],
+  "さとう": ["noun", "sugar"], "チョコレート": ["noun", "chocolate"], "かたち": ["noun", "shape"], "へん": ["adjective", "strange; odd"], "とても": ["adverb", "very"],
+  "おいしい": ["adjective", "tasty; delicious"], "よろこぶ": ["verb", "to be happy; to be pleased"], "ホテル": ["noun", "hotel"], "あたらしい": ["adjective", "new"],
+  "しごと": ["noun", "job; work"], "はじめる": ["verb", "to start"], "かれ": ["pronoun", "he"], "フロント": ["noun", "front desk"], "はたらく": ["verb", "to work"],
+  "まいにち": ["noun", "every day"], "いろいろな": ["adjective", "various"], "くに": ["noun", "country"], "ひと": ["noun", "person; people"], "あう": ["verb", "to meet"],
+  "つかれる": ["verb", "to get tired"], "きゃく": ["noun", "guest; customer"], "たのしい": ["adjective", "fun; happy (たのしそう = looks happy)"],
+  "ことば": ["noun", "word"], "おぼえる": ["verb", "to learn; to memorize"], "この": ["determiner", "this"], "すき": ["adjective", "liked; すき です = (I) like"],
+  "あたま": ["noun", "head"], "いたい": ["adjective", "painful; hurts"], "ねつ": ["noun", "fever"], "びょういん": ["noun", "hospital; clinic"], "いしゃ": ["noun", "doctor"],
+  "のど": ["noun", "throat"], "かぜ": ["noun", "a cold"], "おちゃ": ["noun", "tea"], "たくさん": ["adverb", "a lot"], "よく": ["adverb", "well; often"],
+  "くださる": ["verb", "ください = please (do)"], "ふつか": ["noun", "two days"], "ご": ["suffix", "after; ふつか ご = two days later"], "また": ["adverb", "again"],
+  "げんき": ["adjective", "healthy; well; cheerful"], "なる": ["verb", "to become"], "なつ": ["noun", "summer"], "でんしゃ": ["noun", "train"], "うみ": ["noun", "sea"],
+  "よじかん": ["noun", "four hours"], "かかる": ["verb", "to take (time)"], "まど": ["noun", "window"], "はたけ": ["noun", "field (farm)"], "むら": ["noun", "village"],
+  "みえる": ["verb", "can be seen"], "えき": ["noun", "station"], "おじ": ["noun", "(my) uncle"], "まつ": ["verb", "to wait"], "あおい": ["adjective", "blue"],
+  "つめたい": ["adjective", "cold (to the touch)"], "ちかく": ["noun", "nearby"], "ふるい": ["adjective", "old (things)"], "ほんや": ["noun", "bookshop"],
+  "みせ": ["noun", "shop"], "かみ": ["noun", "hair"], "おじいさん": ["noun", "old man; grandpa"], "ほん": ["noun", "book"], "ぜんぶ": ["noun", "all; everything"],
+  "しる": ["verb", "to know (しっています)"], "ほし": ["noun", "star"], "くれる": ["verb", "to give (to me)"], "ひとばんじゅう": ["adverb", "all night"],
+  "それ": ["pronoun", "that; it"], "よむ": ["verb", "to read"], "かぞく": ["noun", "family"], "ひっこす": ["verb", "to move (house)"], "くる": ["verb", "to come"],
+  "いぬ": ["noun", "dog"], "こども": ["noun", "child (こどもたち = children)"], "ふたり": ["noun", "two people"], "その": ["determiner", "that"], "ほえる": ["verb", "to bark"],
+  "つぎ": ["noun", "next"], "クッキー": ["noun", "cookie"], "もつ": ["verb", "to hold; もってくる = to bring"], "ごめんなさい": ["phrase", "I'm sorry"],
+  "いま": ["noun", "now"], "いい": ["adjective", "good"],
+};
+
+const L = (id: string, level: string, cat: string, min: number, date: string, title: string, tt: string, sents: RawStory["sents"]): RawStory =>
+  ({ id: `ja-${id}`, lang: "ja", level, cat, min, date, title, tt, sents });
+
+export const stories: RawStory[] = [
+  L("snow", "N5", "animals", 1, "Oct 20", "ゆきは どこ？", "Where Is Yuki?", [
+    ["はなは=はな ちいさい しろい ねこを=ねこ かっています=かう 。", "Hana keeps a small white cat."],
+    ["ねこの=ねこ なまえは=なまえ ゆき です 。", "The cat's name is Yuki (Snow)."],
+    ["ある ひ 、 ゆきが=ゆき いえに=いえ いません=いる 。", "One day, Yuki is not at home."],
+    ["はなは=はな にわと=にわ みちを=みち さがします=さがす 。", "Hana searches the garden and the street."],
+    ["よる 、 ゆきは=ゆき だいどころの=だいどころ はこの=はこ なかで=なか ねていました=ねる ！", "At night, Yuki was sleeping in a box in the kitchen!"],
+    ["はなは=はな わらいました=わらう 。", "Hana laughed."],
+  ]),
+  L("morning", "N5", "daily", 1, "Oct 20", "わたしの あさ", "My Morning", [
+    ["わたしは=わたし しちじに=しちじ おきます=おきる 。", "I get up at seven."],
+    ["みずを=みず のんで=のむ 、 パンと=パン たまごを=たまご たべます=たべる 。", "I drink water and eat bread and eggs."],
+    ["それから バスで=バス がっこうへ=がっこう いきます=いく 。", "Then I go to school by bus."],
+    ["ともだちが=ともだち わたしの=わたし となりに=となり すわります=すわる 。", "My friend sits next to me."],
+    ["わたしたちは=わたしたち はなして=はなす 、 わらいます=わらう 。", "We talk and laugh."],
+  ]),
+  L("sunday", "N5", "weather", 1, "Oct 19", "あめの にちようび", "Rain on Sunday", [
+    ["にちようびは=にちようび いちにちじゅう あめでした=あめ 。", "On Sunday, it rained all day."],
+    ["わたしたちは=わたしたち いえに=いえ いました=いる 。", "We stayed at home."],
+    ["ちちが=ちち あたたかい スープを=スープ つくりました=つくる 。", "My father made warm soup."],
+    ["あねと=あね わたしは=わたし トランプを=トランプ しました=する 。", "My sister and I played cards."],
+    ["あめの=あめ おとは=おと おおきかった=おおきい ですが=です 、 いえの=いえ なかは=なか あたたかかった=あたたかい です 。", "The rain was loud, but it was warm inside the house."],
+  ]),
+  L("zoo", "N5", "animals", 1, "Oct 19", "どうぶつえんへ", "A Day at the Zoo", [
+    ["きょう 、 どうぶつえんに=どうぶつえん いきます=いく 。", "Today we go to the zoo."],
+    ["ライオンや=ライオン サルや=サル おおきな ゾウを=ゾウ みます=みる 。", "We see lions, monkeys and a big elephant."],
+    ["サルは=サル バナナを=バナナ たべます=たべる 。", "The monkeys eat bananas."],
+    ["ゾウは=ゾウ みずを=みず のみます=のむ 。", "The elephant drinks water."],
+    ["おとうとは=おとうと サルを=サル つれて=つれる かえりたい=かえる と いいました=いう ！", "My little brother said he wants to take a monkey home!"],
+  ]),
+  L("cake", "N4", "food", 2, "Oct 18", "たんじょうびの ケーキ", "The Birthday Cake", [
+    ["あしたは=あした ははの=はは たんじょうび です 。", "Tomorrow is my mother's birthday."],
+    ["あにと=あに わたしは=わたし ケーキを=ケーキ つくりたい=つくる です 。", "My brother and I want to make a cake."],
+    ["たまごと=たまご さとうと=さとう チョコレートを=チョコレート かいました=かう 。", "We bought eggs, sugar and chocolate."],
+    ["ケーキの=ケーキ かたちは=かたち へん でしたが=です 、 とても おいしかった=おいしい です 。", "The cake had a strange shape, but it was very tasty."],
+    ["ははは=はは とても よろこびました=よろこぶ 。", "My mother was very happy."],
+  ]),
+  L("hotel", "N4", "work", 2, "Oct 18", "あたらしい しごと", "A New Job", [
+    ["けんたは=けんた ホテルで=ホテル あたらしい しごとを=しごと はじめました=はじめる 。", "Kenta started a new job at a hotel."],
+    ["かれは=かれ フロントで=フロント はたらいています=はたらく 。", "He works at the front desk."],
+    ["まいにち 、 いろいろな くにの=くに ひとに=ひと あいます=あう 。", "Every day, he meets people from many countries."],
+    ["つかれている=つかれる きゃくも=きゃく いれば=いる 、 たのしそうな=たのしい きゃくも=きゃく います=いる 。", "Some guests are tired, and some guests look happy."],
+    ["けんたは=けんた まいにち あたらしい ことばを=ことば おぼえるので=おぼえる 、 この しごとが=しごと すき です 。", "Kenta likes this job because he learns new words every day."],
+  ]),
+  L("doctor", "N4", "daily", 2, "Oct 17", "びょういんで", "At the Doctor", [
+    ["さくらは=さくら あたまが=あたま いたくて=いたい 、 ねつも=ねつ あります=ある 。", "Sakura has a headache and a fever."],
+    ["さくらは=さくら びょういんに=びょういん いきました=いく 。", "Sakura went to the clinic."],
+    ["いしゃは=いしゃ さくらの=さくら のどを=のど みました=みる 。", "The doctor looked at Sakura's throat."],
+    ["かぜ ですね=です 。 おちゃを=おちゃ たくさん のんで=のむ 、 よく ねて=ねる ください=くださる 。", "It's a cold. Please drink a lot of tea and sleep well."],
+    ["ふつか ご 、 さくらは=さくら また げんきに=げんき なりました=なる 。", "Two days later, Sakura was well again."],
+  ]),
+  L("seatrain", "N4", "travel", 2, "Oct 16", "でんしゃで うみへ", "The Train to the Sea", [
+    ["なつに=なつ 、 でんしゃで=でんしゃ うみへ=うみ いきます=いく 。", "In summer, we go to the sea by train."],
+    ["よじかん かかります=かかる 。", "It takes four hours."],
+    ["まどから=まど はたけや=はたけ ちいさな むらが=むら みえます=みえる 。", "From the window, I can see fields and small villages."],
+    ["えきで=えき おじが=おじ まっていました=まつ 。", "My uncle was waiting at the station."],
+    ["うみは=うみ あおくて=あおい 、 みずは=みず つめたかった=つめたい です ！", "The sea was blue and the water was cold!"],
+  ]),
+  L("bookshop", "N4", "city", 2, "Oct 15", "ふるい ほんや", "The Old Bookshop", [
+    ["いえの=いえ ちかくに=ちかく ふるい ほんやが=ほんや あります=ある 。", "Near my house, there is an old bookshop."],
+    ["みせの=みせ ひとは=ひと かみが=かみ しろい おじいさん です 。", "The shopkeeper is an old man with white hair."],
+    ["みせに=みせ ある ほんを=ほん ぜんぶ しっています=しる 。", "He knows every book in the shop."],
+    ["きょう 、 ほしの=ほし ほんを=ほん くれました=くれる 。", "Today he gave me a book about stars."],
+    ["わたしは=わたし ひとばんじゅう それを=それ よみました=よむ 。", "I read it all night."],
+  ]),
+  L("neighbor", "N4", "home", 2, "Oct 14", "あたらしい となりの ひと", "Our New Neighbors", [
+    ["となりの=となり いえに=いえ あたらしい かぞくが=かぞく ひっこして=ひっこす きました=くる 。", "A new family moved into the house next door."],
+    ["おおきい いぬと=いぬ こどもが=こども ふたり います=いる 。", "They have a big dog and two children."],
+    ["その いぬは=いぬ よる 、 よく ほえます=ほえる 。", "That dog often barks at night."],
+    ["つぎの=つぎ ひ 、 こどもたちが=こども クッキーを=クッキー もって=もつ きて=くる 、 ごめんなさい と いいました=いう 。", "The next day, the children brought cookies and said sorry."],
+    ["いまは=いま なかの=なか いい ともだち です 。", "Now we are good friends."],
+  ]),
+];

@@ -59,6 +59,10 @@ interface LangProfile {
   /** "YYYY-MM-DD" → activity that day */
   log: Record<string, DayLog>;
   quiz: { right: number; total: number };
+  /** Story ids the learner bookmarked. */
+  favorites: string[];
+  /** Best scores in practice games, by game id. */
+  games: Record<string, { played: number; best: number }>;
 }
 
 export interface Settings {
@@ -105,6 +109,8 @@ function revive(store: Store): Store {
     profile.stories ??= [];
     profile.log ??= {};
     profile.quiz ??= { right: 0, total: 0 };
+    profile.favorites ??= [];
+    profile.games ??= {};
     for (const w of Object.values(profile.words)) {
       if (w.card) {
         w.card.due = new Date(w.card.due);
@@ -229,7 +235,7 @@ export function useLearner(lang: LangCode) {
         lang,
         profiles: {
           ...s.profiles,
-          [lang]: existing ?? { level, words: seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 } },
+          [lang]: existing ?? { level, words: seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {} },
         },
       });
     },
@@ -342,6 +348,22 @@ export function useLearner(lang: LangCode) {
     [update],
   );
 
+  const toggleFavorite = useCallback(
+    (id: string) =>
+      update((p) => ({ ...p, favorites: p.favorites.includes(id) ? p.favorites.filter((f) => f !== id) : [id, ...p.favorites] })),
+    [update],
+  );
+
+  /** Record a practice game result; keeps the best score. */
+  const recordGame = useCallback(
+    (game: string, score: number) =>
+      update((p) => {
+        const g = p.games[game] ?? { played: 0, best: 0 };
+        return { ...p, games: { ...p.games, [game]: { played: g.played + 1, best: Math.max(g.best, score) } } };
+      }),
+    [update],
+  );
+
   const addStory = useCallback((story: UserStory) => update((p) => ({ ...p, stories: [story, ...p.stories] })), [update]);
   const removeStory = useCallback((id: string) => update((p) => ({ ...p, stories: p.stories.filter((s) => s.id !== id) })), [update]);
 
@@ -361,6 +383,8 @@ export function useLearner(lang: LangCode) {
     stories: profile?.stories ?? [],
     log: profile?.log ?? {},
     quiz: profile?.quiz ?? { right: 0, total: 0 },
+    favorites: profile?.favorites ?? [],
+    games: profile?.games ?? {},
     knownCount: words.filter((w) => displayState(w) === "known").length,
     learningCount: words.filter((w) => w.saved === "learning").length,
     allWords: words,
@@ -376,6 +400,8 @@ export function useLearner(lang: LangCode) {
     recordQuiz,
     dueWords,
     grade,
+    toggleFavorite,
+    recordGame,
     addStory,
     removeStory,
     reset,

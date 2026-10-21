@@ -1,12 +1,13 @@
 import { languages, storiesFor } from "@storyling/content";
 import Link from "next/link";
 import { ContinueButton } from "@/views/ContinueButton";
+import { Logo } from "@/components/ui";
 
 export default function Landing() {
   return (
     <div className="landing">
       <header>
-        <Link href="/" className="logo"><span className="mark">S</span>Storyling</Link>
+        <Link href="/" className="logo"><Logo />Storyling</Link>
         <ContinueButton />
       </header>
 
@@ -64,7 +65,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="foot">Storyling · Your progress is saved in your browser · Audio is a computer voice and labeled as one</footer>
+      <footer className="foot">Storyling · Your progress is saved in your browser · Audio is a computer voice and labeled as one · <Link href="/credits">Photo credits</Link></footer>
     </div>
   );
 }

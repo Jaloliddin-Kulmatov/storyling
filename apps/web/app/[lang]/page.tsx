@@ -1,7 +1,7 @@
 import type { LangCode } from "@storyling/core";
-import { Today } from "@/views/Today";
+import { Home } from "@/views/Home";
 
-export default async function TodayPage({ params }: { params: Promise<{ lang: string }> }) {
+export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  return <Today lang={lang as LangCode} />;
+  return <Home lang={lang as LangCode} />;
 }

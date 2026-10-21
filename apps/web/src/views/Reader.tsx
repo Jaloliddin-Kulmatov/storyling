@@ -9,8 +9,8 @@ import { callAi, useAiEnabled } from "@/lib/ai";
 import { canSpeak, hasRecording, playSentence, playWord, preload, stopAudio } from "@/lib/audio";
 import { useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories } from "@/lib/rank";
-import { isUserStory, lookupIn, PUNCT, textOf, useStory, type AnyStory } from "@/lib/stories";
-import { Icon, Toast } from "@/components/ui";
+import { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnyStory } from "@/lib/stories";
+import { Cover, Icon, Toast } from "@/components/ui";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -27,7 +27,7 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
       <div className="empty" style={{ marginTop: 40 }}>
         <h2 style={{ fontSize: 22 }}>Story not found</h2>
         <p className="muted">It may have been deleted from this device.</p>
-        <Link className="btn primary" href={`/${lang}/library`}>Open the library</Link>
+        <Link className="btn primary" href={`/${lang}`}>Back to Home</Link>
       </div>
     );
   }
@@ -48,6 +48,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [cursor, setCursor] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [shown, setShown] = useState<Set<number>>(() => new Set());
   const run = useRef(0);
 
   const recorded = hasRecording(story.id);
@@ -105,8 +106,11 @@ function StoryReader({ story }: { story: AnyStory }) {
   return (
     <>
       <div className="reader-bar">
-        <Link href={`/${lang}/library`} className="btn ghost sm">{Icon.back} Library</Link>
+        <Link href={`/${lang}`} className="btn ghost sm">{Icon.back} Home</Link>
         <div className="row">
+          <button className={`chip save-chip${learner.favorites.includes(story.id) ? " on" : ""}`} aria-pressed={learner.favorites.includes(story.id)} onClick={() => learner.toggleFavorite(story.id)}>
+            {Icon.bookmark} {learner.favorites.includes(story.id) ? "Saved" : "Save"}
+          </button>
           <div className="seg" role="group" aria-label="Text size">
             <button aria-label="Smaller text" onClick={() => setSettings({ fontScale: Math.max(0.85, +(settings.fontScale - 0.1).toFixed(2)) })}>A−</button>
             <button aria-label="Larger text" onClick={() => setSettings({ fontScale: Math.min(1.4, +(settings.fontScale + 0.1).toFixed(2)) })}>A+</button>
@@ -118,14 +122,20 @@ function StoryReader({ story }: { story: AnyStory }) {
 
       <div className="reader">
         <article className="article">
-          <div className="eyebrow">{story.level} · {story.minutes} min · {meta.name}</div>
-          <h1 lang={lang}>{story.title}</h1>
+          <Cover story={story} className="article-art" />
+          <div className="row small muted" style={{ marginTop: 16 }}>
+            <span className="lvl">{story.level}</span>
+            <span>{TOPIC_LABEL[isUserStory(story) ? "mine" : story.topic] ?? story.topic}</span>
+            <span>· {story.date}</span>
+            <span>· {story.sentences.reduce((n, x) => n + x.tokens.filter((t) => t.lemma).length, 0)} words</span>
+            <span>· {story.minutes} min</span>
+          </div>
+          <h1 lang={lang} style={{ marginTop: 6 }}>{story.title}</h1>
           {story.titleEnglish && <p className="muted" style={{ margin: "4px 0 0" }}>{story.titleEnglish}</p>}
 
           <div className={`text${settings.highlightNew ? " hl" : ""}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
             {story.sentences.map((s, i) => (
               <span key={i} id={`s-${i}`} className={`sent${playing === i ? " playing" : ""}`}>
-                {settings.showTranslations && s.translation && <span className="tr" lang="en">{s.translation}</span>}
                 {s.tokens.map((t, j) => {
                   const space = !meta.noSpace && j > 0 && !PUNCT.test(t.surface) ? " " : "";
                   if (!t.lemma) return <span key={j}>{space}{t.surface}</span>;
@@ -145,6 +155,13 @@ function StoryReader({ story }: { story: AnyStory }) {
                     {Icon.speaker}
                   </button>
                 )}
+                {s.translation && !settings.showTranslations && (
+                  <button className="icon-btn" style={{ width: 28, height: 28, marginLeft: 4, verticalAlign: "middle" }} aria-pressed={shown.has(i)} aria-label={`Translate sentence ${i + 1}`}
+                    onClick={() => setShown((x) => { const n = new Set(x); if (n.has(i)) n.delete(i); else n.add(i); return n; })}>
+                    {Icon.translate}
+                  </button>
+                )}
+                {s.translation && (settings.showTranslations || shown.has(i)) && <span className="tr" lang="en">{s.translation}</span>}
               </span>
             ))}
           </div>
@@ -157,7 +174,7 @@ function StoryReader({ story }: { story: AnyStory }) {
 
           <Finish story={story} tapped={tapped} done={done} onDone={(msg) => { setDone(true); setToast(msg); }} />
           {isUserStory(story) && (
-            <DeleteStory onDelete={() => { learner.removeStory(story.id); router.push(`/${lang}/library`); }} />
+            <DeleteStory onDelete={() => { learner.removeStory(story.id); router.push(`/${lang}`); }} />
           )}
         </article>
 
@@ -332,7 +349,7 @@ function Finish({ story, tapped, done, onDone }: { story: AnyStory; tapped: Set<
         <h2 style={{ fontSize: 22, margin: 0 }}>Well done!</h2>
         <div className="row">
           {next && <Link className="btn primary" href={`/${lang}/read/${next.story.id}`}>Next story: <span lang={lang}>{next.story.title}</span></Link>}
-          <Link className="btn" href={`/${lang}/words`}>Review words</Link>
+          <Link className="btn" href={`/${lang}/practice`}>Practice words</Link>
           <Link className="btn ghost" href={`/${lang}`}>Today</Link>
         </div>
       </div>

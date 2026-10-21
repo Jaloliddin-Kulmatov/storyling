@@ -9,7 +9,7 @@ export const LANGS: Record<string, RawLang> = {
   en: { name: "English", native: "English", tts: "en-US", voice: "Samantha", levels: ["A1", "A2"] },
   es: { name: "Spanish", native: "Español", tts: "es-ES", voice: "Mónica", levels: ["A1", "A2", "B1"] },
   fr: { name: "French", native: "Français", tts: "fr-FR", voice: "Thomas", levels: ["A1", "A2"] },
-  de: { name: "German", native: "Deutsch", tts: "de-DE", voice: "Anna", levels: ["A1", "A2", "B1"] },
+  de: { name: "German", native: "Deutsch", tts: "de-DE", voice: "Anna", levels: ["A1", "A2", "B1", "B2", "C1"] },
   zh: { name: "Chinese", native: "中文", tts: "zh-CN", voice: "Tingting", levels: ["HSK 1", "HSK 2"], noSpace: true },
   ja: { name: "Japanese", native: "日本語", tts: "ja-JP", voice: "Kyoko", levels: ["N5", "N4"] },
   ko: { name: "Korean", native: "한국어", tts: "ko-KR", voice: "Yuna", levels: ["Level 1", "Level 2", "Level 3"] },

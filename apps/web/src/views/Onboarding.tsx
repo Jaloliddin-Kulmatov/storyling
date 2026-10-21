@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useHydrated, useLearner, type Level } from "@/lib/learner";
+import { Logo } from "@/components/ui";
 
 const LEVELS: { level: Level; title: string; detail: (first: string) => string }[] = [
   { level: 0, title: "Just starting", detail: () => "I know a few words and can read the script." },
@@ -26,7 +27,7 @@ export function Onboarding() {
     <div className="center">
       <div className="onb">
         <div className="spread" style={{ marginBottom: 28 }}>
-          <Link href="/" className="logo"><span className="mark">S</span>Storyling</Link>
+          <Link href="/" className="logo"><Logo />Storyling</Link>
           <span className="muted small">Step {step + 1} of 2</span>
         </div>
         {step === 0 || !lang ? (

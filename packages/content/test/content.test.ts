@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { languages, lookup, sentenceText, stories, storiesFor } from "../src";
+import { EVERYDAY_LANGS, languages, lookup, sentenceText, stories, storiesFor } from "../src";
 
 describe("seed content", () => {
   it("covers 10 languages, each with at least 2 stories", () => {
@@ -31,5 +31,36 @@ describe("seed content", () => {
   it("returns pinyin for Chinese and strips sense suffixes", () => {
     expect(lookup("zh", "茶")).toMatchObject({ meaning: "tea", reading: "chá" });
     expect(lookup("de", "sein#v")).toMatchObject({ display: "sein", pos: "verb" });
+  });
+});
+
+describe("story packs", () => {
+  const PACK = ["snow", "morning", "sunday", "zoo", "cake", "hotel", "doctor", "seatrain", "bookshop", "neighbor"];
+
+  it("has every pack story in every language, with translations outside English", () => {
+    const missing: string[] = [];
+    for (const l of languages.filter((x) => EVERYDAY_LANGS.includes(x.code)))
+      for (const slug of PACK) {
+        const s = stories.find((x) => x.id === `${l.code}-${slug}`);
+        if (!s) missing.push(`${l.code}-${slug}`);
+        else if (l.code !== "en" && s.sentences.some((x) => !x.translation)) missing.push(`${s.id} (translation)`);
+      }
+    expect(missing).toEqual([]);
+  });
+
+  it("uses only each language's own levels and unique ids", () => {
+    const ids = new Set<string>();
+    for (const s of stories) {
+      expect(ids.has(s.id)).toBe(false);
+      ids.add(s.id);
+      expect(languages.find((l) => l.code === s.lang)!.levels).toContain(s.level);
+    }
+  });
+});
+
+describe("covers", () => {
+  it("has a cover photo for every catalog story", async () => {
+    const { coverOf } = await import("../src");
+    expect(stories.filter((s) => !coverOf(s.id)).map((s) => s.id)).toEqual([]);
   });
 });

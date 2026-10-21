@@ -1,10 +1,7 @@
-import type { LangCode } from "@storyling/core";
-import type { Metadata } from "next";
-import { Library } from "@/views/Library";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Library" };
-
+// The library is now the Home feed.
 export default async function LibraryPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  return <Library lang={lang as LangCode} />;
+  redirect(`/${lang}`);
 }
