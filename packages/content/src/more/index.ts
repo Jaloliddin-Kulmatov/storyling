@@ -1,7 +1,20 @@
 import type { RawEntry, RawStory } from "../raw";
 import * as de from "./de";
 import * as deReading from "./de-reading";
+import * as deReading2 from "./de-reading2";
 import * as en from "./en";
+import * as en2 from "./en2";
+import * as esReading from "./es-reading";
+import * as koReading from "./ko-reading";
+import * as es2 from "./es2";
+import * as fr2 from "./fr2";
+import * as de2 from "./de2";
+import * as it2 from "./it2";
+import * as pt2 from "./pt2";
+import * as ru2 from "./ru2";
+import * as zh2 from "./zh2";
+import * as ja2 from "./ja2";
+import * as ko2 from "./ko2";
 import * as es from "./es";
 import * as fr from "./fr";
 import * as it from "./it";
@@ -34,6 +47,19 @@ const PACKS: Pack[] = [
   { lang: "ja", ...ja },
   { lang: "ko", ...ko },
   { lang: "de", ...deReading },
+  { lang: "de", ...deReading2 },
+  { lang: "en", ...en2 },
+  { lang: "es", ...esReading },
+  { lang: "ko", ...koReading },
+  { lang: "es", ...es2 },
+  { lang: "fr", ...fr2 },
+  { lang: "de", ...de2 },
+  { lang: "it", ...it2 },
+  { lang: "pt", ...pt2 },
+  { lang: "ru", ...ru2 },
+  { lang: "zh", ...zh2 },
+  { lang: "ja", ...ja2 },
+  { lang: "ko", ...ko2 },
 ];
 
 /** Languages that have the 10-story everyday pack. */

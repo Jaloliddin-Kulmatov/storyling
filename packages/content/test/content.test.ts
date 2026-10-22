@@ -59,8 +59,12 @@ describe("story packs", () => {
 });
 
 describe("covers", () => {
-  it("has a cover photo for every catalog story", async () => {
+  it("points only to cover photos that exist (stories without one get a drawn picture)", async () => {
     const { coverOf } = await import("../src");
-    expect(stories.filter((s) => !coverOf(s.id)).map((s) => s.id)).toEqual([]);
+    const { existsSync } = await import("node:fs");
+    const missing = stories
+      .map((s) => coverOf(s.id))
+      .filter((p): p is string => !!p && !existsSync(new URL(`../../../apps/web/public${p}`, import.meta.url)));
+    expect(missing).toEqual([]);
   });
 });
