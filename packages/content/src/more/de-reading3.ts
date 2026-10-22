@@ -1,0 +1,218 @@
+import type { RawEntry, RawStory } from "../raw";
+import { dict as glossary } from "./de-reading3-dict";
+
+/* eslint-disable */
+// German reading texts, batch 3 (B1–C1). Original texts written for Storyling; topics follow common reading-course themes.
+export const dict: Record<string, RawEntry> = glossary;
+
+const L = (id: string, level: string, cat: string, min: number, title: string, tt: string, sents: RawStory["sents"]): RawStory =>
+  ({ id: `de-${id}`, lang: "de", level, cat, min, date: "Oct 23", title, tt, sents });
+
+export const stories: RawStory[] = [
+  // ── B1 ──
+  L("carnival", "B1", "culture", 2, "Der Notting Hill Carnival", "Notting Hill Carnival", [
+    ["Jedes=jeder Jahr im August feiert=feiern London eines=ein der=der größten=groß Straßenfeste=Straßenfest Europas=Europa .", "Every year in August, London celebrates one of the biggest street festivals in Europe."],
+    ["Der=der Notting Hill Carnival findet=stattfinden seit 1966 statt=stattfinden .", "The Notting Hill Carnival has taken place since 1966."],
+    ["Er=er wurde=werden von Menschen=Mensch aus der Karibik gegründet=gründen , die=der#r in London lebten=leben .", "It was founded by people from the Caribbean who lived in London."],
+    ["Zwei=zwei Tage=Tag lang ziehen=ziehen bunte=bunt Umzüge=Umzug durch die=der Straßen=Straße .", "For two days, colorful parades move through the streets."],
+    ["Man=man hört=hören Steelbands , tanzt=tanzen und isst=essen karibisches=karibisch Essen .", "People listen to steel bands, dance and eat Caribbean food."],
+    ["Über=über eine=ein Million Menschen=Mensch kommen=kommen jedes=jeder Jahr zu diesem=dieser Fest .", "More than a million people come to this festival every year."],
+  ]),
+  L("astrology", "B1", "science", 2, "Astrologie", "Astrology", [
+    ["Viele=viel Zeitschriften=Zeitschrift haben=haben eine=ein Seite mit Horoskopen=Horoskop .", "Many magazines have a page with horoscopes."],
+    ["Die=der Astrologie teilt=einteilen die=der Menschen=Mensch nach ihrem=ihr Geburtstag in zwölf Sternzeichen=Sternzeichen ein=einteilen .", "Astrology divides people into twelve star signs according to their birthday."],
+    ["Sie=sie behauptet=behaupten , dass die=der Sterne=Stern unseren=unser Charakter und unsere=unser Zukunft beeinflussen=beeinflussen .", "It claims that the stars influence our character and our future."],
+    ["Wissenschaftler=Wissenschaftler haben=haben das=der oft getestet=testen , aber nie Beweise=Beweis gefunden=finden .", "Scientists have often tested this but have never found proof."],
+    ["Man=man darf=dürfen Astrologie nicht mit Astronomie verwechseln=verwechseln .", "You must not confuse astrology with astronomy."],
+    ["Die=der Astronomie ist=sein#v eine=ein echte=echt Wissenschaft , die=der#r die=der Sterne=Stern und Planeten=Planet erforscht=erforschen .", "Astronomy is a real science that studies the stars and planets."],
+  ]),
+  L("crying", "B1", "science", 2, "Weinen ist gesund", "Crying Is Healthy", [
+    ["Alle=all Menschen=Mensch weinen=weinen , egal wie alt sie sind=sein#v .", "All people cry, no matter how old they are."],
+    ["Unsere=unser Augen=Auge produzieren=produzieren jeden=jeder Tag Tränen=Träne , damit sie feucht bleiben=bleiben .", "Our eyes produce tears every day so that they stay moist."],
+    ["Andere=andere Tränen=Träne kommen=kommen , wenn uns Rauch oder eine=ein Zwiebel in die=der Augen=Auge steigt=steigen .", "Other tears come when smoke or an onion gets into our eyes."],
+    ["Am=an interessantesten=interessant sind=sein#v aber die=der Tränen=Träne , die=der#r wir aus Gefühl weinen=weinen .", "But the most interesting tears are the ones we cry from emotion."],
+    ["Viele=viel Menschen=Mensch fühlen=fühlen sich nach dem=der Weinen ruhiger=ruhig und leichter=leicht .", "Many people feel calmer and lighter after crying."],
+    ["Babys=Baby weinen=weinen , weil sie noch nicht sprechen=sprechen können=können : So zeigen=zeigen sie , dass sie etwas brauchen=brauchen .", "Babies cry because they can't speak yet: that is how they show that they need something."],
+  ]),
+  L("comaneci", "B1", "people", 2, "Nadia Comăneci", "Nadia Comăneci", [
+    ["Nadia Comăneci ist=sein#v eine=ein Turnerin aus Rumänien .", "Nadia Comăneci is a gymnast from Romania."],
+    ["Bei=bei den=der Olympischen=olympisch Spielen=Spiel 1976 in Montreal war=sein#v sie erst vierzehn Jahre=Jahr alt .", "At the 1976 Olympic Games in Montreal, she was only fourteen years old."],
+    ["Am=an Stufenbarren bekam=bekommen sie als erste=erst Turnerin der=der Geschichte die=der perfekte=perfekt Note 10 .", "On the uneven bars, she became the first gymnast in history to receive a perfect score of 10."],
+    ["Die=der Anzeigetafel konnte=können diese=dieser Zahl aber nicht zeigen=zeigen und zeigte=zeigen nur 1,00 .", "But the scoreboard could not show this number and only displayed 1.00."],
+    ["Bei=bei diesen=dieser Spielen=Spiel gewann=gewinnen sie drei Goldmedaillen=Goldmedaille .", "At these Games, she won three gold medals."],
+    ["Später=später zog=ziehen sie in die=der USA , wo sie bis heute lebt=leben .", "Later she moved to the USA, where she still lives today."],
+  ]),
+  L("cocacola", "B1", "history", 2, "Die Geschichte von Coca-Cola", "The Story of Coca-Cola", [
+    ["Coca-Cola wurde=werden 1886 in Atlanta in den=der USA erfunden=erfinden .", "Coca-Cola was invented in 1886 in Atlanta, USA."],
+    ["Der=der Apotheker John Pemberton wollte=wollen eigentlich eine=ein Medizin gegen Kopfschmerzen und Müdigkeit herstellen=herstellen .", "The pharmacist John Pemberton actually wanted to make a medicine for headaches and tiredness."],
+    ["Der=der Name kommt=kommen von zwei Zutaten=Zutat : den=der Blättern=Blatt der=der Kokapflanze und der Kolanuss .", "The name comes from two ingredients: the leaves of the coca plant and the kola nut."],
+    ["Am=an Anfang verkaufte=verkaufen man nur ein paar Gläser=Glas am Tag .", "At first, only a few glasses were sold a day."],
+    ["Ein=ein Geschäftsmann kaufte=kaufen später die=der Firma und machte=machen viel Werbung .", "A businessman later bought the company and did a lot of advertising."],
+    ["Heute=heute kann=können man Coca-Cola in fast jedem=jeder Land der=der Welt kaufen=kaufen .", "Today you can buy Coca-Cola in almost every country in the world."],
+  ]),
+  L("teabag", "B1", "food", 2, "Die Erfindung des Teebeutels", "The Invention of the Tea Bag", [
+    ["Tee trinken=trinken die=der Menschen=Mensch in China schon seit Tausenden=Tausend von Jahren=Jahr .", "People in China have been drinking tea for thousands of years."],
+    ["Der=der Teebeutel ist=sein#v dagegen eine=ein ziemlich neue=neu Erfindung .", "The tea bag, on the other hand, is a fairly new invention."],
+    ["Der=der Legende nach schickte=schicken ein Teehändler aus New York um 1908 kleine=klein Proben=Probe in Säckchen=Säckchen aus Seide an seine=sein Kunden=Kunde .", "According to the legend, a tea merchant from New York sent small samples in little silk bags to his customers around 1908."],
+    ["Die=der Kunden=Kunde öffneten=öffnen die=der Säckchen=Säckchen nicht , sondern legten=legen sie direkt ins heiße=heiß Wasser .", "The customers didn't open the bags but put them straight into the hot water."],
+    ["So=so entstand=entstehen aus einem=ein Missverständnis eine=ein praktische=praktisch Idee .", "That is how a practical idea came out of a misunderstanding."],
+    ["Heute=heute bestehen=bestehen Teebeutel meistens aus Papier .", "Today, tea bags are usually made of paper."],
+  ]),
+  L("dumas", "B1", "people", 2, "Alexandre Dumas", "Alexandre Dumas", [
+    ["Alexandre Dumas war=sein#v einer=ein der=der beliebtesten=beliebt französischen=französisch Schriftsteller des=der 19. Jahrhunderts=Jahrhundert .", "Alexandre Dumas was one of the most popular French writers of the 19th century."],
+    ["Seine=sein Großmutter war=sein#v eine=ein versklavte=versklavt Frau aus der Karibik .", "His grandmother was an enslaved woman from the Caribbean."],
+    ["Dumas schrieb=schreiben spannende=spannend Abenteuerromane=Abenteuerroman , zum Beispiel Die=der drei Musketiere .", "Dumas wrote exciting adventure novels, for example The Three Musketeers."],
+    ["Auch=auch Der=der Graf von Monte Christo ist=sein#v bis heute sehr bekannt .", "The Count of Monte Cristo is also still very well known today."],
+    ["Er=er schrieb=schreiben so viel , dass er dabei Helfer=Helfer hatte=haben .", "He wrote so much that he had helpers."],
+    ["Er=er verdiente=verdienen viel Geld , gab=ausgeben es aber auch schnell wieder aus=ausgeben .", "He earned a lot of money, but he also spent it again quickly."],
+  ]),
+  L("forgery", "B1", "culture", 2, "Der Kunstfälscher", "The Art Forger", [
+    ["Han van Meegeren war=sein#v ein niederländischer=niederländisch Maler , der=der#r berühmte=berühmt Bilder=Bild fälschte=fälschen .", "Han van Meegeren was a Dutch painter who forged famous paintings."],
+    ["Er=er malte=malen neue=neu Bilder=Bild im Stil des=der alten=alt Meisters=Meister Vermeer .", "He painted new pictures in the style of the old master Vermeer."],
+    ["Experten=Experte glaubten=glauben , die=der Bilder=Bild seien=sein#v echt , und Museen=Museum zahlten=zahlen viel Geld dafür .", "Experts believed the paintings were genuine, and museums paid a lot of money for them."],
+    ["Nach=nach dem=der Zweiten=zweit Weltkrieg kam=kommen er ins Gefängnis , weil er ein Bild an die=der Nazis=Nazi verkauft=verkaufen hatte=haben .", "After the Second World War, he went to prison because he had sold a painting to the Nazis."],
+    ["Um=um zu beweisen=beweisen , dass es eine=ein Fälschung war=sein#v , malte=malen er vor Zeugen=Zeuge einen=ein neuen=neu Vermeer .", "To prove that it was a fake, he painted a new Vermeer in front of witnesses."],
+    ["Am=an Ende wurde=werden er nur wegen Betrugs=Betrug verurteilt=verurteilen .", "In the end, he was only convicted of fraud."],
+  ]),
+  L("eye", "B1", "science", 2, "Wie das Auge sieht", "How the Eye Sees", [
+    ["Das=der Licht kommt=kommen durch die=der Pupille in unser Auge .", "Light enters our eye through the pupil."],
+    ["Die=der Linse bündelt=bündeln das=der Licht und wirft=werfen ein Bild auf die=der Netzhaut .", "The lens focuses the light and casts an image onto the retina."],
+    ["Dieses=dieser Bild steht=stehen auf dem=der Kopf .", "This image is upside down."],
+    ["Erst=erst das=der Gehirn dreht=drehen es um und zeigt=zeigen uns die=der Welt richtig .", "Only the brain turns it around and shows us the world the right way up."],
+    ["Bei=bei hellem=hell Licht wird=werden die=der Pupille klein , im Dunkeln wird=werden sie groß .", "In bright light the pupil becomes small; in the dark it becomes big."],
+    ["Mit=mit speziellen=speziell Zellen=Zelle in der Netzhaut können=können wir Farben=Farbe erkennen=erkennen .", "With special cells in the retina, we can see colors."],
+  ]),
+  L("letters", "B1", "daily", 2, "Briefe schreiben", "Writing Letters", [
+    ["Früher=früher schrieben=schreiben die=der Menschen=Mensch viele=viel Briefe=Brief an Familie und Freunde=Freund .", "In the past, people wrote many letters to family and friends."],
+    ["Heute=heute schicken=schicken wir lieber=gern schnelle=schnell Nachrichten=Nachricht mit dem=der Handy .", "Today we prefer to send quick messages on our phones."],
+    ["Trotzdem=trotzdem freuen=freuen sich viele=viel Menschen=Mensch sehr über einen=ein Brief mit der Hand .", "Even so, many people are very happy to get a handwritten letter."],
+    ["Ein=ein Brief zeigt=zeigen , dass sich jemand Zeit genommen=nehmen hat=haben .", "A letter shows that someone took their time."],
+    ["Man=man kann=können ihn aufheben=aufheben und nach vielen=viel Jahren=Jahr wieder lesen=lesen .", "You can keep it and read it again after many years."],
+    ["Vielleicht=vielleicht schreibst=schreiben du diese=dieser Woche auch einen=ein Brief ?", "Maybe you will write a letter this week too?"],
+  ]),
+
+  // ── B2 ──
+  L("noisecancel", "B2", "science", 3, "Kopfhörer gegen Lärm", "Noise-Cancelling Headphones", [
+    ["Moderne=modern Kopfhörer können=können Lärm fast verschwinden=verschwinden lassen=lassen .", "Modern headphones can make noise almost disappear."],
+    ["Kleine=klein Mikrofone=Mikrofon nehmen=aufnehmen die=der Geräusche=Geräusch der=der Umgebung auf=aufnehmen .", "Small microphones pick up the sounds around you."],
+    ["Ein=ein Chip erzeugt=erzeugen daraus in Sekundenbruchteilen eine=ein Gegenwelle , die=der#r genau umgekehrt schwingt=schwingen .", "From this, a chip produces a counter-wave in fractions of a second that vibrates in exactly the opposite way."],
+    ["Treffen=treffen beide=beide Wellen=Welle aufeinander , heben=aufheben sie sich weitgehend auf=aufheben .", "When the two waves meet, they largely cancel each other out."],
+    ["Am=an besten=gut funktioniert=funktionieren das bei gleichmäßigen=gleichmäßig , tiefen=tief Geräuschen=Geräusch wie dem=der Brummen eines=ein Flugzeugs=Flugzeug .", "This works best with steady, low sounds such as the hum of an airplane."],
+    ["Bei=bei Stimmen=Stimme oder plötzlichen=plötzlich Geräuschen=Geräusch ist=sein#v die=der Wirkung deutlich schwächer=schwach .", "With voices or sudden sounds, the effect is much weaker."],
+  ]),
+  L("chinese", "B2", "culture", 3, "Die chinesische Sprache", "The Chinese Language", [
+    ["Chinesisch wird=werden von mehr als einer=ein Milliarde Menschen=Mensch gesprochen=sprechen .", "Chinese is spoken by more than a billion people."],
+    ["Anders=anders als Deutsch verwendet=verwenden es kein Alphabet , sondern Schriftzeichen=Schriftzeichen , die=der#r oft für ganze=ganz Wörter=Wort stehen=stehen .", "Unlike German, it doesn't use an alphabet but characters that often stand for whole words."],
+    ["Eine=ein besondere=besonder Herausforderung für Lernende=Lernende sind=sein#v die=der Töne=Ton .", "The tones are a particular challenge for learners."],
+    ["Im=im Hochchinesischen=Hochchinesisch kann=können die=der Silbe ma je nach Tonhöhe Mutter , Pferd oder schimpfen bedeuten=bedeuten .", "In Standard Chinese, the syllable ma can mean mother, horse or to scold, depending on the pitch."],
+    ["In=in der Volksrepublik China verwendet=verwenden man seit den=der 1950er Jahren=Jahr vereinfachte=vereinfacht Zeichen=Zeichen .", "In the People's Republic of China, simplified characters have been used since the 1950s."],
+    ["In=in Taiwan und Hongkong schreibt=schreiben man dagegen weiterhin die=der traditionellen=traditionell Formen=Form .", "In Taiwan and Hong Kong, on the other hand, people still write the traditional forms."],
+    ["Mit=mit Pinyin , einer=ein Umschrift in lateinischen=lateinisch Buchstaben=Buchstabe , fällt=fallen der Einstieg deutlich leichter=leicht .", "With pinyin, a transcription in Latin letters, getting started is much easier."],
+  ]),
+  L("vitamins", "B2", "science", 3, "Vitamine", "Vitamins", [
+    ["Jahrhundertelang=jahrhundertelang starben=sterben Seeleute=Seemann auf langen=lang Reisen=Reise an Skorbut .", "For centuries, sailors died of scurvy on long voyages."],
+    ["Im=im Jahr 1747 zeigte=zeigen der schottische=schottisch Arzt James Lind , dass Zitronen=Zitrone gegen diese=dieser Krankheit helfen=helfen .", "In 1747, the Scottish doctor James Lind showed that lemons help against this disease."],
+    ["Den=der Grund kannte=kennen man damals noch nicht : Es fehlte=fehlen den=der Seeleuten=Seemann an Vitamin C .", "The reason was not yet known at the time: the sailors lacked vitamin C."],
+    ["Der=der Begriff Vitamin entstand=entstehen erst 1912 und bedeutet=bedeuten ungefähr lebenswichtiger=lebenswichtig Stoff .", "The term vitamin only appeared in 1912 and roughly means substance essential for life."],
+    ["Die=der meisten=meist Vitamine=Vitamin nehmen=aufnehmen wir mit der Nahrung auf=aufnehmen ; Vitamin D bildet=bilden der Körper dagegen mithilfe von Sonnenlicht .", "We take in most vitamins with our food; vitamin D, on the other hand, the body makes with the help of sunlight."],
+    ["Wer=wer sich ausgewogen ernährt=ernähren , braucht=brauchen meist keine=kein Tabletten=Tablette , denn zu viel von manchen=manche Vitaminen=Vitamin kann=können sogar schaden=schaden .", "Anyone who eats a balanced diet usually needs no pills, because too much of some vitamins can even be harmful."],
+  ]),
+  L("trevi", "B2", "city", 3, "Der Trevi-Brunnen", "The Trevi Fountain", [
+    ["Der=der Trevi-Brunnen ist=sein#v der berühmteste=berühmt Brunnen Roms=Rom und wurde=werden 1762 fertiggestellt=fertigstellen .", "The Trevi Fountain is the most famous fountain in Rome and was completed in 1762."],
+    ["In=in der Mitte steht=stehen eine=ein mächtige=mächtig Figur des=der Meeresgottes=Meeresgott Oceanus auf einem=ein Wagen in Form einer=ein Muschel .", "In the middle stands a mighty figure of the sea god Oceanus on a chariot in the shape of a shell."],
+    ["Eine=ein beliebte=beliebt Tradition besagt=besagen , dass man nach Rom zurückkehrt=zurückkehren , wenn man eine=ein Münze über die=der Schulter in den=der Brunnen wirft=werfen .", "A popular tradition says that you will return to Rome if you throw a coin over your shoulder into the fountain."],
+    ["Auf=auf diese=dieser Weise landen=landen jedes=jeder Jahr Münzen=Münze im Wert von über einer=ein Million Euro im Wasser .", "In this way, coins worth more than a million euros end up in the water every year."],
+    ["Das=der Geld wird=werden regelmäßig eingesammelt=einsammeln und für wohltätige=wohltätig Zwecke=Zweck gespendet=spenden .", "The money is collected regularly and donated to charitable causes."],
+    ["Weltberühmt=weltberühmt wurde=werden der Brunnen auch durch den=der Film La Dolce Vita aus dem=der Jahr 1960 .", "The fountain also became world-famous through the 1960 film La Dolce Vita."],
+  ]),
+  L("pyrenees", "B2", "nature", 3, "Die Pyrenäen", "The Pyrenees", [
+    ["Die=der Pyrenäen bilden=bilden eine=ein natürliche=natürlich Grenze zwischen Frankreich und Spanien .", "The Pyrenees form a natural border between France and Spain."],
+    ["Das=der Gebirge erstreckt=erstrecken sich über rund 430 Kilometer vom Atlantik bis zum Mittelmeer .", "The mountain range stretches about 430 kilometers from the Atlantic to the Mediterranean."],
+    ["Mitten=mitten in den=der Bergen=Berg liegt=liegen der kleine=klein Staat Andorra .", "In the middle of the mountains lies the small country of Andorra."],
+    ["Der=der höchste=hoch Gipfel ist=sein#v der Aneto mit 3404 Metern=Meter .", "The highest peak is Aneto, at 3,404 meters."],
+    ["In=in den=der Tälern=Tal leben=leben Basken=Baske und Katalanen=Katalane , die=der#r ihre=ihr eigenen=eigen Sprachen=Sprache und Traditionen=Tradition pflegen=pflegen .", "Basques and Catalans live in the valleys and keep up their own languages and traditions."],
+    ["Seit=seit einigen=einige Jahrzehnten=Jahrzehnt leben=leben dort sogar wieder Braunbären=Braunbär , die=der#r aus Slowenien angesiedelt=ansiedeln wurden=werden .", "For some decades, brown bears have even lived there again, brought in from Slovenia."],
+  ]),
+  L("santa", "B2", "culture", 3, "Wer ist der Weihnachtsmann?", "Who Is Santa Claus?", [
+    ["Das=der Vorbild des=der Weihnachtsmanns=Weihnachtsmann ist=sein#v der heilige=heilig Nikolaus , ein Bischof aus dem=der vierten=viert Jahrhundert .", "The model for Santa Claus is Saint Nicholas, a bishop from the fourth century."],
+    ["Niederländische=niederländisch Einwanderer=Einwanderer brachten=bringen ihren=ihr Sinterklaas nach Amerika , wo daraus Santa Claus wurde=werden .", "Dutch immigrants brought their Sinterklaas to America, where he became Santa Claus."],
+    ["Ein=ein Gedicht aus dem=der Jahr 1823 machte=machen den=der Schlitten mit den=der fliegenden=fliegend Rentieren=Rentier bekannt .", "A poem from 1823 made the sleigh with the flying reindeer well known."],
+    ["Oft=oft heißt=heißen es , Coca-Cola habe=haben den=der Weihnachtsmann erfunden=erfinden .", "It is often said that Coca-Cola invented Santa Claus."],
+    ["Tatsächlich=tatsächlich trug=tragen er schon vorher einen=ein roten=rot Mantel , die=der#r Werbung der=der 1930er Jahre=Jahr machte=machen dieses=dieser Bild aber weltweit bekannt .", "In fact, he wore a red coat before then, but the advertising of the 1930s made this image known worldwide."],
+    ["In=in manchen=manche Regionen=Region Deutschlands=Deutschland bringt=bringen dagegen das=der Christkind die=der Geschenke=Geschenk .", "In some regions of Germany, on the other hand, the Christ Child brings the presents."],
+  ]),
+  L("gulliver", "B2", "culture", 3, "Gullivers Reisen", "Gulliver's Travels", [
+    ["Gullivers=Gulliver Reisen erschien=erscheinen 1726 und stammt=stammen von dem=der irischen=irisch Schriftsteller Jonathan Swift .", "Gulliver's Travels appeared in 1726 and was written by the Irish writer Jonathan Swift."],
+    ["Der=der Schiffsarzt Lemuel Gulliver strandet=stranden zuerst in Liliput , wo die=der Menschen=Mensch nur fünfzehn Zentimeter groß sind=sein#v .", "The ship's doctor Lemuel Gulliver is first stranded in Lilliput, where the people are only fifteen centimeters tall."],
+    ["Später=später gerät=geraten er in ein Land voller Riesen=Riese , in dem=der#r er selbst winzig ist=sein#v .", "Later he ends up in a land full of giants, where he himself is tiny."],
+    ["Heute=heute kennen=kennen viele=viel das=der Buch als Kindergeschichte .", "Today, many people know the book as a children's story."],
+    ["Ursprünglich=ursprünglich war=sein#v es jedoch eine=ein bissige=bissig Satire auf die=der Politik und die=der Gesellschaft seiner=sein Zeit .", "Originally, however, it was a biting satire on the politics and society of its time."],
+    ["Die=der Streitereien=Streiterei der=der Liliputaner=Liliputaner über Kleinigkeiten=Kleinigkeit sollten=sollen zeigen=zeigen , wie lächerlich Machtkämpfe=Machtkampf sein=sein#v können=können .", "The Lilliputians' quarrels over trivial things were meant to show how ridiculous power struggles can be."],
+  ]),
+  L("defoe", "B2", "people", 3, "Daniel Defoe und Robinson Crusoe", "Daniel Defoe and Robinson Crusoe", [
+    ["Daniel Defoe führte=führen ein abwechslungsreiches=abwechslungsreich Leben : Er war=sein#v Händler , Journalist und zeitweise sogar Geheimagent .", "Daniel Defoe led a varied life: he was a merchant, a journalist and at times even a secret agent."],
+    ["Bekannt=bekannt wurde=werden er jedoch erst mit fast sechzig Jahren=Jahr durch seinen=sein Roman Robinson Crusoe aus dem=der Jahr 1719 .", "However, he only became famous at almost sixty with his 1719 novel Robinson Crusoe."],
+    ["Das=der Buch erzählt=erzählen von einem=ein Seemann , der=der#r nach einem=ein Schiffbruch jahrelang allein auf einer=ein Insel überlebt=überleben .", "The book tells of a sailor who survives alone on an island for years after a shipwreck."],
+    ["Als=als Vorbild diente=dienen vermutlich der schottische=schottisch Seemann Alexander Selkirk , der=der#r vier Jahre=Jahr auf einer=ein Pazifikinsel verbrachte=verbringen .", "The model was probably the Scottish sailor Alexander Selkirk, who spent four years on a Pacific island."],
+    ["Robinson baut=bauen sich ein Haus , hält=halten Ziegen=Ziege und trifft=treffen schließlich auf einen=ein Mann , den=der#r er Freitag nennt=nennen .", "Robinson builds himself a house, keeps goats and finally meets a man whom he calls Friday."],
+    ["Viele=viel Literaturwissenschaftler=Literaturwissenschaftler zählen=zählen das=der Werk zu den=der ersten=erst englischen=englisch Romanen=Roman .", "Many literary scholars count the work among the first English novels."],
+  ]),
+
+  // ── C1 ──
+  L("pepys", "C1", "history", 4, "Das Tagebuch des Samuel Pepys", "The Diary of Samuel Pepys", [
+    ["Von=von 1660 bis 1669 führte=führen der Londoner=londoner Marinebeamte Samuel Pepys ein Tagebuch , das=der#r heute als einzigartige=einzigartig historische=historisch Quelle gilt=gelten .", "From 1660 to 1669, the London naval official Samuel Pepys kept a diary that is now considered a unique historical source."],
+    ["Er=er schrieb=schreiben in einer=ein Kurzschrift , sodass seine=sein Notizen=Notiz erst im 19. Jahrhundert entziffert=entziffern und veröffentlicht=veröffentlichen wurden=werden .", "He wrote in shorthand, so his notes were only deciphered and published in the 19th century."],
+    ["Pepys schildert=schildern nicht nur politische=politisch Ereignisse=Ereignis , sondern auch seinen=sein Alltag , seine=sein Ehe und seine=sein Schwächen=Schwäche erstaunlich offen .", "Pepys describes not only political events but also his daily life, his marriage and his weaknesses with astonishing openness."],
+    ["Er=er war=sein#v Augenzeuge der=der großen=groß Pestepidemie von 1665 und des=der Großen=groß Brandes=Brand von London im Jahr 1666 .", "He was an eyewitness to the great plague epidemic of 1665 and the Great Fire of London in 1666."],
+    ["Um=um seine=sein Wertsachen=Wertsache vor dem=der Feuer zu retten=retten , vergrub=vergraben er unter anderem Wein und einen=ein Parmesankäse im Garten .", "To save his valuables from the fire, he buried wine and a Parmesan cheese in the garden, among other things."],
+    ["1669 gab=aufgeben er das=der Tagebuch auf=aufgeben , weil er fürchtete=fürchten , sein Augenlicht zu verlieren=verlieren .", "In 1669, he gave up the diary because he feared he was losing his eyesight."],
+  ]),
+  L("tigris", "C1", "nature", 4, "Der Tigris", "The Tigris", [
+    ["Der=der Tigris entspringt=entspringen im Osten der=der Türkei und fließt=fließen auf rund 1850 Kilometern=Kilometer durch Syrien und den=der Irak .", "The Tigris rises in eastern Turkey and flows about 1,850 kilometers through Syria and Iraq."],
+    ["Im=im Süden des=der Irak vereinigt=vereinigen er sich mit dem=der Euphrat und mündet=münden schließlich in den=der Persischen=persisch Golf .", "In southern Iraq, it joins the Euphrates and finally flows into the Persian Gulf."],
+    ["Das=der Land zwischen beiden=beide Flüssen=Fluss nannten=nennen die=der Griechen=Grieche Mesopotamien , also Zwischenstromland .", "The Greeks called the land between the two rivers Mesopotamia, that is, the land between the rivers."],
+    ["Hier=hier entstanden=entstehen einige=einige der=der ältesten=alt Städte=Stadt der=der Menschheit , und hier wurde=werden auch die=der Schrift erfunden=erfinden .", "Some of humanity's oldest cities arose here, and writing was also invented here."],
+    ["An=an seinen=sein Ufern=Ufer liegen=liegen bis heute große=groß Städte=Stadt wie Bagdad und Mossul .", "Large cities such as Baghdad and Mosul still lie on its banks today."],
+    ["Staudämme=Staudamm am Oberlauf führen=führen jedoch zunehmend zu Konflikten=Konflikt um das=der knappe=knapp Wasser .", "However, dams on the upper course increasingly lead to conflicts over the scarce water."],
+  ]),
+  L("irishmusic", "C1", "culture", 4, "Irische Volksmusik", "Irish Traditional Music", [
+    ["Die=der irische=irisch Volksmusik wurde=werden über Jahrhunderte=Jahrhundert vor allem mündlich weitergegeben=weitergeben .", "Irish traditional music was passed on mainly by ear for centuries."],
+    ["Typische=typisch Instrumente=Instrument sind=sein#v die=der Fiedel , die=der Blechflöte , die=der Rahmentrommel Bodhrán und der Dudelsack Uilleann Pipes .", "Typical instruments are the fiddle, the tin whistle, the bodhrán frame drum and the uilleann pipes."],
+    ["Die=der Harfe ist=sein#v sogar das=der Nationalsymbol Irlands=Irland und ziert=zieren Münzen=Münze und Pässe=Pass .", "The harp is even Ireland's national symbol and appears on coins and passports."],
+    ["Charakteristisch=charakteristisch sind=sein#v die=der sogenannten=sogenannt Sessions , bei denen=der#r sich Musiker=Musiker zwanglos in Pubs=Pub treffen=treffen und gemeinsam spielen=spielen .", "Typical are the so-called sessions, where musicians meet informally in pubs and play together."],
+    ["Ab=ab den=der 1960er Jahren=Jahr erlebte=erleben die=der Musik durch Gruppen=Gruppe wie The Dubliners eine=ein Wiederbelebung .", "From the 1960s, the music experienced a revival through groups such as The Dubliners."],
+    ["Heute=heute verbinden=verbinden viele=viel junge=jung Musiker=Musiker die=der alten=alt Melodien=Melodie mit Rock , Jazz oder elektronischen=elektronisch Klängen=Klang .", "Today, many young musicians combine the old melodies with rock, jazz or electronic sounds."],
+  ]),
+  L("theseus", "C1", "culture", 4, "Theseus und der Minotaurus", "Theseus and the Minotaur", [
+    ["Der=der griechischen=griechisch Sage nach musste=müssen Athen regelmäßig sieben junge=jung Männer=Mann und sieben junge=jung Frauen=Frau nach Kreta schicken=schicken .", "According to Greek legend, Athens regularly had to send seven young men and seven young women to Crete."],
+    ["Dort=dort wurden=werden sie dem=der Minotaurus geopfert=opfern , einem=ein Ungeheuer mit dem=der Körper eines=ein Menschen=Mensch und dem=der Kopf eines=ein Stieres=Stier .", "There they were sacrificed to the Minotaur, a monster with the body of a man and the head of a bull."],
+    ["Der=der Königssohn Theseus meldete=melden sich freiwillig , um das=der Ungeheuer zu töten=töten .", "The king's son Theseus volunteered to kill the monster."],
+    ["Die=der kretische=kretisch Prinzessin Ariadne verliebte=verlieben sich in ihn und gab=geben ihm einen=ein Faden , mit dem=der#r er aus dem=der Labyrinth zurückfand=zurückfinden .", "The Cretan princess Ariadne fell in love with him and gave him a thread with which he found his way back out of the labyrinth."],
+    ["Auf=auf der Heimfahrt vergaß=vergessen Theseus jedoch , die=der schwarzen=schwarz Segel=Segel gegen weiße=weiß auszutauschen=austauschen .", "On the journey home, however, Theseus forgot to swap the black sails for white ones."],
+    ["Sein=sein Vater Aigeus glaubte=glauben , der Sohn sei=sein#v tot , und stürzte=stürzen sich ins Meer , das=der#r seitdem Ägäis heißt=heißen .", "His father Aegeus believed his son was dead and threw himself into the sea, which has since been called the Aegean."],
+  ]),
+  L("ferdowsi", "C1", "people", 4, "Firdausi und das Schahname", "Ferdowsi and the Shahnameh", [
+    ["Der=der persische=persisch Dichter Firdausi lebte=leben um das=der Jahr 1000 im heutigen=heutig Iran .", "The Persian poet Ferdowsi lived around the year 1000 in what is now Iran."],
+    ["Über=über dreißig Jahre=Jahr lang arbeitete=arbeiten er an seinem=sein Hauptwerk , dem=der Schahname , dem=der Buch der=der Könige=König .", "For over thirty years, he worked on his main work, the Shahnameh, the Book of Kings."],
+    ["Das=der Epos umfasst=umfassen rund 50.000 Doppelverse=Doppelvers und erzählt=erzählen die=der Geschichte Persiens=Persien von mythischen=mythisch Anfängen=Anfang bis zur arabischen=arabisch Eroberung .", "The epic contains about 50,000 couplets and tells the history of Persia from mythical beginnings to the Arab conquest."],
+    ["Sein=sein bekanntester=bekannt Held ist=sein#v der Krieger Rostam , dessen=der#r Abenteuer bis heute in Teehäusern=Teehaus erzählt=erzählen werden=werden .", "Its best-known hero is the warrior Rostam, whose adventures are still told in teahouses today."],
+    ["Firdausi verwendete=verwenden bewusst kaum arabische=arabisch Lehnwörter=Lehnwort und trug=beitragen so zur Bewahrung der=der persischen=persisch Sprache bei=beitragen .", "Ferdowsi deliberately used hardly any Arabic loanwords and so helped to preserve the Persian language."],
+    ["Der=der Legende nach bezahlte=bezahlen ihn der Sultan nur mit Silber statt mit dem=der versprochenen=versprochen Gold , was der Dichter mit einem=ein Spottgedicht quittierte=quittieren .", "According to legend, the sultan paid him only in silver instead of the promised gold, to which the poet responded with a mocking poem."],
+  ]),
+  L("centenarians", "C1", "science", 4, "Wie man hundert Jahre alt wird", "How to Live to a Hundred", [
+    ["In=in einigen=einige Regionen=Region der=der Welt erreichen=erreichen auffällig viele=viel Menschen=Mensch ein Alter von hundert Jahren=Jahr .", "In some regions of the world, a strikingly large number of people reach the age of a hundred."],
+    ["Dazu=dazu zählen=zählen etwa Okinawa in Japan , Sardinien in Italien und die=der griechische=griechisch Insel Ikaria .", "These include Okinawa in Japan, Sardinia in Italy and the Greek island of Ikaria."],
+    ["Forscher=Forscher haben=haben diese=dieser sogenannten=sogenannt Blauen=blau Zonen=Zone untersucht=untersuchen und gemeinsame=gemeinsam Merkmale=Merkmal gefunden=finden .", "Researchers have studied these so-called Blue Zones and found common features."],
+    ["Die=der Menschen=Mensch dort bewegen=bewegen sich viel im Alltag , essen=essen überwiegend pflanzlich und pflegen=pflegen enge=eng soziale=sozial Kontakte=Kontakt .", "People there move a lot in daily life, eat a mostly plant-based diet and maintain close social ties."],
+    ["Die=der Gene spielen=spielen dagegen offenbar nur eine=ein kleinere=klein Rolle als lange angenommen=annehmen .", "Genes, on the other hand, apparently play a smaller role than was long assumed."],
+    ["Kritiker=Kritiker geben=bedenken allerdings zu bedenken=bedenken , dass die=der Geburtsdaten=Geburtsdatum mancher=manche sehr alter=alt Menschen=Mensch nicht zuverlässig dokumentiert=dokumentieren sind=sein#v .", "Critics point out, however, that the birth dates of some very old people are not reliably documented."],
+  ]),
+  L("darkmatter", "C1", "science", 4, "Dunkle Materie", "Dark Matter", [
+    ["Bereits=bereits 1933 bemerkte=bemerken der Schweizer Astronom Fritz Zwicky , dass sich Galaxien=Galaxie in Haufen=Haufen viel zu schnell bewegen=bewegen .", "As early as 1933, the Swiss astronomer Fritz Zwicky noticed that galaxies in clusters move far too fast."],
+    ["Die=der sichtbare=sichtbar Materie reichte=reichen nicht aus=ausreichen , um sie mit ihrer=ihr Schwerkraft zusammenzuhalten=zusammenhalten .", "The visible matter was not enough to hold them together with its gravity."],
+    ["In=in den=der 1970er Jahren=Jahr zeigte=zeigen die=der Amerikanerin Vera Rubin Ähnliches für die=der Sterne=Stern am Rand von Galaxien=Galaxie .", "In the 1970s, the American Vera Rubin showed something similar for the stars at the edge of galaxies."],
+    ["Heute=heute gehen=ausgehen die=der meisten=meist Physiker=Physiker davon aus=ausgehen , dass rund 85 Prozent der=der Materie im Universum unsichtbar sind=sein#v .", "Today, most physicists assume that around 85 percent of the matter in the universe is invisible."],
+    ["Woraus=woraus diese=dieser dunkle=dunkel Materie besteht=bestehen , konnte=können trotz aufwendiger=aufwendig Experimente=Experiment bisher niemand nachweisen=nachweisen .", "What this dark matter consists of, no one has yet been able to prove, despite elaborate experiments."],
+    ["Einige=einige Forscher=Forscher vermuten=vermuten deshalb , dass nicht die=der Materie fehlt=fehlen , sondern unsere=unser Theorie der=der Schwerkraft unvollständig ist=sein#v .", "Some researchers therefore suspect that it is not matter that is missing, but that our theory of gravity is incomplete."],
+  ]),
+];

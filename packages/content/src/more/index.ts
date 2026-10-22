@@ -2,6 +2,7 @@ import type { RawEntry, RawStory } from "../raw";
 import * as de from "./de";
 import * as deReading from "./de-reading";
 import * as deReading2 from "./de-reading2";
+import * as deReading3 from "./de-reading3";
 import * as en from "./en";
 import * as en2 from "./en2";
 import * as esReading from "./es-reading";
@@ -48,6 +49,7 @@ const PACKS: Pack[] = [
   { lang: "ko", ...ko },
   { lang: "de", ...deReading },
   { lang: "de", ...deReading2 },
+  { lang: "de", ...deReading3 },
   { lang: "en", ...en2 },
   { lang: "es", ...esReading },
   { lang: "ko", ...koReading },
