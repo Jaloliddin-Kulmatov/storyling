@@ -173,6 +173,7 @@ function StoryReader({ story }: { story: AnyStory }) {
           </div>
 
           <Finish story={story} tapped={tapped} done={done} onDone={(msg) => { setDone(true); setToast(msg); }} />
+          <WatchMore story={story} />
           {isUserStory(story) && (
             <DeleteStory onDelete={() => { learner.removeStory(story.id); router.push(`/${lang}`); }} />
           )}
@@ -415,6 +416,26 @@ function DeleteStory({ onDelete }: { onDelete: () => void }) {
       <button className={`btn sm ${sure ? "danger" : "ghost"}`} onClick={() => (sure ? onDelete() : setSure(true))}>
         {sure ? "Tap again to delete this text" : "Delete this text"}
       </button>
+    </div>
+  );
+}
+
+/** Topic videos on YouTube (a search in the story's language) and a link to the Watch page. */
+const READING_TOPICS = new Set(["history", "people", "nature", "science", "culture"]);
+
+function WatchMore({ story }: { story: AnyStory }) {
+  const meta = language(story.lang);
+  const topic = isUserStory(story) ? "mine" : story.topic;
+  // Reading texts are about a named subject; search for it in the target language. Everyday stories: topic vocabulary videos.
+  const query = READING_TOPICS.has(topic) ? `${story.title} ${meta.native}` : `${meta.name} ${TOPIC_LABEL[topic] ?? topic} vocabulary for learners`;
+  return (
+    <div className="box watch-box">
+      <span className="eyebrow row" style={{ display: "inline-flex" }}>{Icon.video} Watch and listen</span>
+      <span className="small">Hear real speakers talk about this topic.</span>
+      <div className="row">
+        <a className="btn sm" href={`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`} target="_blank" rel="noopener noreferrer">Videos about {story.titleEnglish || story.title}</a>
+        <Link className="btn sm ghost" href={`/${story.lang}/watch`}>{meta.name} videos for learners</Link>
+      </div>
     </div>
   );
 }

@@ -11,13 +11,14 @@ import { Icon, Logo } from "./ui";
 const NAV = [
   { href: "", label: "Home", icon: Icon.home },
   { href: "/words", label: "Notebook", icon: Icon.notebook },
+  { href: "/watch", label: "Watch", icon: Icon.video },
   { href: "/practice", label: "Practice", icon: Icon.practice },
   { href: "/dictionary", label: "Dictionary", icon: Icon.dict },
   { href: "/progress", label: "Me", icon: Icon.me },
 ] as const;
 
-// Phones get the same five tabs at the bottom.
-const TABS = NAV;
+// Phones get five tabs; Dictionary is reached from the Notebook there.
+const TABS = NAV.filter((n) => n.href !== "/dictionary");
 
 export function AppShell({ lang, children }: { lang: LangCode; children: ReactNode }) {
   const path = usePathname();

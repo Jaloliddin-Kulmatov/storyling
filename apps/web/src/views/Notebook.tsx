@@ -47,7 +47,10 @@ export function Notebook({ lang }: { lang: LangCode }) {
     <>
       <div className="page-head">
         <div><div className="eyebrow">Your collection</div><h1>Notebook</h1></div>
-        <Link className="btn sm primary" href={`/${lang}/practice`}>{Icon.practice} Practice</Link>
+        <div className="row">
+          <Link className="btn sm" href={`/${lang}/dictionary`}>{Icon.dict} Dictionary</Link>
+          <Link className="btn sm primary" href={`/${lang}/practice`}>{Icon.practice} Practice</Link>
+        </div>
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Notebook">
