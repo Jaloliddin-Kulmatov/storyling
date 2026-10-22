@@ -67,4 +67,9 @@ describe("covers", () => {
       .filter((p): p is string => !!p && !existsSync(new URL(`../../../apps/web/public${p}`, import.meta.url)));
     expect(missing).toEqual([]);
   });
+
+  it("has a cover photo for every catalog story", async () => {
+    const { coverOf } = await import("../src");
+    expect(stories.filter((s) => !coverOf(s.id)).map((s) => s.id)).toEqual([]);
+  });
 });
