@@ -7,10 +7,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { callAi, useAiEnabled } from "@/lib/ai";
 import { canSpeak, hasRecording, playSentence, playWord, preload, stopAudio } from "@/lib/audio";
+import { examplesFor, wordLevelOf } from "@storyling/learner";
 import { useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories } from "@/lib/rank";
 import { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnyStory } from "@/lib/stories";
 import { Cover, Icon, Toast } from "@/components/ui";
+import { DictationRun } from "@/components/DictationRun";
+import { useStories } from "@/lib/stories";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -49,7 +52,10 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [toast, setToast] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [shown, setShown] = useState<Set<number>>(() => new Set());
+  const [mode, setMode] = useState<null | "dictation" | "grammar">(null);
   const run = useRef(0);
+  const { markOpened } = learner;
+  useEffect(() => markOpened(story.id), [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const recorded = hasRecording(story.id);
   const voice = recorded || canSpeak();
@@ -117,6 +123,7 @@ function StoryReader({ story }: { story: AnyStory }) {
           </div>
           <button className="chip" aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>Translation</button>
           <button className="chip" aria-pressed={settings.highlightNew} onClick={() => setSettings({ highlightNew: !settings.highlightNew })}>Highlights</button>
+          <button className="chip" aria-pressed={settings.levelUnderline} onClick={() => setSettings({ levelUnderline: !settings.levelUnderline })}>Levels</button>
         </div>
       </div>
 
@@ -133,7 +140,7 @@ function StoryReader({ story }: { story: AnyStory }) {
           <h1 lang={lang} style={{ marginTop: 6 }}>{story.title}</h1>
           {story.titleEnglish && <p className="muted" style={{ margin: "4px 0 0" }}>{story.titleEnglish}</p>}
 
-          <div className={`text${settings.highlightNew ? " hl" : ""}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
+          <div className={`text${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
             {story.sentences.map((s, i) => (
               <span key={i} id={`s-${i}`} className={`sent${playing === i ? " playing" : ""}`}>
                 {s.tokens.map((t, j) => {
@@ -143,10 +150,11 @@ function StoryReader({ story }: { story: AnyStory }) {
                   const ws = t.isName ? "known" : learner.wordState(t.lemma);
                   const state = ws === "learning" && learner.word(t.lemma)?.saved !== "learning" ? "new" : ws;
                   const sel = picked?.lemma === t.lemma && picked.sentence === i;
+                  const lv = wordLevelOf(lang, t.lemma);
                   return (
                     <span key={j}>
                       {space}
-                      <button className={`w ${state}${sel ? " selected" : ""}`} onClick={() => pick(t, i)}>{t.surface}</button>
+                      <button className={`w ${state}${lv !== undefined && !t.isName ? ` lv${Math.min(lv, 4)}` : ""}${sel ? " selected" : ""}`} onClick={() => pick(t, i)}>{t.surface}</button>
                     </span>
                   );
                 })}
@@ -166,6 +174,12 @@ function StoryReader({ story }: { story: AnyStory }) {
             ))}
           </div>
 
+          {settings.levelUnderline && !isUserStory(story) && (
+            <div className="lvl-legend" aria-label="Word level colors">
+              <span>Word underline = level it first appears at:</span>
+              {meta.levels.slice(0, 5).map((l, k) => <span key={l}><i style={{ background: `var(--lv${k})` }} />{l}</span>)}
+            </div>
+          )}
           <div className="legend">
             <span><span className="sw hl"><span className="w new">new</span></span>new word</span>
             <span><span className="sw hl"><span className="w learning">word</span></span>saved for review</span>
@@ -181,6 +195,34 @@ function StoryReader({ story }: { story: AnyStory }) {
 
         <WordPanel story={story} picked={picked} ai={ai} onClose={() => setPicked(null)} />
       </div>
+
+      {!picked && (
+        <div className="fab-bar" role="toolbar" aria-label="Reading tools">
+          <button aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>{Icon.translate} Translation</button>
+          {voice && <button onClick={() => { stop(); setMode("dictation"); }}>{Icon.speaker} Dictation</button>}
+          <button onClick={() => setMode("grammar")}>{Icon.spark} Grammar</button>
+        </div>
+      )}
+      {mode === "dictation" && (
+        <div className="overlay" role="dialog" aria-label="Dictation" onClick={(e) => e.target === e.currentTarget && setMode(null)}>
+          <div className="sheet-in">
+            <div className="spread"><b style={{ fontSize: 18 }}>Dictation · {story.title}</b><button className="icon-btn" aria-label="Close" onClick={() => setMode(null)}>{Icon.close}</button></div>
+            <DictationRun
+              items={story.sentences.map((_, index) => ({ story, index }))}
+              rate={settings.rate}
+              onFinish={(score) => { learner.recordGame("dictation", score); setMode(null); setToast(`Dictation finished · ${score}%`); }}
+            />
+          </div>
+        </div>
+      )}
+      {mode === "grammar" && (
+        <div className="overlay" role="dialog" aria-label="Grammar help" onClick={(e) => e.target === e.currentTarget && setMode(null)}>
+          <div className="sheet-in">
+            <div className="spread"><b style={{ fontSize: 18 }}>Grammar help</b><button className="icon-btn" aria-label="Close" onClick={() => setMode(null)}>{Icon.close}</button></div>
+            <GrammarHelp story={story} ai={ai} />
+          </div>
+        </div>
+      )}
 
       {voice && (
         <div className="player">
@@ -267,6 +309,7 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
       {sentence.translation && (
         <div className="box"><div className="eyebrow" style={{ marginBottom: 4 }}>Sentence</div>{sentence.translation}</div>
       )}
+      <Examples story={story} lemma={picked.lemma} />
 
       {ai && (
         <div className="box">
@@ -435,6 +478,72 @@ function WatchMore({ story }: { story: AnyStory }) {
       <div className="row">
         <a className="btn sm" href={`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`} target="_blank" rel="noopener noreferrer">Videos about {story.titleEnglish || story.title}</a>
         <Link className="btn sm ghost" href={`/${story.lang}/watch`}>{meta.name} videos for learners</Link>
+      </div>
+    </div>
+  );
+}
+
+/** Pick a sentence and get a plain-English grammar explanation (needs the AI key on the server). */
+function GrammarHelp({ story, ai }: { story: AnyStory; ai: boolean }) {
+  const [pickedIdx, setPickedIdx] = useState<number | null>(null);
+  const [state, setState] = useState<{ busy: boolean; text?: string; error?: string }>({ busy: false });
+
+  async function explain(i: number) {
+    setPickedIdx(i);
+    setState({ busy: true });
+    const sentence = story.sentences[i]!;
+    try {
+      const { text } = await callAi<{ text: string }>("explain", { lang: story.lang, sentence: textOf(story, sentence), translation: sentence.translation });
+      setState({ busy: false, text });
+    } catch (e) {
+      setState({ busy: false, error: (e as Error).message });
+    }
+  }
+
+  if (!ai) {
+    return (
+      <div className="empty">
+        <p style={{ margin: 0 }}><b>Grammar help uses AI.</b></p>
+        <p className="muted small" style={{ margin: "4px 0 0" }}>The site owner can turn it on by adding an AI key. Meanwhile, tap any word to see its meaning and example sentences.</p>
+      </div>
+    );
+  }
+  return (
+    <>
+      <p className="muted small" style={{ margin: 0 }}>Choose a sentence to explain.</p>
+      <div className="list" style={{ maxHeight: 240, overflow: "auto" }}>
+        {story.sentences.map((s, i) => (
+          <button key={i} className="row-card" style={{ display: "block", textAlign: "left", fontFamily: "var(--f-read)", fontSize: 17, borderColor: pickedIdx === i ? "var(--primary)" : undefined }} lang={story.lang} onClick={() => explain(i)}>
+            {textOf(story, s)}
+          </button>
+        ))}
+      </div>
+      {state.busy && <p className="muted">Thinking…</p>}
+      {state.text && <div className="box ai-text">{state.text}</div>}
+      {state.error && <p role="alert" style={{ color: "var(--danger)", margin: 0 }}>{state.error}</p>}
+    </>
+  );
+}
+
+/** More sentences that use the word, with audio. */
+function Examples({ story, lemma }: { story: AnyStory; lemma: string }) {
+  const lang = story.lang;
+  const all = useStories(lang);
+  const items = useMemo(() => examplesFor(all.filter((x) => x.id !== story.id), lemma, 3), [all, lemma, story.id]);
+  if (!items.length) return null;
+  return (
+    <div>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>More examples</div>
+      <div className="ex-list">
+        {items.map((ex) => (
+          <div className="ex" key={ex.story.id}>
+            <button className="icon-btn" aria-label="Hear this sentence" onClick={() => playSentence(ex.story.id, lang, ex.sentence, ex.text)}>{Icon.speaker}</button>
+            <div>
+              <div className="t" lang={lang}>{ex.text}</div>
+              {ex.translation && <div className="muted small">{ex.translation}</div>}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -6,11 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { playWord } from "@/lib/audio";
 import { useLearner } from "@/lib/learner";
-import { useRankedStories } from "@/lib/rank";
+import { useRankedStories, type Ranked } from "@/lib/rank";
 import { useWordInfo } from "@/lib/words";
 import { Icon, StoryRow } from "@/components/ui";
 
-type Tab = "words" | "saved" | "texts";
+type Tab = "words" | "saved" | "history" | "texts";
 type Filter = "learning" | "known" | "ignored";
 
 const days = (n: number) => (n < 1 ? "today" : n < 30 ? `in ${Math.round(n)}d` : `in ${Math.round(n / 30)}mo`);
@@ -42,12 +42,14 @@ export function Notebook({ lang }: { lang: LangCode }) {
 
   const saved = learner.favorites.map((id) => ranked.find((r) => r.story.id === id)).filter((r) => !!r);
   const texts = ranked.filter((r) => learner.stories.some((s) => s.id === r.story.id));
+  const history = learner.history.map((h) => ({ at: h.at, r: ranked.find((r) => r.story.id === h.id) })).filter((h): h is { at: number; r: Ranked } => !!h.r);
 
   return (
     <>
       <div className="page-head">
         <div><div className="eyebrow">Your collection</div><h1>Notebook</h1></div>
         <div className="row">
+          <Link className="btn sm" href={`/${lang}/packs`}>{Icon.library} Word packs</Link>
           <Link className="btn sm" href={`/${lang}/dictionary`}>{Icon.dict} Dictionary</Link>
           <Link className="btn sm primary" href={`/${lang}/practice`}>{Icon.practice} Practice</Link>
         </div>
@@ -56,6 +58,7 @@ export function Notebook({ lang }: { lang: LangCode }) {
       <div className="level-tabs" role="tablist" aria-label="Notebook">
         <button role="tab" aria-selected={tab === "words"} onClick={() => setTab("words")}>Words <small>{counts.learning}</small></button>
         <button role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>Saved stories <small>{saved.length}</small></button>
+        <button role="tab" aria-selected={tab === "history"} onClick={() => setTab("history")}>History <small>{history.length}</small></button>
         <button role="tab" aria-selected={tab === "texts"} onClick={() => setTab("texts")}>My texts <small>{texts.length}</small></button>
       </div>
 
@@ -118,6 +121,23 @@ export function Notebook({ lang }: { lang: LangCode }) {
           {!saved.length && (
             <div className="empty">
               <p className="muted">Press the bookmark on any story to keep it here.</p>
+              <Link className="btn primary" href={`/${lang}`}>Browse stories</Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "history" && (
+        <div className="list" style={{ marginTop: 14 }}>
+          {history.map(({ at, r }) => (
+            <div key={r.story.id} style={{ display: "grid", gap: 2 }}>
+              <span className="small muted" style={{ paddingLeft: 4 }}>{new Date(at).toLocaleDateString("en", { weekday: "short", day: "numeric", month: "short" })} · {new Date(at).toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" })}</span>
+              <StoryRow {...r} />
+            </div>
+          ))}
+          {!history.length && (
+            <div className="empty">
+              <p className="muted">Stories you open will be listed here.</p>
               <Link className="btn primary" href={`/${lang}`}>Browse stories</Link>
             </div>
           )}

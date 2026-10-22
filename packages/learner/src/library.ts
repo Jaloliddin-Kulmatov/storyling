@@ -2,6 +2,7 @@ import { lookup, sentenceText, storiesFor, type CatalogStory, type DictEntry } f
 import { coverage, recommend, type Coverage, type LangCode, type Sentence } from "@storyling/core";
 import { useCallback, useMemo } from "react";
 import { useLearner, type StoredWord, type UserStory } from "./index";
+import { FUNCTION_POS, wordLevels } from "./placement";
 
 /**
  * Library helpers shared by the web and phone apps: the learner's stories next to the catalog,
@@ -137,4 +138,80 @@ export function shuffle<T>(xs: readonly T[]): T[] {
     [a[i], a[j]] = [a[j]!, a[i]!];
   }
   return a;
+}
+
+const levelCache = new Map<LangCode, Map<string, number>>();
+
+/** Index of the easiest level whose stories use this word (0 = first level), or undefined. */
+export function wordLevelOf(lang: LangCode, lemma: string): number | undefined {
+  let m = levelCache.get(lang);
+  if (!m) levelCache.set(lang, (m = wordLevels(lang)));
+  return m.get(lemma);
+}
+
+/** Example sentences that use a word, from the catalog and the learner's own texts. */
+export function examplesFor(stories: AnyStory[], lemma: string, limit = 3) {
+  const out: { story: AnyStory; sentence: number; text: string; translation?: string }[] = [];
+  for (const st of stories) {
+    for (const [i, s] of st.sentences.entries()) {
+      if (s.tokens.some((t) => t.lemma === lemma)) {
+        out.push({ story: st, sentence: i, text: textOf(st, s), translation: s.translation });
+        break; // one example per story keeps them varied
+      }
+    }
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+export interface WordPack {
+  topic: string;
+  label: string;
+  words: { lemma: string; display: string; meaning: string; pos: string; reading?: string; level: number }[];
+  /** A story id from this topic, for the cover. */
+  coverStory: string;
+}
+
+const packCache = new Map<LangCode, WordPack[]>();
+
+/**
+ * Vocabulary packs by topic, from the catalog: each content word goes to the topic whose stories use it most,
+ * easiest words first. Packs with fewer than 8 words are left out.
+ */
+export function wordPacks(lang: LangCode): WordPack[] {
+  const cached = packCache.get(lang);
+  if (cached) return cached;
+  const counts = new Map<string, Map<string, number>>();
+  const firstStory = new Map<string, string>();
+  for (const s of storiesFor(lang)) {
+    firstStory.set(s.topic, firstStory.get(s.topic) ?? s.id);
+    for (const sent of s.sentences)
+      for (const t of sent.tokens) {
+        if (!t.lemma || t.isName) continue;
+        const m = counts.get(t.lemma) ?? new Map<string, number>();
+        m.set(s.topic, (m.get(s.topic) ?? 0) + 1);
+        counts.set(t.lemma, m);
+      }
+  }
+  const levels = wordLevels(lang);
+  const byTopic = new Map<string, WordPack["words"]>();
+  for (const [lemma, perTopic] of counts) {
+    const e = lookup(lang, lemma);
+    if (!e || FUNCTION_POS.has(e.pos)) continue;
+    const topic = [...perTopic.entries()].sort((a, b) => b[1] - a[1])[0]![0];
+    const list = byTopic.get(topic) ?? [];
+    list.push({ lemma, display: e.display, meaning: e.meaning, pos: e.pos, ...(e.reading ? { reading: e.reading } : {}), level: levels.get(lemma) ?? 0 });
+    byTopic.set(topic, list);
+  }
+  const packs = [...byTopic.entries()]
+    .filter(([, words]) => words.length >= 8)
+    .map(([topic, words]) => ({
+      topic,
+      label: TOPIC_LABEL[topic] ?? topic,
+      words: words.sort((a, b) => a.level - b.level || a.display.localeCompare(b.display)),
+      coverStory: firstStory.get(topic)!,
+    }))
+    .sort((a, b) => b.words.length - a.words.length);
+  packCache.set(lang, packs);
+  return packs;
 }

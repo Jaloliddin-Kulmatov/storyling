@@ -29,6 +29,11 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   const reading = path.includes("/read/");
   const due = hydrated ? learner.dueWords().length : 0;
   const settingsRef = useRef<HTMLDialogElement>(null);
+  const [{ theme }] = useSettings();
+  useEffect(() => {
+    if (theme === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   // First visit to a language without a level: send the learner to onboarding.
   useEffect(() => {
@@ -116,6 +121,15 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
           <select className="select" value={settings.dailyGoalMinutes} onChange={(e) => set({ dailyGoalMinutes: Number(e.target.value) })}>
             {[5, 10, 15, 20, 30].map((m) => <option key={m} value={m}>{m} minutes a day</option>)}
           </select>
+        </label>
+        <div className="field">
+          Theme
+          <div className="seg" role="group" aria-label="Theme">
+            {(["auto", "light", "dark"] as const).map((t) => <button key={t} aria-pressed={settings.theme === t} onClick={() => set({ theme: t })}>{t === "auto" ? "Auto" : t === "light" ? "Light" : "Dark"}</button>)}
+          </div>
+        </div>
+        <label className="row" style={{ fontWeight: 600 }}>
+          <input type="checkbox" checked={settings.levelUnderline} onChange={(e) => set({ levelUnderline: e.target.checked })} /> Underline words by level
         </label>
         <label className="row" style={{ fontWeight: 600 }}>
           <input type="checkbox" checked={settings.highlightNew} onChange={(e) => set({ highlightNew: e.target.checked })} /> Highlight new and review words

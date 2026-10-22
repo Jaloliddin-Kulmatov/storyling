@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 // Color variables come from the shared tokens package, so web and app stay in sync.
-const THEME = `:root{${cssVars("light")}}@media (prefers-color-scheme: dark){:root{${cssVars("dark")}color-scheme:dark}}`;
+const THEME = `:root{${cssVars("light")}}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${cssVars("dark")}color-scheme:dark}}:root[data-theme="dark"]{${cssVars("dark")}color-scheme:dark}`;
+// Applies a saved light/dark choice before the first paint so the page does not flash.
+const THEME_SCRIPT = `try{var t=JSON.parse(localStorage.getItem("storyling.learner.v2")||"{}").settings.theme;if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export const metadata: Metadata = {
   title: { default: "Storyling", template: "%s · Storyling" },
@@ -25,6 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href={FONTS} />
         <style dangerouslySetInnerHTML={{ __html: THEME }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>{children}</body>
     </html>

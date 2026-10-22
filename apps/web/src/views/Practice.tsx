@@ -10,8 +10,9 @@ import { useLearner, type StoredWord } from "@/lib/learner";
 import { isUserStory, lookupIn, PUNCT, textOf, useStories, type AnyStory } from "@/lib/stories";
 import { highlight, shuffle, useWordInfo } from "@/lib/words";
 import { Icon } from "@/components/ui";
+import { DictationRun } from "@/components/DictationRun";
 
-type Mode = "review" | "match" | "order" | "listen" | "test";
+type Mode = "review" | "match" | "order" | "listen" | "dictation" | "test";
 
 interface PoolWord {
   lemma: string;
@@ -26,6 +27,7 @@ const GAMES: { mode: Mode; title: string; text: string; icon: keyof typeof Icon 
   { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "spark" },
   { mode: "order", title: "Build the sentence", text: "Put the words of a story sentence in order.", icon: "library" },
   { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker" },
+  { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker" },
   { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress" },
 ];
 
@@ -42,6 +44,7 @@ export function Practice({ lang }: { lang: LangCode }) {
   if (mode === "match") return <Shell title="Match words" onBack={back}><Match lang={lang} /></Shell>;
   if (mode === "order") return <Shell title="Build the sentence" onBack={back}><Order lang={lang} /></Shell>;
   if (mode === "listen") return <Shell title="Listening" onBack={back}><Listen lang={lang} /></Shell>;
+  if (mode === "dictation") return <Shell title="Dictation" onBack={back}><DictationGame lang={lang} onBack={back} /></Shell>;
   if (mode === "test") return <Shell title="Level test" onBack={back}><LevelTest lang={lang} /></Shell>;
 
   return (
@@ -494,5 +497,26 @@ function LevelTest({ lang }: { lang: LangCode }) {
         </>
       )}
     </div>
+  );
+}
+
+// ── Dictation ──
+function DictationGame({ lang, onBack }: { lang: LangCode; onBack: () => void }) {
+  const sentences = useSentences(lang);
+  const learner = useLearner(lang);
+  const [game, setGame] = useState(0);
+  const items = useFrozen(() => shuffle(sentences).slice(0, ROUNDS).map((x) => ({ story: x.story, index: x.i })), `dictation-${game}`);
+  if (!items.length) return <div className="empty"><p className="muted">No sentences to practice yet.</p></div>;
+  return (
+    <DictationRun
+      key={game}
+      items={items}
+      rate={learner.level === 0 ? 0.85 : 1}
+      onFinish={(score) => {
+        learner.recordGame("dictation", score);
+        setGame((g) => g + 1);
+        onBack();
+      }}
+    />
   );
 }

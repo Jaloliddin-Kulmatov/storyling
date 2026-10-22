@@ -63,6 +63,8 @@ interface LangProfile {
   favorites: string[];
   /** Best scores in practice games, by game id. */
   games: Record<string, { played: number; best: number }>;
+  /** Stories the learner opened, newest first. */
+  history: { id: string; at: number }[];
 }
 
 export interface Settings {
@@ -71,6 +73,9 @@ export interface Settings {
   showTranslations: boolean;
   rate: number; // audio speed
   dailyGoalMinutes: number;
+  /** Underline each word in the color of the level where it first appears. */
+  levelUnderline: boolean;
+  theme: "auto" | "light" | "dark";
 }
 
 interface Store {
@@ -89,6 +94,8 @@ export const defaultSettings: Settings = {
   showTranslations: false,
   rate: 1,
   dailyGoalMinutes: 10,
+  levelUnderline: true,
+  theme: "auto",
 };
 
 const EMPTY: Store = { profiles: {}, settings: defaultSettings };
@@ -111,6 +118,7 @@ function revive(store: Store): Store {
     profile.quiz ??= { right: 0, total: 0 };
     profile.favorites ??= [];
     profile.games ??= {};
+    profile.history ??= [];
     for (const w of Object.values(profile.words)) {
       if (w.card) {
         w.card.due = new Date(w.card.due);
@@ -235,7 +243,7 @@ export function useLearner(lang: LangCode) {
         lang,
         profiles: {
           ...s.profiles,
-          [lang]: existing ?? { level, words: known ? Object.fromEntries([...new Set([...starterWords(lang), ...known])].map((l) => [l, newUserWord(l, STARTER_P)])) : seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {} },
+          [lang]: existing ?? { level, words: known ? Object.fromEntries([...new Set([...starterWords(lang), ...known])].map((l) => [l, newUserWord(l, STARTER_P)])) : seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {}, history: [] },
         },
       });
     },
@@ -348,6 +356,28 @@ export function useLearner(lang: LangCode) {
     [update],
   );
 
+  /** Remember that a story was opened (moves it to the top of the reading history). */
+  const markOpened = useCallback(
+    (id: string) =>
+      update((p) => ({ ...p, history: [{ id, at: Date.now() }, ...p.history.filter((h) => h.id !== id)].slice(0, 100) })),
+    [update],
+  );
+
+  /** Save several words for review at once (word packs). */
+  const addWords = useCallback(
+    (lemmas: string[], source?: StoredWord["source"]) =>
+      update((p) => {
+        const words = { ...p.words };
+        for (const lemma of lemmas) {
+          const w: StoredWord = words[lemma] ?? newUserWord(lemma, UNSEEN_P);
+          if (w.saved === "learning" || displayState(w) === "known") continue;
+          words[lemma] = { ...w, saved: "learning", card: w.card ?? newCard(), source: w.source ?? source };
+        }
+        return { ...p, words };
+      }),
+    [update],
+  );
+
   const toggleFavorite = useCallback(
     (id: string) =>
       update((p) => ({ ...p, favorites: p.favorites.includes(id) ? p.favorites.filter((f) => f !== id) : [id, ...p.favorites] })),
@@ -384,6 +414,7 @@ export function useLearner(lang: LangCode) {
     log: profile?.log ?? {},
     quiz: profile?.quiz ?? { right: 0, total: 0 },
     favorites: profile?.favorites ?? [],
+    history: profile?.history ?? [],
     games: profile?.games ?? {},
     knownCount: words.filter((w) => displayState(w) === "known").length,
     learningCount: words.filter((w) => w.saved === "learning").length,
@@ -401,6 +432,8 @@ export function useLearner(lang: LangCode) {
     dueWords,
     grade,
     toggleFavorite,
+    markOpened,
+    addWords,
     recordGame,
     addStory,
     removeStory,
@@ -409,3 +442,4 @@ export function useLearner(lang: LangCode) {
 }
 export * from "./library";
 export * from "./placement";
+export * from "./dictation";

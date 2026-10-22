@@ -15,7 +15,7 @@ export interface PlacementWord {
 }
 
 const PER_LEVEL = 6;
-const SKIP_POS = new Set(["name", "article", "pronoun", "preposition", "conjunction", "determiner", "particle", "contraction", "interjection", "number", "copula", "suffix", "measure word", "counter"]);
+export const FUNCTION_POS = new Set(["name", "article", "pronoun", "preposition", "conjunction", "determiner", "particle", "contraction", "interjection", "number", "copula", "suffix", "measure word", "counter"]);
 
 /** Every word with the easiest level it appears at, from catalog stories only. */
 export function wordLevels(lang: LangCode): Map<string, number> {
@@ -40,7 +40,7 @@ export function placementWords(lang: LangCode, rand: () => number = Math.random)
   const byLevel: PlacementWord[][] = levels.map(() => []);
   for (const [lemma, level] of wordLevels(lang)) {
     const e = lookup(lang, lemma);
-    if (!e || SKIP_POS.has(e.pos)) continue;
+    if (!e || FUNCTION_POS.has(e.pos)) continue;
     byLevel[level]!.push({ lemma, display: e.display, reading: e.reading, level });
   }
   return byLevel.flatMap((list) => {
