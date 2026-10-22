@@ -4,7 +4,8 @@ import { language, languages, storiesFor } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { placementResult, placementWords, type PlacementWord } from "@storyling/learner";
 import { useHydrated, useLearner, type Level } from "@/lib/learner";
 import { Logo } from "@/components/ui";
 
@@ -71,9 +72,24 @@ function LevelStep({ lang, level, setLevel, onBack }: { lang: LangCode; level: L
   const hydrated = useHydrated();
   const router = useRouter();
 
+  const [testing, setTesting] = useState(false);
+
   function go() {
     learner.start(level);
     router.push(`/${lang}`);
+  }
+
+  if (testing) {
+    return (
+      <WordTest
+        lang={lang}
+        onBack={() => setTesting(false)}
+        onDone={(r) => {
+          learner.start(r.level, r.known);
+          router.push(`/${lang}`);
+        }}
+      />
+    );
   }
 
   if (hydrated && learner.started) {
@@ -103,9 +119,43 @@ function LevelStep({ lang, level, setLevel, onBack }: { lang: LangCode; level: L
           </button>
         ))}
       </div>
+      <button className="box" onClick={() => setTesting(true)} style={{ textAlign: "left", border: "1.5px dashed var(--primary)", background: "var(--primary-soft)", cursor: "pointer" }}>
+        <b>Not sure? Take the 1-minute word test</b>
+        <span className="muted small" style={{ display: "block" }}>Tick the words you know. We use your answers to pick stories that fit you.</span>
+      </button>
       <div className="spread">
         <button className="btn ghost" onClick={onBack}>Back</button>
         <button className="btn primary" onClick={go}>Start reading</button>
+      </div>
+    </div>
+  );
+}
+
+/** A yes/no word test: the learner ticks the words they know. */
+function WordTest({ lang, onBack, onDone }: { lang: LangCode; onBack: () => void; onDone: (r: ReturnType<typeof placementResult>) => void }) {
+  const meta = language(lang);
+  const sample = useMemo<PlacementWord[]>(() => placementWords(lang), [lang]);
+  const [ticked, setTicked] = useState<Set<string>>(() => new Set());
+  const toggle = (l: string) => setTicked((t) => { const n = new Set(t); if (n.has(l)) n.delete(l); else n.add(l); return n; });
+
+  return (
+    <div className="stack">
+      <div>
+        <h1 style={{ fontSize: "clamp(26px, 4.5vw, 36px)", fontWeight: 800 }}>Which {meta.name} words do you know?</h1>
+        <p className="muted" style={{ fontSize: 16, marginTop: 8 }}>Tap every word whose meaning you know. Skip the ones you are not sure about.</p>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {sample.map((w) => (
+          <button key={w.lemma} className="chip" lang={lang} aria-pressed={ticked.has(w.lemma)} onClick={() => toggle(w.lemma)} style={{ fontSize: 19, padding: "8px 14px", fontFamily: "var(--f-read)" }}>
+            {w.display}
+          </button>
+        ))}
+      </div>
+      <div className="spread">
+        <button className="btn ghost" onClick={onBack}>Back</button>
+        <button className="btn primary" onClick={() => onDone(placementResult(lang, sample, ticked))}>
+          {ticked.size ? `Done, I know ${ticked.size}` : "I know none of these"}
+        </button>
       </div>
     </div>
   );

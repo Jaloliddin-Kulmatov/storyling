@@ -26,7 +26,7 @@ export const FIT_LABEL: Record<Fit, string> = {
   easy: "Easy",
   just_right: "Just right",
   stretch: "Stretch",
-  too_hard: "Too hard",
+  too_hard: "Challenging",
 };
 
 const counts = (t: Token): t is Token & { lemma: string } => !!t.lemma && !t.isName;

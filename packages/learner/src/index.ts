@@ -227,7 +227,7 @@ export function useLearner(lang: LangCode) {
   );
 
   const start = useCallback(
-    (level: Level) => {
+    (level: Level, known?: string[]) => {
       const s = read();
       const existing = s.profiles[lang];
       write({
@@ -235,7 +235,7 @@ export function useLearner(lang: LangCode) {
         lang,
         profiles: {
           ...s.profiles,
-          [lang]: existing ?? { level, words: seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {} },
+          [lang]: existing ?? { level, words: known ? Object.fromEntries([...new Set([...starterWords(lang), ...known])].map((l) => [l, newUserWord(l, STARTER_P)])) : seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {} },
         },
       });
     },
@@ -408,3 +408,4 @@ export function useLearner(lang: LangCode) {
   };
 }
 export * from "./library";
+export * from "./placement";
