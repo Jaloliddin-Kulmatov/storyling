@@ -78,3 +78,39 @@ export function playWord(lang: LangCode, lemma: string): Promise<boolean> {
 export function hasStoryAudio(storyId: string): boolean {
   return !!audio.stories[storyId];
 }
+
+// ── speech for texts without a recording ──
+import * as Speech from "expo-speech";
+import { language } from "@storyling/content";
+
+export function speak(text: string, lang: LangCode, rate = 1): Promise<boolean> {
+  stopAudio();
+  Speech.stop();
+  const mine = token;
+  return new Promise((resolve) => {
+    Speech.speak(text, {
+      language: language(lang).tts,
+      rate,
+      onDone: () => resolve(mine === token),
+      onStopped: () => resolve(false),
+      onError: () => resolve(false),
+    });
+  });
+}
+
+/** A sentence: the recording when there is one, otherwise the device voice. */
+export async function playSentenceAny(storyId: string, lang: LangCode, index: number, text: string, rate = 1): Promise<boolean> {
+  if (hasStoryAudio(storyId)) return playSentence(storyId, index, rate);
+  return speak(text, lang, rate);
+}
+
+/** A word: the recorded clip when there is one, otherwise the device voice. */
+export async function playWordAny(lang: LangCode, lemma: string, surface: string): Promise<boolean> {
+  if (audio.words[lang]?.w[lemma]) return playWord(lang, lemma);
+  return speak(surface, lang);
+}
+
+export function stopAll() {
+  stopAudio();
+  Speech.stop();
+}

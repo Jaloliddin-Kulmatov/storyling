@@ -1,46 +1,12 @@
 "use client";
 
-import { language, lookup, sentenceText, storiesFor, type CatalogStory, type DictEntry } from "@storyling/content";
+import { language } from "@storyling/content";
 import type { LangCode, Sentence } from "@storyling/core";
 import type { UserStory } from "@storyling/learner";
-import { useMemo } from "react";
 import type { PreparedText } from "@/server/ai";
-import { useLearner } from "./learner";
 
-export type AnyStory = CatalogStory | UserStory;
-
-export const isUserStory = (s: AnyStory): s is UserStory => "origin" in s;
-export const PUNCT = /^[\p{P}\p{S}]+$/u;
-
-/** Catalog stories plus the learner's own texts, newest own texts first. */
-export function useStories(lang: LangCode): AnyStory[] {
-  const { stories } = useLearner(lang);
-  return useMemo(() => [...stories, ...storiesFor(lang)], [stories, lang]);
-}
-
-export function useStory(lang: LangCode, id: string): AnyStory | undefined {
-  const all = useStories(lang);
-  return all.find((s) => s.id === id);
-}
-
-/** Meaning of a lemma: the story's own glossary first, then the shared dictionary. */
-export function lookupIn(story: AnyStory, lemma: string): DictEntry | undefined {
-  if (isUserStory(story)) {
-    const e = story.dict[lemma];
-    if (e) return { lemma, display: lemma, pos: e[0], meaning: e[1], ...(e[2] ? { reading: e[2] } : {}) };
-  }
-  return lookup(story.lang, lemma);
-}
-
-export function textOf(story: AnyStory, sentence: Sentence): string {
-  return sentenceText(story.lang, sentence);
-}
-
-export const TOPIC_LABEL: Record<string, string> = {
-  daily: "Daily life", food: "Food", work: "Work", weather: "Weather", animals: "Animals",
-  travel: "Travel", city: "City", home: "Home", history: "History", people: "People",
-  nature: "Nature", science: "Science", culture: "Culture", mine: "My texts",
-};
+export { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, topicOf, useStories, useStory, type AnyStory } from "@storyling/learner";
+import { PUNCT } from "@storyling/learner";
 
 const minutesFor = (words: number) => Math.max(1, Math.round(words / 80));
 

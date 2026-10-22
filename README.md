@@ -23,20 +23,22 @@ Learn languages by reading stories you can almost understand. Web, iOS and Andro
 
    Then open <http://localhost:3000>.
 
-4. Run the phone app (install the Expo Go app on your phone first, or Xcode for the iOS Simulator):
+4. Run the phone app (Expo, iOS and Android):
 
    ```bash
-   cd apps/mobile && npx expo install --fix && npx expo start
+   cd apps/mobile && npx expo run:ios
    ```
 
-   `expo install --fix` aligns the Expo package versions with the installed SDK.
+   This builds the app into the iOS Simulator (needs Xcode, opened once to finish setup). For a quick look in a browser instead, run `corepack pnpm --filter @storyling/mobile web`.
+
+   The app has the same features as the website: Home feed by level, reader with tap-to-translate, audio and quick check, Notebook, Watch (YouTube videos for learners), Practice games and Me (progress and settings). Progress is stored on the phone.
 
 ## Layout
 
 ```
 apps/
   web/            Next.js web app (deploys to Vercel)
-  mobile/         Expo app for iOS and Android: same screens, bottom-sheet word lookup, bundled audio
+  mobile/         Expo app for iOS and Android: tabs for Home, Notebook, Watch, Practice and Me
 packages/
   core/           learning engine: word model, coverage/fit, placement, FSRS review, recommender
   content/        seed stories, dictionary and recorded audio timings for 10 languages

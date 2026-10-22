@@ -148,3 +148,5 @@ export function coverOf(id: string): string | undefined {
   const slug = COVER_ALIAS[id] ?? id.slice(id.indexOf("-") + 1);
   return coverCredits[slug] ? `/covers/${slug}.jpg` : undefined;
 }
+
+export * from "./videos";
