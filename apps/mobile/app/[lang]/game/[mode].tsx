@@ -7,7 +7,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { playSentenceAny, playWordAny, stopAll } from "../../../src/audio";
 import { READ_FONT, useTheme } from "../../../src/theme";
-import { Button, Icon } from "../../../src/ui";
+import { Button, Icon, Tx } from "../../../src/ui";
 
 const TITLES: Record<string, string> = { review: "Flashcards", match: "Match words", order: "Build the sentence", listen: "Listening", test: "Level test" };
 const ROUNDS = 5;
@@ -59,7 +59,7 @@ function Choice({ label, state, onPress, disabled, lang }: { label: string; stat
   return (
     <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button"
       style={{ borderWidth: 2, borderRadius: 14, padding: 13, borderColor: state === "ok" ? t.primary : state === "no" ? t.danger : t.line, backgroundColor: state === "ok" ? t.primarySoft : state === "no" ? t.dangerSoft : t.surface }}>
-      <Text style={{ color: t.ink, fontWeight: "600", fontSize: 15, fontFamily: lang ? READ_FONT : undefined }}>{label}</Text>
+      {lang ? <Text style={{ color: t.ink, fontWeight: "600", fontSize: 15, fontFamily: READ_FONT }}>{label}</Text> : <Tx style={{ color: t.ink, fontWeight: "600", fontSize: 15 }}>{label}</Tx>}
     </Pressable>
   );
 }
@@ -174,8 +174,8 @@ function Review({ lang }: { lang: LangCode }) {
         <>
           <View style={{ alignItems: "center", gap: 2 }}>
             {!!meaning?.reading && <Text style={{ color: t.muted }}>{meaning.reading}</Text>}
-            <Text style={{ color: t.ink, fontSize: 22, fontWeight: "800" }}>{meaning?.meaning ?? "—"}</Text>
-            {!!ctx?.translation && <Text style={{ color: t.muted, textAlign: "center", marginTop: 6 }}>{ctx.translation}</Text>}
+            <Tx style={{ color: t.ink, fontSize: 22, fontWeight: "800" }}>{meaning?.meaning ?? "—"}</Tx>
+            {!!ctx?.translation && <Tx style={{ color: t.muted, textAlign: "center", marginTop: 6 }}>{ctx.translation}</Tx>}
           </View>
           <View style={{ flexDirection: "row", gap: 6 }}>
             {GRADES.map(({ g, label, kind }) => (
@@ -241,7 +241,7 @@ function Match({ lang }: { lang: LangCode }) {
                 if (picked === p.lemma) { setSolved((s) => new Set(s).add(p.lemma)); setPicked(null); }
                 else { setMistakes((m) => m + 1); setWrong(p.lemma); setTimeout(() => setWrong(null), 500); }
               }}>
-              <Text style={{ color: t.ink, fontSize: 13.5, fontWeight: "600", textAlign: "center" }}>{p.meaning}</Text>
+              <Tx style={{ color: t.ink, fontSize: 13.5, fontWeight: "600", textAlign: "center" }}>{p.meaning}</Tx>
             </Pressable>
           ))}
         </View>
@@ -276,7 +276,7 @@ function Order({ lang }: { lang: LangCode }) {
   return (
     <Card>
       <Text style={{ color: t.muted, fontSize: 12.5 }}>Sentence {n + 1} of {rounds.length}</Text>
-      {!!cur.s.translation && <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>{cur.s.translation}</Text>}
+      {!!cur.s.translation && <Tx style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>{cur.s.translation}</Tx>}
       <View style={{ minHeight: 64, borderWidth: 2, borderStyle: "dashed", borderRadius: 14, padding: 8, flexDirection: "row", flexWrap: "wrap", gap: 6,
         borderColor: checked === true ? t.primary : checked === false ? t.danger : t.line, backgroundColor: checked === true ? t.primarySoft : checked === false ? t.dangerSoft : "transparent" }}>
         {built.map((i, k) => (
@@ -351,7 +351,7 @@ function Listen({ lang }: { lang: LangCode }) {
       })}
       {chosen !== null && (
         <>
-          {!!cur.s.translation && <Text style={{ color: t.muted }}>{cur.s.translation}</Text>}
+          {!!cur.s.translation && <Tx style={{ color: t.muted }}>{cur.s.translation}</Tx>}
           <Button kind="primary" label={n + 1 >= rounds.length ? "See result" : "Next"} onPress={() => {
             if (n + 1 >= rounds.length) learner.recordGame("listen", Math.round((score / rounds.length) * 100));
             setN(n + 1); setChosen(null);

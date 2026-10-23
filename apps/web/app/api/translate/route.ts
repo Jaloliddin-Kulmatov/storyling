@@ -9,6 +9,10 @@ const keyOf = (target: string, src: string) => `${target}:${createHash("sha1").u
  * Translate short English texts (sentence translations, word meanings) into the learner's language.
  * Results are shared through the database when there is one, so each text is translated once for everyone.
  */
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
+
+export const OPTIONS = () => new NextResponse(null, { status: 204, headers: CORS });
+
 export async function POST(req: NextRequest) {
   try {
     const b = (await req.json().catch(() => ({}))) as { target?: unknown; texts?: unknown };
@@ -39,9 +43,9 @@ export async function POST(req: NextRequest) {
         await Promise.all(miss.map((i, j) => sql`INSERT INTO translations (key, target, src, out) VALUES (${keyOf(target, src[i]!)}, ${target}, ${src[i]!}, ${done[j]!}) ON CONFLICT (key) DO NOTHING`));
       }
     }
-    return NextResponse.json({ texts: out });
+    return NextResponse.json({ texts: out }, { headers: CORS });
   } catch (e) {
     const err = e instanceof AiError ? e : new AiError("Translation failed.", 500);
-    return NextResponse.json({ error: err.message }, { status: err.status });
+    return NextResponse.json({ error: err.message }, { status: err.status, headers: CORS });
   }
 }

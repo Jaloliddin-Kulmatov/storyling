@@ -7,7 +7,7 @@ import { FlatList, Pressable, ScrollView, Text, TextInput, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { playWordAny } from "../../../src/audio";
 import { READ_FONT, useTheme } from "../../../src/theme";
-import { Button, Chip, Cover, Empty, Icon, LevelPill, Tabs, topicLabel } from "../../../src/ui";
+import { Button, Chip, Cover, Empty, Icon, LevelPill, Tabs, topicLabel, Tx } from "../../../src/ui";
 
 type Tab = "words" | "saved" | "texts";
 type Filter = "learning" | "known" | "ignored";
@@ -118,7 +118,7 @@ export default function Notebook() {
                 <Pressable onPress={() => playWordAny(lang, w.lemma, e?.display ?? w.lemma)} hitSlop={8} accessibilityLabel="Hear the word"><Icon name="volume-high" /></Pressable>
               </View>
               {!!e?.reading && <Text style={{ color: t.muted }}>{e.reading}</Text>}
-              <Text style={{ color: t.ink, fontWeight: "600" }}>{e?.meaning ?? "No meaning saved"}{e?.pos ? <Text style={{ color: t.muted, fontWeight: "400" }}>  · {e.pos}</Text> : null}</Text>
+              <Text style={{ color: t.ink, fontWeight: "600" }}>{e?.meaning ? <Tx>{e.meaning}</Tx> : "No meaning saved"}{e?.pos ? <Text style={{ color: t.muted, fontWeight: "400" }}>  · {e.pos}</Text> : null}</Text>
               {ctx && <Text style={{ color: t.inkSoft, fontFamily: READ_FONT, borderLeftWidth: 3, borderColor: t.learningSoft, paddingLeft: 8 }}>{ctx.text}</Text>}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
                 <Text style={{ color: t.muted, fontSize: 12 }}>Seen {w.encounters}×</Text>

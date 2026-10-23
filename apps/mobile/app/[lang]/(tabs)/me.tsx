@@ -1,6 +1,6 @@
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
-import { today, useLearner, useSettings, useStories } from "@storyling/learner";
+import { today, TRANSLATE_TARGETS, useLearner, useSettings, useStories } from "@storyling/learner";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
@@ -78,6 +78,10 @@ export default function Me() {
           <Text style={{ color: t.ink, fontSize: 15, marginTop: 8 }}>Text size</Text>
           <View style={{ flexDirection: "row", gap: 8 }}>
             {[0.9, 1, 1.15, 1.3].map((s) => <Chip key={s} label={s === 1 ? "Normal" : s < 1 ? "Small" : s < 1.2 ? "Large" : "Larger"} on={Math.abs(settings.fontScale - s) < 0.03} onPress={() => set({ fontScale: s })} />)}
+          </View>
+          <Text style={{ color: t.ink, fontSize: 15, marginTop: 8 }}>Translations and meanings in</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {TRANSLATE_TARGETS.map((x) => <Chip key={x.code} label={x.name} on={settings.translateTo === x.code} onPress={() => set({ translateTo: x.code })} />)}
           </View>
           {row("Highlight new and review words", settings.highlightNew, (v) => set({ highlightNew: v }))}
           {row("Show all translations", settings.showTranslations, (v) => set({ showTranslations: v }))}

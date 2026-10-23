@@ -8,6 +8,7 @@ import { useLearner } from "@/lib/learner";
 import { highlight, shuffle } from "@/lib/words";
 import { isUserStory, textOf, useStories } from "@/lib/stories";
 import { Icon } from "@/components/ui";
+import { Tr } from "@/lib/translate";
 
 type Section = "Listening" | "Reading" | "Vocabulary" | "Grammar";
 interface Q {
@@ -19,6 +20,8 @@ interface Q {
   options: string[];
   answer: string;
   note?: string;
+  /** Grammar fallback: the English meaning the learner must match to a sentence. */
+  means?: string;
 }
 
 const PER_SECTION = 5;
@@ -114,7 +117,7 @@ function build(lang: LangCode, level: string, stories: ReturnType<typeof useStor
   else
     for (const x of shuffle(sents.filter((y) => y.s.translation)).slice(0, PER_SECTION)) {
       const others = shuffle(sents.filter((y) => y.text !== x.text)).slice(0, 2).map((y) => y.text);
-      out.push({ section: "Grammar", prompt: `Which sentence means: "${x.s.translation}"?`, options: shuffle([x.text, ...others]), answer: x.text });
+      out.push({ section: "Grammar", prompt: "Which sentence means:", means: x.s.translation, options: shuffle([x.text, ...others]), answer: x.text });
     }
   return out;
 }
@@ -173,7 +176,7 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
             <summary>Review answers</summary>
             {qs.map((x, i) => (
               <p key={i} className="small" lang={lang} style={{ margin: "8px 0" }}>
-                <b>{i + 1}.</b> {x.section === "Listening" ? x.answer : x.prompt} — {answers[i] === x.answer ? "✓" : <span>✗ <b>{x.answer}</b></span>}{x.note ? <span className="muted"> · {x.note}</span> : null}
+                <b>{i + 1}.</b> {x.section === "Listening" ? x.answer : x.prompt} — {answers[i] === x.answer ? "✓" : <span>✗ <b>{x.answer}</b></span>}{x.note ? <span className="muted"> · <Tr>{x.note}</Tr></span> : null}
               </p>
             ))}
           </details>
@@ -203,10 +206,10 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
             <button className="icon-btn play big" aria-label="Play again" onClick={() => playSentence(q2.say!.storyId, lang, q2.say!.index, q2.say!.text, 1)}>{Icon.play}</button>
           </div>
         ) : null}
-        <div lang={q2.section === "Vocabulary" || q2.section === "Reading" || q2.section === "Grammar" ? lang : undefined} style={{ fontFamily: "var(--f-read)", fontSize: q2.section === "Vocabulary" ? 34 : 21, lineHeight: 1.5 }}>{q2.prompt}</div>
+        <div lang={q2.section === "Vocabulary" || q2.section === "Reading" || q2.section === "Grammar" ? lang : undefined} style={{ fontFamily: "var(--f-read)", fontSize: q2.section === "Vocabulary" ? 34 : 21, lineHeight: 1.5 }}>{q2.section === "Grammar" && q2.means ? <>{q2.prompt} “<Tr>{q2.means}</Tr>”</> : q2.prompt}</div>
         <div className="choices">
           {q2.options.map((o) => (
-            <button key={o} lang={q2.section === "Vocabulary" ? undefined : lang} className={`choice${answers[n] === o ? " ok" : ""}`} onClick={() => setAnswers((a) => a.map((v, i) => (i === n ? o : v)))}>{o}</button>
+            <button key={o} lang={q2.section === "Vocabulary" ? undefined : lang} className={`choice${answers[n] === o ? " ok" : ""}`} onClick={() => setAnswers((a) => a.map((v, i) => (i === n ? o : v)))}>{q2.section === "Vocabulary" ? <Tr>{o}</Tr> : o}</button>
           ))}
         </div>
         <div className="spread">

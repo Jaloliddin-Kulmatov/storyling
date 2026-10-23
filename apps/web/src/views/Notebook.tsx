@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr } from "@/lib/translate";
 import { displayState, type LangCode } from "@storyling/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -89,7 +90,7 @@ export function Notebook({ lang }: { lang: LangCode }) {
                       <button className="icon-btn" aria-label={`Hear ${w.lemma}`} onClick={() => playWord(lang, w.lemma, e?.display ?? w.lemma)}>{Icon.speaker}</button>
                     </div>
                     {e?.reading && <span className="reading">{e.reading}</span>}
-                    <span className="g">{e?.meaning ?? "No meaning saved"}</span>
+                    <span className="g">{e?.meaning ? <Tr>{e.meaning}</Tr> : "No meaning saved"}</span>
                     {ctx && <Link href={`/${lang}/read/${ctx.story.id}`} className="ex" lang={lang}>{ctx.text}</Link>}
                     <div className="spread small">
                       <span className="muted">

@@ -7,7 +7,7 @@ import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { playWordAny } from "../../src/audio";
 import { READ_FONT, useTheme } from "../../src/theme";
-import { Icon } from "../../src/ui";
+import { Icon, Tx } from "../../src/ui";
 
 /** Dictionary: search every word in the language or its English meaning. */
 export default function Dictionary() {
@@ -53,7 +53,7 @@ export default function Dictionary() {
             <View style={{ marginHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: t.line, flexDirection: "row", gap: 10 }}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={{ color: t.ink, fontFamily: READ_FONT, fontSize: 20 }}>{e.display} {!!e.reading && <Text style={{ color: t.muted, fontSize: 13 }}>{e.reading}</Text>}</Text>
-                <Text style={{ color: t.ink }}>{e.meaning} <Text style={{ color: t.muted }}>· {e.pos}</Text></Text>
+                <Text style={{ color: t.ink }}><Tx>{e.meaning}</Tx> <Text style={{ color: t.muted }}>· {e.pos}</Text></Text>
                 {ex && (
                   <Pressable onPress={() => router.push(`/${lang}/read/${ex.story.id}`)}>
                     <Text style={{ color: t.muted, fontFamily: READ_FONT }} numberOfLines={1}>{ex.text}</Text>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr } from "@/lib/translate";
 import { language } from "@storyling/content";
 import { previewIntervals, type LangCode, type ReviewGrade, type Sentence } from "@storyling/core";
 import Link from "next/link";
@@ -235,9 +236,9 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
         <>
           <div>
             {meaning?.reading && <div className="reading">{meaning.reading}</div>}
-            <div style={{ fontSize: 22, fontWeight: 700 }}>{meaning?.meaning ?? "—"}</div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{meaning?.meaning ? <Tr>{meaning.meaning}</Tr> : "—"}</div>
             {meaning?.pos && <div className="muted small">{meaning.pos}</div>}
-            {ctx?.translation && <p className="muted" style={{ margin: "8px 0 0" }}>{ctx.translation}</p>}
+            {ctx?.translation && <p className="muted" style={{ margin: "8px 0 0" }}><Tr>{ctx.translation}</Tr></p>}
           </div>
           <div className="grades">
             {GRADES.map(({ g, label, cls }) => (
@@ -302,7 +303,7 @@ function Match({ lang }: { lang: LangCode }) {
         </div>
         <div className="col">
           {right.map((p) => (
-            <button key={p.lemma} className={`tile en${solved.has(p.lemma) ? " solved" : ""}${wrong === p.lemma ? " wrong" : ""}`} disabled={solved.has(p.lemma) || !picked} onClick={() => choose(p.lemma)}>{p.meaning}</button>
+            <button key={p.lemma} className={`tile en${solved.has(p.lemma) ? " solved" : ""}${wrong === p.lemma ? " wrong" : ""}`} disabled={solved.has(p.lemma) || !picked} onClick={() => choose(p.lemma)}><Tr>{p.meaning}</Tr></button>
           ))}
         </div>
       </div>
@@ -352,7 +353,7 @@ function Order({ lang }: { lang: LangCode }) {
   return (
     <div className="flash" style={{ textAlign: "left" }}>
       <div className="spread small muted"><span>Sentence {n + 1} of {rounds.length}</span><span>{cur.story.title}</span></div>
-      {cur.s.translation && <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{cur.s.translation}</p>}
+      {cur.s.translation && <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}><Tr>{cur.s.translation}</Tr></p>}
       <div className={`build${checked === true ? " ok" : checked === false ? " no" : ""}`} lang={lang}>
         {built.map((i, k) => (
           <button key={k} className="tile sm" disabled={checked !== null} onClick={() => setBuilt(built.filter((_, j) => j !== k))}>{words[i]!.surface}</button>
@@ -421,7 +422,7 @@ function Listen({ lang }: { lang: LangCode }) {
       </div>
       {chosen !== null && (
         <>
-          {cur.s.translation && <p className="muted" style={{ margin: 0 }}>{cur.s.translation}</p>}
+          {cur.s.translation && <p className="muted" style={{ margin: 0 }}><Tr>{cur.s.translation}</Tr></p>}
           <button className="btn primary block" onClick={() => {
             if (n + 1 >= rounds.length) learner.recordGame("listen", Math.round((score / rounds.length) * 100));
             setN(n + 1);
@@ -495,7 +496,7 @@ function LevelTest({ lang }: { lang: LangCode }) {
               setChosen(o);
               if (o === q.p.meaning) setScore((s) => s + 1);
               else learner.setWord(q.p.lemma, "learning", { storyId: q.p.story.id, sentence: q.p.sentence });
-            }}>{o}</button>
+            }}><Tr>{o}</Tr></button>
         ))}
       </div>
       {chosen !== null && (

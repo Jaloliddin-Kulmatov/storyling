@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr } from "@/lib/translate";
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import { wordPacks } from "@storyling/learner";
@@ -70,7 +71,7 @@ export function Packs({ lang }: { lang: LangCode }) {
                           <span style={{ minWidth: 0 }}>
                             <span className="l" lang={lang}>{w.display}</span> {w.reading && <span className="reading">{w.reading}</span>}{" "}
                             <span className="pill" style={{ color: `var(--lv${Math.min(w.level, 4)})` }}>{meta.levels[w.level]}</span>
-                            <span className="g" style={{ display: "block" }}>{w.meaning}</span>
+                            <span className="g" style={{ display: "block" }}><Tr>{w.meaning}</Tr></span>
                           </span>
                           <span className="row">
                             <button className="icon-btn" aria-label={`Hear ${w.display}`} onClick={() => playWord(lang, w.lemma, w.display)}>{Icon.speaker}</button>

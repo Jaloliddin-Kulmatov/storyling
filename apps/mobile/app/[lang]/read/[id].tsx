@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
-import { isUserStory, lookupIn, PUNCT, shuffle, textOf, useLearner, useRankedStories, useSettings, useStory, type AnyStory } from "@storyling/learner";
+import { isUserStory, lookupIn, PUNCT, shuffle, textOf, useLearner, useRankedStories, useSettings, useStory, useTranslated, type AnyStory } from "@storyling/learner";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { hasStoryAudio, playSentenceAny, playWordAny, stopAll } from "../../../src/audio";
 import { READ_FONT, reading, useTheme } from "../../../src/theme";
-import { Button, Cover, Icon, LevelPill, topicLabel } from "../../../src/ui";
+import { Button, Cover, Icon, LevelPill, topicLabel, Tx } from "../../../src/ui";
 
 const RATES = [0.75, 1, 1.25];
 const READING_TOPICS = new Set(["history", "people", "nature", "science", "culture"]);
@@ -43,6 +43,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const router = useRouter();
   const learner = useLearner(lang);
   const [settings, setSettings] = useSettings();
+  const trs = useTranslated(story.sentences.map((x) => x.translation));
   const [picked, setPicked] = useState<Picked | null>(null);
   const [shown, setShown] = useState<Set<number>>(() => new Set());
   const [playing, setPlaying] = useState<number | null>(null);
@@ -157,7 +158,7 @@ function StoryReader({ story }: { story: AnyStory }) {
                   )}
                 </Text>
                 {!!s.translation && (settings.showTranslations || shown.has(i)) && (
-                  <Text style={{ color: t.muted, fontSize: 14.5, borderLeftWidth: 3, borderColor: t.primarySoft, paddingLeft: 8, marginBottom: 4 }}>{s.translation}</Text>
+                  <Text style={{ color: t.muted, fontSize: 14.5, borderLeftWidth: 3, borderColor: t.primarySoft, paddingLeft: 8, marginBottom: 4 }}>{trs.texts[i]}</Text>
                 )}
               </View>
             ))}
@@ -233,7 +234,7 @@ function WordSheet({ story, picked, onClose, bottom }: { story: AnyStory; picked
         </Pressable>
       </View>
       {!!entry?.reading && <Text style={{ color: t.muted }}>{entry.reading}</Text>}
-      <Text style={{ color: t.ink, fontSize: 18, fontWeight: "600" }}>{entry?.meaning ?? "No meaning in the dictionary yet."}</Text>
+      <Tx style={{ color: t.ink, fontSize: 18, fontWeight: "600" }}>{entry?.meaning ?? "No meaning in the dictionary yet."}</Tx>
       {picked.surface !== (entry?.display ?? picked.lemma) && <Text style={{ color: t.muted, fontSize: 13 }}>In the text: {picked.surface}</Text>}
       <View style={{ flexDirection: "row", gap: 3 }}>
         {Array.from({ length: 10 }, (_, i) => <View key={i} style={{ flex: 1, height: 5, borderRadius: 9, backgroundColor: i < seen ? t.newWord : t.surface2 }} />)}
@@ -244,7 +245,7 @@ function WordSheet({ story, picked, onClose, bottom }: { story: AnyStory; picked
         {btn("Known", state === "known", t.primary, () => learner.setWord(picked.lemma, "known"))}
         {btn("Ignore", state === "ignored", t.muted, () => learner.setWord(picked.lemma, state === "ignored" ? undefined : "ignored"))}
       </View>
-      {!!sentence?.translation && <Text style={{ color: t.inkSoft, backgroundColor: t.surface2, borderRadius: 10, padding: 10 }}>{sentence.translation}</Text>}
+      {!!sentence?.translation && <Tx style={{ color: t.inkSoft, backgroundColor: t.surface2, borderRadius: 10, padding: 10 }}>{sentence.translation}</Tx>}
     </View>
   );
 }
@@ -345,7 +346,7 @@ function Finish({ story, tapped }: { story: AnyStory; tapped: Set<string> }) {
               else learner.setWord(q.lemma, "learning", { storyId: story.id, sentence: q.sentence });
             }}
             style={{ borderWidth: 2, borderRadius: 12, padding: 12, borderColor: ok ? t.primary : no ? t.danger : t.line, backgroundColor: ok ? t.primarySoft : no ? t.dangerSoft : t.surface }}>
-            <Text style={{ color: t.ink, fontWeight: "600" }}>{o}</Text>
+            <Tx style={{ color: t.ink, fontWeight: "600" }}>{o}</Tx>
           </Pressable>
         );
       })}

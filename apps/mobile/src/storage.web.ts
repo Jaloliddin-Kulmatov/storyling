@@ -1,7 +1,7 @@
-import { configureStorage } from "@storyling/learner";
+import { configureStorage, configureTranslation, type KeyValueStorage } from "@storyling/learner";
 
 // In a browser (Expo web preview), learner state lives in localStorage.
-configureStorage({
+const kv: KeyValueStorage = {
   getItem: (key) => {
     try {
       return window.localStorage.getItem(key);
@@ -16,4 +16,8 @@ configureStorage({
       // storage unavailable (private mode); progress lasts for this visit only
     }
   },
-});
+};
+configureStorage(kv);
+
+const api = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "");
+configureTranslation({ storage: kv, ...(api ? { endpoint: `${api}/api/translate` } : {}) });

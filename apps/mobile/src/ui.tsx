@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { coverOf } from "@storyling/content";
 import { FIT_LABEL, type Coverage } from "@storyling/core";
-import { isUserStory, TOPIC_LABEL, topicOf, type AnyStory } from "@storyling/learner";
+import { isUserStory, TOPIC_LABEL, topicOf, useTranslated, type AnyStory } from "@storyling/learner";
 import type { ReactNode } from "react";
-import { Image, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View, type StyleProp, type TextProps, type ViewStyle } from "react-native";
 import { coverAssets } from "./coverAssets";
 import { READ_FONT, useTheme, type Theme } from "./theme";
 
@@ -151,3 +151,9 @@ export const styles = {
   }),
   card: (t: Theme): ViewStyle => ({ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1, borderRadius: 18, padding: 16 }),
 };
+
+/** A <Text> of English content (a meaning or a sentence translation) shown in the learner's chosen language. */
+export function Tx({ children, ...rest }: Omit<TextProps, "children"> & { children?: string }) {
+  const t = useTranslated([children]);
+  return <Text {...rest}>{t.texts[0]}</Text>;
+}

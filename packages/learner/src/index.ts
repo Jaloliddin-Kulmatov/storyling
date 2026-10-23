@@ -519,3 +519,4 @@ export * from "./placement";
 export * from "./dictation";
 export * from "./subtitles";
 export * from "./targets";
+export * from "./translate";

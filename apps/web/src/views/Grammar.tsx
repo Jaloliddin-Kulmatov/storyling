@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLearner } from "@/lib/learner";
 import { shuffle } from "@/lib/words";
+import { Tr } from "@/lib/translate";
 
 /** Grammar: a short explanation per topic, then exercises with an explanation after every answer. */
 export function Grammar({ lang }: { lang: LangCode }) {
@@ -68,7 +69,7 @@ function Lesson({ topic, lang, onBack }: { topic: GrammarTopic; lang: LangCode; 
             const lines = p.split("\n");
             return (
               <div key={i}>
-                {lines.map((l, k) => l.startsWith("- ") ? <div key={k} lang={lang} style={{ paddingLeft: 14 }}>• {l.slice(2)}</div> : <p key={k} style={{ margin: "0 0 6px" }}>{l}</p>)}
+                {lines.map((l, k) => l.startsWith("- ") ? <div key={k} lang={lang} style={{ paddingLeft: 14 }}>• {l.slice(2)}</div> : <p key={k} style={{ margin: "0 0 6px" }}><Tr>{l}</Tr></p>)}
               </div>
             );
           })}
@@ -105,7 +106,7 @@ function Lesson({ topic, lang, onBack }: { topic: GrammarTopic; lang: LangCode; 
         </div>
         {chosen !== null && (
           <>
-            <p style={{ margin: 0 }}><b>{chosen === q.a ? "Correct. " : "Not quite. "}</b>{q.why}{q.tr ? <span className="muted"> — {q.tr}</span> : null}</p>
+            <p style={{ margin: 0 }}><b>{chosen === q.a ? "Correct. " : "Not quite. "}</b><Tr>{q.why}</Tr>{q.tr ? <span className="muted"> — <Tr>{q.tr}</Tr></span> : null}</p>
             <button className="btn primary block" onClick={() => {
               if (n + 1 >= items.length) learner.recordGame(`grammar-${topic.id}`, Math.round(((score) / items.length) * 100));
               setN(n + 1);
