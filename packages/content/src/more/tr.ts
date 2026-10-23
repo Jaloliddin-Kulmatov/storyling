@@ -3,7 +3,7 @@ import type { RawEntry, RawStory } from "../raw";
 /* eslint-disable */
 export const dict: Record<string, RawEntry> = {
   "Murat": ["name", "Murat (a name)"], "İzmir": ["name", "Izmir (a city)"], "Elif": ["name", "Elif (a name)"], "Defne": ["name", "Defne (a name)"],
-  "Pamuk": ["name", "Pamuk, \"Cotton\" (the cat's name)"], "Levent": ["name", "Levent (a name)"], "Selin": ["name", "Selin (a name)"], "Tolga": ["name", "Tolga (a name)"],
+  "Pamuk": ["name", "Pamuk (a name; the cat's name means \"cotton\")"], "Levent": ["name", "Levent (a name)"], "Selin": ["name", "Selin (a name)"], "Tolga": ["name", "Tolga (a name)"],
   "Boncuk": ["name", "Boncuk, \"Bead\" (the puppy's name)"], "Ayşe": ["name", "Ayşe (a name)"], "Ali": ["name", "Ali (a name)"],
   "bir": ["determiner", "a / an; one"], "ve": ["conjunction", "and"], "ama": ["conjunction", "but"], "çünkü": ["conjunction", "because"], "ile": ["preposition", "with; by (ile = -le / -la)"],
   "için": ["preposition", "for"], "hakkında": ["preposition", "about"], "her": ["determiner", "every; each"], "bazı": ["determiner", "some"], "birçok": ["determiner", "many"],

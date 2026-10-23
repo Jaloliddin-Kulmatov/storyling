@@ -1,4 +1,5 @@
 import type { LangCode } from "@storyling/core";
+import { TURKISH } from "./grammar-tr";
 
 /**
  * Grammar exercises. Original explanations and sentences written for Storyling.
@@ -23,10 +24,10 @@ export interface GrammarTopic {
   items: GrammarItem[];
 }
 
-type Row = [q: string, a: string, o: string[], why: string, tr?: string];
-const topic = (id: string, level: string, title: string, explain: string, rows: Row[]): GrammarTopic => ({
-  id: `de-${id}`,
-  lang: "de",
+export type Row = [q: string, a: string, o: string[], why: string, tr?: string];
+export const makeTopic = (lang: LangCode) => (id: string, level: string, title: string, explain: string, rows: Row[]): GrammarTopic => ({
+  id: `${lang}-${id}`,
+  lang,
   level,
   title,
   explain,
@@ -34,6 +35,8 @@ const topic = (id: string, level: string, title: string, explain: string, rows: 
 });
 
 const PICK = "Which sentence is correct?";
+
+const topic = makeTopic("de");
 
 export const GRAMMAR: GrammarTopic[] = [
   // ───────────── A1 ─────────────
@@ -248,4 +251,4 @@ export const GRAMMAR: GrammarTopic[] = [
   ]),
 ];
 
-export const grammarFor = (lang: LangCode): GrammarTopic[] => GRAMMAR.filter((g) => g.lang === lang);
+export const grammarFor = (lang: LangCode): GrammarTopic[] => [...GRAMMAR, ...TURKISH].filter((g) => g.lang === lang);

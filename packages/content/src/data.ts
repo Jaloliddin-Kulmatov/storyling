@@ -15,7 +15,7 @@ export const LANGS: Record<string, RawLang> = {
   ko: { name: "Korean", native: "한국어", tts: "ko-KR", voice: "Yuna", levels: ["Level 1", "Level 2", "Level 3"] },
   pt: { name: "Portuguese", native: "Português", tts: "pt-BR", voice: "Luciana", levels: ["A1", "A2"] },
   ru: { name: "Russian", native: "Русский", tts: "ru-RU", voice: "Milena", levels: ["A1", "A2"] },
-  tr: { name: "Turkish", native: "Türkçe", tts: "tr-TR", voice: "Yelda", levels: ["A1", "A2"] },
+  tr: { name: "Turkish", native: "Türkçe", tts: "tr-TR", voice: "Yelda", levels: ["A1", "A2", "B1"] },
 };
 
 export const DICT: Record<string, Record<string, RawEntry>> = {

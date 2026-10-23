@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { GRAMMAR } from "../src/grammar";
+import { grammarFor } from "../src/grammar";
+
+const GRAMMAR = [...grammarFor("de"), ...grammarFor("tr")];
 
 describe("grammar exercises", () => {
   it("has unique topic ids and every answer among its options", () => {

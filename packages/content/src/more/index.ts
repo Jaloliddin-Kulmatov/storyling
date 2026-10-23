@@ -18,6 +18,7 @@ import * as ko2 from "./ko2";
 import * as es from "./es";
 import * as fr from "./fr";
 import * as tr from "./tr";
+import * as tr2 from "./tr2";
 import * as ja from "./ja";
 import * as ko from "./ko";
 import * as pt from "./pt";
@@ -60,6 +61,7 @@ const PACKS: Pack[] = [
   { lang: "zh", ...zh2 },
   { lang: "ja", ...ja2 },
   { lang: "ko", ...ko2 },
+  { lang: "tr", ...tr2 },
 ];
 
 /** Languages that have the 10-story everyday pack. */
