@@ -3,6 +3,7 @@
 import type { LangCode } from "@storyling/core";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useStories } from "@/lib/stories";
+import { AccountCard } from "@/components/AccountCard";
 
 export function Progress({ lang }: { lang: LangCode }) {
   const learner = useLearner(lang);
@@ -25,7 +26,9 @@ export function Progress({ lang }: { lang: LangCode }) {
     <>
       <div className="page-head"><div><div className="eyebrow">Your reading</div><h1>Progress</h1></div></div>
 
-      <div className="stats">
+      <AccountCard lang={lang} />
+
+      <div className="stats" style={{ marginTop: 16 }}>
         <div className="stat"><b>{learner.knownCount}</b><span>words known</span></div>
         <div className="stat"><b>{learner.streak} {learner.streak === 1 ? "day" : "days"}</b><span>streak</span></div>
         <div className="stat"><b>{learner.finished.length}/{stories.length}</b><span>stories read</span></div>

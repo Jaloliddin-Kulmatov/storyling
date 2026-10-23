@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
+    "@neondatabase/serverless": "^1.2.0",
     "@storyling/content": "workspace:*",
     "@storyling/core": "workspace:*",
     "@storyling/learner": "workspace:*",

@@ -5,6 +5,7 @@ import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
+import { useSyncAgent } from "@/lib/account";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
 import { Icon, Logo } from "./ui";
 
@@ -26,6 +27,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   const hydrated = useHydrated();
   const learner = useLearner(lang);
   const meta = language(lang);
+  useSyncAgent();
   const reading = path.includes("/read/");
   const due = hydrated ? learner.dueWords().length : 0;
   const settingsRef = useRef<HTMLDialogElement>(null);

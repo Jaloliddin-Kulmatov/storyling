@@ -164,6 +164,26 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
+/** The whole store as JSON, for syncing to an account. */
+export function exportStore(): string {
+  return JSON.stringify(read());
+}
+
+/** Merge a store from the server into this device and keep the result (nothing is lost on either side). */
+export function mergeIntoStore(remoteJson: string) {
+  const remote = revive(migrate(JSON.parse(remoteJson)));
+  write(mergeStores(read(), remote));
+}
+
+/** Points per day ("YYYY-MM-DD") across all languages: 2 per minute read, 1 per word, 10 per new story. */
+export function dayPoints(): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const p of Object.values(read().profiles))
+    for (const [day, l] of Object.entries(p?.log ?? {}))
+      out[day] = (out[day] ?? 0) + Math.round((l.seconds / 60) * 2) + l.words + l.stories * 10;
+  return out;
+}
+
 export const today = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -176,6 +196,57 @@ function seedWords(lang: LangCode, level: Level): Record<string, StoredWord> {
       for (const sent of s.sentences) for (const t of sent.tokens) if (t.lemma) lemmas = [...lemmas, t.lemma];
   }
   return Object.fromEntries(lemmas.map((l) => [l, newUserWord(l, STARTER_P)]));
+}
+
+const lastSeen = (w: StoredWord) => (w.card?.last_review ? new Date(w.card.last_review).getTime() : 0);
+
+function mergeProfile(a: LangProfile, b: LangProfile): LangProfile {
+  const words: Record<string, StoredWord> = { ...a.words };
+  for (const [k, w] of Object.entries(b.words)) {
+    const mine = words[k];
+    if (!mine) words[k] = w;
+    else {
+      const win = lastSeen(w) > lastSeen(mine) || (lastSeen(w) === lastSeen(mine) && w.encounters + w.taps > mine.encounters + mine.taps) ? w : mine;
+      const lose = win === w ? mine : w;
+      words[k] = { ...win, saved: win.saved ?? lose.saved, encounters: Math.max(a.words[k]?.encounters ?? 0, w.encounters), taps: Math.max(a.words[k]?.taps ?? 0, w.taps) };
+    }
+  }
+  const log: Record<string, DayLog> = { ...a.log };
+  for (const [d, l] of Object.entries(b.log)) {
+    const m = log[d];
+    log[d] = m ? { seconds: Math.max(m.seconds, l.seconds), words: Math.max(m.words, l.words), stories: Math.max(m.stories, l.stories) } : l;
+  }
+  const games = { ...a.games };
+  for (const [g, v] of Object.entries(b.games)) {
+    const m = games[g];
+    games[g] = m ? { played: Math.max(m.played, v.played), best: Math.max(m.best, v.best) } : v;
+  }
+  const history = new Map<string, number>();
+  for (const h of [...a.history, ...b.history]) history.set(h.id, Math.max(history.get(h.id) ?? 0, h.at));
+  const stories = new Map<string, UserStory>();
+  for (const st of [...a.stories, ...b.stories]) stories.set(st.id, st);
+  return {
+    level: a.level,
+    words,
+    finished: [...new Set([...a.finished, ...b.finished])],
+    stories: [...stories.values()],
+    log,
+    quiz: { right: Math.max(a.quiz.right, b.quiz.right), total: Math.max(a.quiz.total, b.quiz.total) },
+    favorites: [...new Set([...a.favorites, ...b.favorites])],
+    games,
+    history: [...history.entries()].map(([id, at]) => ({ id, at })).sort((x, y) => y.at - x.at).slice(0, 200),
+  };
+}
+
+/** Combine two stores: words keep the more recent review, logs and scores keep the larger value, lists are unioned. */
+export function mergeStores(a: Store, b: Store): Store {
+  const profiles: Store["profiles"] = { ...a.profiles };
+  for (const [lang, p] of Object.entries(b.profiles) as [LangCode, LangProfile | undefined][]) {
+    if (!p) continue;
+    const mine = profiles[lang];
+    profiles[lang] = mine ? mergeProfile(mine, p) : p;
+  }
+  return { lang: a.lang ?? b.lang, profiles, settings: a.settings };
 }
 
 const noop = () => () => {};
