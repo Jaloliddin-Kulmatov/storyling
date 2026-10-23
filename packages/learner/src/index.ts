@@ -443,3 +443,4 @@ export function useLearner(lang: LangCode) {
 export * from "./library";
 export * from "./placement";
 export * from "./dictation";
+export * from "./subtitles";

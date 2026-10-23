@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { Band, Channel, Video } from "@/lib/channels";
 import { useLearner } from "@/lib/learner";
 import { Icon } from "@/components/ui";
+import { VideoWithTranscript } from "@/components/Transcript";
 
 const BAND_LABEL: Record<Band, string> = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" };
 
@@ -58,20 +59,11 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
 
       {current ? (
         <div className="player-card">
-          <div className="yt">
-            <iframe
-              key={current.id}
-              src={`https://www.youtube-nocookie.com/embed/${current.id}?rel=0&cc_load_policy=1&cc_lang_pref=${lang}&hl=en`}
-              title={current.title}
-              allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowFullScreen
-              loading="lazy"
-            />
-          </div>
+          <VideoWithTranscript lang={lang} videoId={current.id} title={current.title} />
           <div className="pc-body">
             <span className="row small"><span className="lvl">{BAND_LABEL[current.band]}</span><span className="muted">{current.channel} · {ago(current.published)}</span></span>
             <b className="pc-title">{current.title}</b>
-            <span className="muted small">Tip: turn on subtitles (CC) in the player. Slow the video down with the gear icon if it is too fast.</span>
+            <span className="muted small">Tip: slow the video down with the gear icon if it is too fast.</span>
             <a className="small" href={`https://www.youtube.com/watch?v=${current.id}`} target="_blank" rel="noopener noreferrer">Open on YouTube</a>
           </div>
         </div>
@@ -95,9 +87,9 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
       <div className="section-h"><h2>Channels</h2></div>
       <div className="list">
         {channels.map((c) => (
-          <a key={c.id} className="trow channel-row" href={`https://www.youtube.com/channel/${c.id}`} target="_blank" rel="noopener noreferrer">
+          <a key={c.id} className="trow channel-row" href={c.playlist ? `https://www.youtube.com/playlist?list=${c.playlist}` : `https://www.youtube.com/channel/${c.id}`} target="_blank" rel="noopener noreferrer">
             <span><b>{c.name}</b><span className="g" style={{ display: "block" }}>{c.note}</span></span>
-            <span className="btn sm">Open channel</span>
+            <span className="btn sm">Open on YouTube</span>
           </a>
         ))}
       </div>

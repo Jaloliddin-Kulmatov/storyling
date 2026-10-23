@@ -10,6 +10,8 @@ export interface Channel {
   /** Default difficulty when a video title doesn't say. */
   band: Band;
   note: string;
+  /** Read a playlist feed instead of the channel's own (course series). */
+  playlist?: string;
 }
 
 export const CHANNELS: Record<LangCode, Channel[]> = {
@@ -18,7 +20,9 @@ export const CHANNELS: Record<LangCode, Channel[]> = {
     { id: "UCvgLaFuTGGRXl0eyvBRCifA", name: "Easy English", band: "intermediate", note: "Street interviews with subtitles" },
   ],
   de: [
-    { id: "UCxUWIEL-USsiPak0Qy6_vVg", name: "DW Deutsch lernen", band: "beginner", note: "Deutsche Welle courses, including the series Nicos Weg" },
+    { id: "nicos-weg", playlist: "PLs7zUO7VPyJ5DV1iBRgSw2uDl832n0bLg", name: "Nicos Weg (DW)", band: "beginner", note: "The DW telenovela course, episode by episode, A1 to B1" },
+    { id: "german-made-easy", playlist: "PLvr84R8yDNJZxVFRhIAdv-UGEj2KOA86n", name: "German Made Easy", band: "beginner", note: "Step-by-step beginner lessons in English, from the alphabet up" },
+    { id: "UCxUWIEL-USsiPak0Qy6_vVg", name: "DW Deutsch lernen", band: "intermediate", note: "Deutsche Welle news and job German, about B1" },
     { id: "UCbxb2fqe9oNgglAoYqsYOtQ", name: "Easy German", band: "intermediate", note: "Street interviews and Super Easy German for beginners" },
   ],
   es: [
@@ -60,6 +64,7 @@ export interface Video {
 
 /** A title that names a level wins over the channel's default. */
 export function bandFor(title: string, fallback: Band): Band {
+  if (/\bB1\b|\bB2\b|kurz und leicht/i.test(title)) return "intermediate";
   if (/super ?easy|superbeginner|beginner|anfänger|débutant|principiante|\bA1\b|\bA2\b|slow/i.test(title)) return "beginner";
   if (/advanced|fortgeschritten|avancé|avanzado|\bC1\b|\bC2\b/i.test(title)) return "advanced";
   if (/intermediate|\bB1\b|\bB2\b/i.test(title)) return "intermediate";
@@ -92,7 +97,7 @@ export async function fetchVideos(lang: LangCode, init?: RequestInit & { next?: 
   const lists = await Promise.all(
     CHANNELS[lang].map(async (ch) => {
       try {
-        const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`, init);
+        const res = await fetch(`https://www.youtube.com/feeds/videos.xml?${ch.playlist ? `playlist_id=${ch.playlist}` : `channel_id=${ch.id}`}`, init);
         if (res.ok) {
           const videos = parseFeed(await res.text(), ch);
           if (videos.length) return videos;

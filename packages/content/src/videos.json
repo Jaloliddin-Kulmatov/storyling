@@ -195,6 +195,22 @@
 ],
 "de": [
 {
+"id": "Y39Sg_XJSJg",
+"title": "Deutsch lernen mit Videos | Kurz und leicht vom 22.10.2026 | mit deutschen Untertiteln",
+"channel": "DW Deutsch lernen",
+"channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
+"published": "2026-10-22T12:25:26+00:00",
+"band": "intermediate"
+},
+{
+"id": "JKrvYs0VnA8",
+"title": "Deutsch lernen mit Videos | Warum manche Menschen ihren Sarg selbst bauen | deutsche Untertitel",
+"channel": "DW Deutsch lernen",
+"channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
+"published": "2026-10-22T12:11:07+00:00",
+"band": "intermediate"
+},
+{
 "id": "b-k2yDRx6yw",
 "title": "Learn Austrian German with Me in Klagenfurt",
 "channel": "Easy German",
@@ -208,7 +224,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-21T13:44:39+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "UlvqYsdfu7Q",
@@ -248,7 +264,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-20T13:19:08+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "TfBIG2tYF1o",
@@ -256,7 +272,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-19T14:32:47+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "6gr5wvJpxCU",
@@ -272,7 +288,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-16T13:09:26+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "82mQyOyfzxw",
@@ -280,7 +296,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-15T14:48:56+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "ErU0UsVKeSM",
@@ -288,7 +304,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-15T11:19:22+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "dxPmrx14ci0",
@@ -296,15 +312,7 @@
 "channel": "DW Deutsch lernen",
 "channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
 "published": "2026-10-14T13:33:31+00:00",
-"band": "beginner"
-},
-{
-"id": "qMtk3goLVSM",
-"title": "Deutsch lernen mit Videos | Kurz und leicht vom 13.10.2026 | mit deutschen Untertiteln",
-"channel": "DW Deutsch lernen",
-"channelId": "UCxUWIEL-USsiPak0Qy6_vVg",
-"published": "2026-10-13T13:30:59+00:00",
-"band": "beginner"
+"band": "intermediate"
 },
 {
 "id": "RbtIMGCizu0",
@@ -320,6 +328,246 @@
 "channel": "Easy German",
 "channelId": "UCbxb2fqe9oNgglAoYqsYOtQ",
 "published": "2026-10-07T17:00:27+00:00",
+"band": "beginner"
+},
+{
+"id": "abFz6JgOMCk",
+"title": "Deutsch lernen | Nicos Weg | Trailer",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-11-07T14:13:45+00:00",
+"band": "beginner"
+},
+{
+"id": "J71RxF7qU2o",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 14: Was trinkst du?",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-11-06T11:32:00+00:00",
+"band": "beginner"
+},
+{
+"id": "VWDtpIIAgAI",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 13: Was machst du hier?",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-11-03T14:40:27+00:00",
+"band": "beginner"
+},
+{
+"id": "IhLqeX8QjSg",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 12: Auf dem Amt",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-11-02T15:01:00+00:00",
+"band": "beginner"
+},
+{
+"id": "AI9EmNzxXGE",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 11: Adressen",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-11-01T13:38:06+00:00",
+"band": "beginner"
+},
+{
+"id": "5wyalwdmpzk",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 10: Wichtige Nummern",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-31T14:33:25+00:00",
+"band": "beginner"
+},
+{
+"id": "p1dci7nBJRo",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 9: Zahlen von 1 bis 100",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-30T12:31:27+00:00",
+"band": "beginner"
+},
+{
+"id": "T89sIATrpBc",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 8: Nico hat ein Problem",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-27T15:34:28+00:00",
+"band": "beginner"
+},
+{
+"id": "Q7ECRAQrzFc",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 7: Woher kommst du?",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-26T14:58:36+00:00",
+"band": "beginner"
+},
+{
+"id": "fZr-eVZ3YOs",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 6: Das ist Nico",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-25T11:26:05+00:00",
+"band": "beginner"
+},
+{
+"id": "FoYSUfsLcjA",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 5: Ich heiße Emma",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-24T14:52:03+00:00",
+"band": "beginner"
+},
+{
+"id": "-qAuGimugds",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 4: Von A bis Z",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-23T11:59:49+00:00",
+"band": "beginner"
+},
+{
+"id": "idFrq0H1Af0",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 3: Tschüss!",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-20T12:22:09+00:00",
+"band": "beginner"
+},
+{
+"id": "upvuC9FR-xU",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 2: Kein Problem!",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-19T12:00:38+00:00",
+"band": "beginner"
+},
+{
+"id": "dC6ZGLzdaTs",
+"title": "Deutsch lernen (A1) | Nicos Weg | Folge 1: Hallo!",
+"channel": "Nicos Weg (DW)",
+"channelId": "nicos-weg",
+"published": "2017-10-18T12:08:08+00:00",
+"band": "beginner"
+},
+{
+"id": "4mAATI7E_VA",
+"title": "Expressing Possession or Two Germans One Cup | Learn German for Beginners | Lesson 15",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-05-04T18:38:17+00:00",
+"band": "beginner"
+},
+{
+"id": "S8ujtZm0bgU",
+"title": "Room Names | Learn German for Beginners | Lesson 14",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-04-13T18:10:05+00:00",
+"band": "beginner"
+},
+{
+"id": "4l3Ov3Si8OI",
+"title": "Common Questions | Learn German for Beginners | Lesson 13",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-04-06T19:00:00+00:00",
+"band": "beginner"
+},
+{
+"id": "HSjsTRDni68",
+"title": "Giving Directions | Learn German for Beginners | Lesson 12",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-03-30T19:46:31+00:00",
+"band": "beginner"
+},
+{
+"id": "KA3ku7Cwd2g",
+"title": "Common Places in Towns and Cities | Learn German for Beginners | Lesson 11",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-03-16T20:00:28+00:00",
+"band": "beginner"
+},
+{
+"id": "3chxta6v2j0",
+"title": "Telling Where You're Going | Learn German for Beginners | Lesson 10",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-03-10T09:39:45+00:00",
+"band": "beginner"
+},
+{
+"id": "-b1t5I7c4w0",
+"title": "Telling The Time | Learn German for Beginners | Lesson 09",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-02-23T20:09:58+00:00",
+"band": "beginner"
+},
+{
+"id": "CCMMdad7dzs",
+"title": "Fruit Vocabulary | Learn German for Beginners | Lesson 8",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-02-16T20:19:42+00:00",
+"band": "beginner"
+},
+{
+"id": "awSEUb3vu0c",
+"title": "Expressing Emotions #1 | Learn German for Beginners | Lesson 7",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2014-02-09T20:02:23+00:00",
+"band": "beginner"
+},
+{
+"id": "nNTXJriwK9c",
+"title": "Days, Months, Seasons and Holidays | Learn German for Beginners | Lesson 6",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-12-01T15:00:01+00:00",
+"band": "beginner"
+},
+{
+"id": "osYR0Ae1Nxk",
+"title": "Common Misunderstandings | Learn German for Beginners | Lesson 5",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-11-17T14:30:00+00:00",
+"band": "beginner"
+},
+{
+"id": "CBa7NF3MMgk",
+"title": "German Numbers | Learn German for Beginners | Lesson 4",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-10-13T14:05:10+00:00",
+"band": "beginner"
+},
+{
+"id": "lARImehSgTA",
+"title": "Age, Occupation and Origin | Learn German for Beginners | Lesson 3",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-09-29T13:40:07+00:00",
+"band": "beginner"
+},
+{
+"id": "y-GUf_TBZIs",
+"title": "Introductions | Learn German for Beginners | Lesson 2",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-09-14T22:44:47+00:00",
+"band": "beginner"
+},
+{
+"id": "CBXIyWpOirg",
+"title": "German Alphabet | Learn German for Beginners | Lesson 1",
+"channel": "German Made Easy",
+"channelId": "german-made-easy",
+"published": "2013-09-01T17:18:33+00:00",
 "band": "beginner"
 }
 ],

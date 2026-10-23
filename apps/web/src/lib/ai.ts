@@ -21,7 +21,7 @@ export function useAiEnabled(): boolean {
   return enabled;
 }
 
-export async function callAi<T>(path: "explain" | "prepare" | "story", body: unknown, signal?: AbortSignal): Promise<T> {
+export async function callAi<T>(path: "explain" | "prepare" | "story" | "translate", body: unknown, signal?: AbortSignal): Promise<T> {
   const res = await fetch(`/api/ai/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
