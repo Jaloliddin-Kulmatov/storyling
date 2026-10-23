@@ -31,6 +31,11 @@ const GAMES: { mode: Mode; title: string; text: string; icon: keyof typeof Icon 
   { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress" },
 ];
 
+const LINKS: { href: string; title: string; text: string; icon: keyof typeof Icon }[] = [
+  { href: "/grammar", title: "Grammar", text: "Short rules and exercises by level.", icon: "library" },
+  { href: "/exams", title: "Mock exams", text: "Timed paper: listening, reading, vocabulary, grammar.", icon: "progress" },
+];
+
 export function Practice({ lang }: { lang: LangCode }) {
   const params = useSearchParams();
   const router = useRouter();
@@ -66,6 +71,13 @@ export function Practice({ lang }: { lang: LangCode }) {
             </Link>
           );
         })}
+        {LINKS.map((g) => (
+          <Link key={g.href} href={`/${lang}${g.href}`} className="game-card">
+            <span className="gi" aria-hidden="true">{Icon[g.icon]}</span>
+            <span className="t">{g.title}</span>
+            <span className="muted small">{g.text}</span>
+          </Link>
+        ))}
       </div>
     </>
   );
