@@ -212,7 +212,7 @@ export function writeStory(lang: string, level: string, topic: string, words: st
 export const TARGET_LANGUAGES: Record<string, string> = {
   en: "English", vi: "Vietnamese", pl: "Polish", fr: "French", ru: "Russian", es: "Spanish", de: "German", ko: "Korean",
   zh: "Chinese (Simplified)", "zh-TW": "Chinese (Traditional)", th: "Thai", tr: "Turkish", id: "Indonesian", fil: "Filipino", uk: "Ukrainian",
-  uz: "Uzbek", ar: "Arabic", hi: "Hindi",
+  uz: "Uzbek", ar: "Arabic", hi: "Hindi", ja: "Japanese", pt: "Portuguese (Brazil)",
 };
 
 const TRANSLATE_SYSTEM =

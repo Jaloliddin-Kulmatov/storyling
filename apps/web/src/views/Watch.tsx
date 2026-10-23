@@ -2,6 +2,7 @@
 
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Band, Channel, Video } from "@/lib/channels";
 import { useLearner } from "@/lib/learner";
@@ -38,6 +39,7 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
     <>
       <div className="page-head">
         <div><div className="eyebrow">{meta.name} · {videos.length} videos</div><h1>Watch</h1></div>
+        <Link className="btn sm" href={`/${lang}/subtitles`}>Subtitle study</Link>
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Difficulty">
