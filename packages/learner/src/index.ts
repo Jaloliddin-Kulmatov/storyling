@@ -76,6 +76,8 @@ export interface Settings {
   /** Underline each word in the color of the level where it first appears. */
   levelUnderline: boolean;
   theme: "auto" | "light" | "dark";
+  /** Language for translations and word meanings ("en" = as written in the content). */
+  translateTo: string;
 }
 
 interface Store {
@@ -96,6 +98,7 @@ export const defaultSettings: Settings = {
   dailyGoalMinutes: 10,
   levelUnderline: true,
   theme: "auto",
+  translateTo: "en",
 };
 
 const EMPTY: Store = { profiles: {}, settings: defaultSettings };
@@ -515,3 +518,4 @@ export * from "./library";
 export * from "./placement";
 export * from "./dictation";
 export * from "./subtitles";
+export * from "./targets";

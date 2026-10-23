@@ -14,6 +14,7 @@ import { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnySt
 import { Cover, Icon, Toast } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
+import { useTranslated } from "@/lib/translate";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -44,6 +45,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [settings, setSettings] = useSettings();
   const ai = useAiEnabled();
   const router = useRouter();
+  const trs = useTranslated(story.sentences.map((x) => x.translation));
 
   const [picked, setPicked] = useState<Picked | null>(null);
   const [tapped, setTapped] = useState<Set<string>>(() => new Set());
@@ -169,7 +171,7 @@ function StoryReader({ story }: { story: AnyStory }) {
                     {Icon.translate}
                   </button>
                 )}
-                {s.translation && (settings.showTranslations || shown.has(i)) && <span className="tr" lang="en">{s.translation}</span>}
+                {s.translation && (settings.showTranslations || shown.has(i)) && <span className="tr" lang={settings.translateTo}>{trs.texts[i]}</span>}
               </span>
             ))}
           </div>
@@ -252,6 +254,8 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
   const learner = useLearner(lang);
   const [explain, setExplain] = useState<{ key: string; text?: string; error?: string; busy: boolean } | null>(null);
   const [question, setQuestion] = useState("");
+  const pe = picked ? lookupIn(story, picked.lemma) : undefined;
+  const tr = useTranslated([pe?.meaning, picked ? story.sentences[picked.sentence]?.translation : undefined]);
 
   if (!picked) {
     return (
@@ -293,7 +297,7 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
       </div>
       {entry?.reading && <span className="reading">{entry.reading}</span>}
       {picked.surface !== (entry?.display ?? picked.lemma) && <span className="muted small">In the text: <span lang={lang}>{picked.surface}</span></span>}
-      <div style={{ fontSize: 18, fontWeight: 600 }}>{entry?.meaning ?? <span className="muted">No meaning in the dictionary yet.</span>}</div>
+      <div style={{ fontSize: 18, fontWeight: 600 }}>{tr.texts[0] ?? <span className="muted">No meaning in the dictionary yet.</span>}</div>
 
       <div>
         <div className="spread small muted" style={{ marginBottom: 4 }}><span>Seen in stories</span><span>{w?.encounters ?? 0}×</span></div>
@@ -307,7 +311,7 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
       </div>
 
       {sentence.translation && (
-        <div className="box"><div className="eyebrow" style={{ marginBottom: 4 }}>Sentence</div>{sentence.translation}</div>
+        <div className="box"><div className="eyebrow" style={{ marginBottom: 4 }}>Sentence</div>{tr.texts[1]}</div>
       )}
       <Examples story={story} lemma={picked.lemma} />
 

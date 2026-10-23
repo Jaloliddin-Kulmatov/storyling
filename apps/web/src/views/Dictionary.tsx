@@ -9,6 +9,7 @@ import { playSentence, playWord } from "@/lib/audio";
 import { useLearner } from "@/lib/learner";
 import { textOf, useStories } from "@/lib/stories";
 import { Icon } from "@/components/ui";
+import { useTranslated } from "@/lib/translate";
 
 /** Letters that are hard to type, shown as keys under the search box. */
 const KEYS: Partial<Record<LangCode, string[]>> = {
@@ -43,6 +44,7 @@ export function Dictionary({ lang }: { lang: LangCode }) {
       .slice(0, 60);
   }, [all, q]);
 
+  const trMeanings = useTranslated(results.slice(0, 40).map((e) => e.meaning));
   const sentences = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (s.length < 2) return [];
@@ -93,7 +95,7 @@ export function Dictionary({ lang }: { lang: LangCode }) {
 
       {tab === "word" && (
         <div className="table">
-          {results.map((e) => {
+          {results.map((e, ri) => {
             const saved = learner.word(e.lemma)?.saved === "learning";
             const known = !saved && learner.wordState(e.lemma) === "known";
             const ex = example(e.lemma);
@@ -104,7 +106,7 @@ export function Dictionary({ lang }: { lang: LangCode }) {
                   <span className="l" lang={lang}>{e.display}</span> {e.reading && <span className="reading">{e.reading}</span>}{" "}
                   <span className="pill">{e.pos}</span>
                   {lv !== undefined && <span className="pill" style={{ color: `var(--lv${Math.min(lv, 4)})`, marginLeft: 4 }}>{meta.levels[lv]}</span>}
-                  <span className="g" style={{ display: "block" }}>{e.meaning}</span>
+                  <span className="g" style={{ display: "block" }}>{ri < 40 ? trMeanings.texts[ri] : e.meaning}</span>
                   {ex && <Link href={`/${lang}/read/${ex.story.id}`} className="small muted" lang={lang} style={{ display: "block", fontFamily: "var(--f-read)" }}>{ex.text}</Link>}
                 </span>
                 <span className="row">

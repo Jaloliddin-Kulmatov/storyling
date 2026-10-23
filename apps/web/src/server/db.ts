@@ -30,6 +30,13 @@ export async function db(): Promise<NeonQueryFunction<false, false>> {
       points integer NOT NULL,
       PRIMARY KEY (user_id, day)
     )`;
+    await q`CREATE TABLE IF NOT EXISTS translations (
+      key text PRIMARY KEY,
+      target text NOT NULL,
+      src text NOT NULL,
+      out text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`;
   })().catch((e) => {
     ready = null;
     throw e;

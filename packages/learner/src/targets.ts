@@ -1,0 +1,21 @@
+/** Languages a learner can read translations and meanings in. "en" is the content as written. */
+export const TRANSLATE_TARGETS: { code: string; name: string; native: string }[] = [
+  { code: "en", name: "English", native: "English" },
+  { code: "uz", name: "Uzbek", native: "Oʻzbekcha" },
+  { code: "ru", name: "Russian", native: "Русский" },
+  { code: "tr", name: "Turkish", native: "Türkçe" },
+  { code: "es", name: "Spanish", native: "Español" },
+  { code: "fr", name: "French", native: "Français" },
+  { code: "de", name: "German", native: "Deutsch" },
+  { code: "pl", name: "Polish", native: "Polski" },
+  { code: "uk", name: "Ukrainian", native: "Українська" },
+  { code: "vi", name: "Vietnamese", native: "Tiếng Việt" },
+  { code: "th", name: "Thai", native: "ไทย" },
+  { code: "id", name: "Indonesian", native: "Bahasa Indonesia" },
+  { code: "fil", name: "Filipino", native: "Filipino" },
+  { code: "ko", name: "Korean", native: "한국어" },
+  { code: "zh", name: "Chinese (Simplified)", native: "简体中文" },
+  { code: "zh-TW", name: "Chinese (Traditional)", native: "繁體中文" },
+  { code: "ar", name: "Arabic", native: "العربية" },
+  { code: "hi", name: "Hindi", native: "हिन्दी" },
+];

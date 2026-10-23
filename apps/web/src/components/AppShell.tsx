@@ -5,6 +5,7 @@ import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
+import { TRANSLATE_TARGETS } from "@storyling/learner";
 import { useSyncAgent } from "@/lib/account";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
 import { Icon, Logo } from "./ui";
@@ -117,6 +118,12 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
         <label className="field">
           Text size
           <input type="range" min={0.85} max={1.4} step={0.05} value={settings.fontScale} onChange={(e) => set({ fontScale: Number(e.target.value) })} />
+        </label>
+        <label className="field">
+          Translations and meanings in
+          <select className="select" value={settings.translateTo} onChange={(e) => set({ translateTo: e.target.value })}>
+            {TRANSLATE_TARGETS.map((t) => <option key={t.code} value={t.code}>{t.native === t.name ? t.name : `${t.name} · ${t.native}`}</option>)}
+          </select>
         </label>
         <label className="field">
           Daily goal
