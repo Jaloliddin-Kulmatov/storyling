@@ -13,9 +13,9 @@ export const LANGS: Record<string, RawLang> = {
   zh: { name: "Chinese", native: "中文", tts: "zh-CN", voice: "Tingting", levels: ["HSK 1", "HSK 2"], noSpace: true },
   ja: { name: "Japanese", native: "日本語", tts: "ja-JP", voice: "Kyoko", levels: ["N5", "N4"] },
   ko: { name: "Korean", native: "한국어", tts: "ko-KR", voice: "Yuna", levels: ["Level 1", "Level 2", "Level 3"] },
-  it: { name: "Italian", native: "Italiano", tts: "it-IT", voice: "Alice", levels: ["A1", "A2"] },
   pt: { name: "Portuguese", native: "Português", tts: "pt-BR", voice: "Luciana", levels: ["A1", "A2"] },
   ru: { name: "Russian", native: "Русский", tts: "ru-RU", voice: "Milena", levels: ["A1", "A2"] },
+  tr: { name: "Turkish", native: "Türkçe", tts: "tr-TR", voice: "Yelda", levels: ["A1", "A2"] },
 };
 
 export const DICT: Record<string, Record<string, RawEntry>> = {
@@ -128,18 +128,6 @@ export const DICT: Record<string, Record<string, RawEntry>> = {
     "한": ["number", "one (before a counter)"], "잔": ["counter", "cup (counter for drinks)"], "사다": ["verb", "to buy"], "주다": ["verb", "to give; to do for someone"],
     "동료": ["noun", "coworker"], "친절하다": ["adjective", "to be kind"], "일": ["noun", "work; task"], "가르치다": ["verb", "to teach"],
     "퇴근길": ["noun", "the way home from work"], "기대되다": ["verb", "to look forward to"], "생각하다": ["verb", "to think"],
-  },
-  it: {
-    "Marco": ["name", "Marco (a name)"], "lavorare": ["verb", "to work"], "in": ["preposition", "in"], "uno": ["article", "a; one (un, una)"],
-    "pizzeria": ["noun", "pizzeria"], "a": ["preposition", "in; at; to"], "Napoli": ["name", "Naples"], "ogni": ["determiner", "every"], "sera": ["noun", "evening"],
-    "preparare": ["verb", "to prepare; to make"], "cento": ["number", "a hundred"], "pizza": ["noun", "pizza"], "il": ["article", "the (il, la, l')"],
-    "suo": ["determiner", "his; her"], "preferito": ["adjective", "favorite"], "essere": ["verb", "to be (è: is)"],
-    "margherita": ["noun", "margherita (pizza with tomato, mozzarella and basil)"], "semplice": ["adjective", "simple"], "ma": ["conjunction", "but"],
-    "buono": ["adjective", "good (buonissimo: very good)"], "Giulia": ["name", "Giulia (a name)"], "aspettare": ["verb", "to wait (for)"],
-    "autobus": ["noun", "bus"], "da": ["preposition", "for; since; from"], "venti": ["number", "twenty"], "minuto": ["noun", "minute"],
-    "piovere": ["verb", "to rain"], "e": ["conjunction", "and"], "lei": ["pronoun", "she"], "non": ["adverb", "not"], "avere": ["verb", "to have"],
-    "ombrello": ["noun", "umbrella"], "finalmente": ["adverb", "finally"], "arrivare": ["verb", "to arrive"], "pieno": ["adjective", "full"],
-    "ridere": ["verb", "to laugh"], "decidere": ["verb", "to decide"], "di": ["preposition", "of; to (before a verb)"], "camminare": ["verb", "to walk"],
   },
   pt: {
     "Ana": ["name", "Ana (a name)"], "e": ["conjunction", "and"], "Pedro": ["name", "Pedro (a name)"], "ir": ["verb", "to go"],
@@ -279,18 +267,6 @@ export const STORIES: RawStory[] = [
     ["동료들도=동료 친절하게=친절하다 일을=일 가르쳐=가르치다 줬어요=주다 .", "Her coworkers also kindly showed her the work."],
     ["퇴근길에=퇴근길 지수는=지수 내일이=내일 기대된다고=기대되다 생각했어요=생각하다 .", "On the way home, Jisu thought that she was looking forward to tomorrow."],
   ] },
-  { id: "it-pizza", lang: "it", level: "A1", cat: "food", min: 1, date: "Oct 3", title: "La pizza di Marco", tt: "Marco's Pizza", sents: [
-    ["Marco lavora=lavorare in una=uno pizzeria a Napoli .", "Marco works in a pizzeria in Naples."],
-    ["Ogni=ogni sera prepara=preparare cento pizze=pizza .", "Every evening he makes a hundred pizzas."],
-    ["La=il sua=suo pizza preferita=preferito è=essere la=il margherita .", "His favorite pizza is the margherita."],
-    ["È=essere semplice ma buonissima=buono !", "It's simple but delicious!"],
-  ] },
-  { id: "it-bus", lang: "it", level: "A2", cat: "city", min: 2, date: "Sep 29", title: "L'autobus in ritardo", tt: "The Late Bus", sents: [
-    ["Giulia aspetta=aspettare l'autobus=autobus da venti minuti=minuto .", "Giulia has been waiting for the bus for twenty minutes."],
-    ["Piove=piovere e lei non ha=avere l'ombrello=ombrello .", "It's raining and she doesn't have her umbrella."],
-    ["Finalmente=finalmente arriva=arrivare l'autobus=autobus , ma è=essere pieno .", "Finally the bus arrives, but it's full."],
-    ["Giulia ride=ridere e decide=decidere di camminare .", "Giulia laughs and decides to walk."],
-  ] },
   { id: "pt-beach", lang: "pt", level: "A1", cat: "travel", min: 1, date: "Oct 3", title: "Um dia na praia", tt: "A Day at the Beach", sents: [
     ["Ana e Pedro vão=ir à=a praia no=em domingo .", "Ana and Pedro go to the beach on Sunday."],
     ["O=o sol está=estar forte e o mar está=estar calmo .", "The sun is strong and the sea is calm."],
@@ -326,7 +302,7 @@ export const SEED: Record<string, string[]> = {
   zh: ["我", "喜欢", "喝", "茶", "一", "的", "朋友", "我们", "去", "是", "很", "吃", "人", "看", "中国"],
   ja: ["わたし", "いえ", "ねこ", "いる", "なまえ", "タマ", "です", "まいにち", "あさ", "でも", "ごはん", "いく", "ともだち", "とても", "ある", "ひと", "まえ", "えき"],
   ko: ["민지", "매일", "아침", "가다", "오늘", "다", "웃다", "말하다", "내일", "오다", "편의점", "점원", "일찍", "준호", "지수", "많이", "있다", "하다", "좋다", "버스", "커피", "한", "사다", "주다", "일", "회사", "너무", "비", "같이", "할머니"],
-  it: ["il", "uno", "in", "a", "e", "essere", "avere", "Marco", "Giulia", "pizza", "ma", "non", "lei", "buono", "ogni", "Napoli"],
+  tr: ["bir", "ve", "ama", "ben", "ev", "var", "iyi", "çok", "gün", "su", "büyük", "küçük", "yapmak", "gitmek", "Murat", "pizza"],
   pt: ["o", "um", "e", "em", "a", "ir", "Ana", "Pedro", "ela", "eles", "sol", "mar", "comer", "meu", "de", "comprar"],
   ru: ["у", "я", "есть", "кот", "он", "и", "на", "в", "очень", "день", "Анна", "утро", "работа", "метро", "всегда", "читать"],
 };

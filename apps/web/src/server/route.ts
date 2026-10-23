@@ -18,7 +18,7 @@ export function aiRoute<T>(handler: (body: Record<string, unknown>) => Promise<T
   };
 }
 
-const LANGS = new Set(["en", "es", "fr", "de", "zh", "ja", "ko", "it", "pt", "ru"]);
+const LANGS = new Set(["en", "es", "fr", "de", "zh", "ja", "ko", "tr", "pt", "ru"]);
 
 export function str(v: unknown, max: number, name: string): string {
   if (typeof v !== "string" || !v.trim()) throw new AiError(`Missing ${name}.`, 400);

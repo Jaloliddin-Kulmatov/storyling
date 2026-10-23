@@ -1,4 +1,4 @@
-export type LangCode = "en" | "es" | "fr" | "de" | "zh" | "ja" | "ko" | "it" | "pt" | "ru";
+export type LangCode = "en" | "es" | "fr" | "de" | "zh" | "ja" | "ko" | "tr" | "pt" | "ru";
 
 /** One token of a sentence. Punctuation tokens have no lemma. */
 export interface Token {

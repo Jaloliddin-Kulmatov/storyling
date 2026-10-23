@@ -77,7 +77,7 @@ function mapError(err: unknown): never {
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", de: "German", zh: "Chinese (Simplified)",
-  ja: "Japanese", ko: "Korean", it: "Italian", pt: "Portuguese (Brazil)", ru: "Russian",
+  ja: "Japanese", ko: "Korean", tr: "Turkish", pt: "Portuguese (Brazil)", ru: "Russian",
 };
 export const languageName = (code: string) => LANGUAGE_NAMES[code] ?? code;
 

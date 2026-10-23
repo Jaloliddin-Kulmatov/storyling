@@ -33,7 +33,10 @@ export const CHANNELS: Record<LangCode, Channel[]> = {
     { id: "UCoUWq2QawqdC3-nRXKk-JUw", name: "Easy French", band: "intermediate", note: "Street interviews and slow French" },
     { id: "UCI4xp8qHD1MDErkqxb1dPbA", name: "innerFrench", band: "intermediate", note: "Clear, natural French on everyday topics" },
   ],
-  it: [{ id: "UChpDG_WQkf_2tgLUr9xTR0g", name: "Easy Italian", band: "intermediate", note: "Street interviews with subtitles" }],
+  tr: [
+    { id: "UC1U-NW0ci6d1aHLc2gOHv8Q", name: "Easy Turkish", band: "intermediate", note: "Street interviews with Turkish and English subtitles" },
+    { id: "UC-HOzxLZiH6MhGU5csLgINA", name: "TurkishClass101", band: "beginner", note: "Short lessons and everyday vocabulary" },
+  ],
   pt: [
     { id: "UCGs6EbIt75S4IMKPRUU0JNQ", name: "Speaking Brazilian", band: "intermediate", note: "Brazilian Portuguese as people really speak it" },
     { id: "UCeLpksGNxcD6eFpl_ixvbMw", name: "Easy Portuguese", band: "intermediate", note: "Street interviews (European Portuguese)" },

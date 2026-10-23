@@ -10,7 +10,6 @@ import * as koReading from "./ko-reading";
 import * as es2 from "./es2";
 import * as fr2 from "./fr2";
 import * as de2 from "./de2";
-import * as it2 from "./it2";
 import * as pt2 from "./pt2";
 import * as ru2 from "./ru2";
 import * as zh2 from "./zh2";
@@ -18,7 +17,7 @@ import * as ja2 from "./ja2";
 import * as ko2 from "./ko2";
 import * as es from "./es";
 import * as fr from "./fr";
-import * as it from "./it";
+import * as tr from "./tr";
 import * as ja from "./ja";
 import * as ko from "./ko";
 import * as pt from "./pt";
@@ -41,7 +40,7 @@ const PACKS: Pack[] = [
   { lang: "es", ...es },
   { lang: "fr", ...fr },
   { lang: "de", ...de },
-  { lang: "it", ...it },
+  { lang: "tr", ...tr },
   { lang: "pt", ...pt },
   { lang: "ru", ...ru },
   { lang: "zh", ...zh },
@@ -56,7 +55,6 @@ const PACKS: Pack[] = [
   { lang: "es", ...es2 },
   { lang: "fr", ...fr2 },
   { lang: "de", ...de2 },
-  { lang: "it", ...it2 },
   { lang: "pt", ...pt2 },
   { lang: "ru", ...ru2 },
   { lang: "zh", ...zh2 },
@@ -65,7 +63,7 @@ const PACKS: Pack[] = [
 ];
 
 /** Languages that have the 10-story everyday pack. */
-export const EVERYDAY_LANGS = ["en", "es", "fr", "de", "it", "pt", "ru", "zh", "ja", "ko"];
+export const EVERYDAY_LANGS = ["en", "es", "fr", "de", "tr", "pt", "ru", "zh", "ja", "ko"];
 
 export const MORE_STORIES: RawStory[] = PACKS.flatMap((p) => p.stories);
 export const MORE_DICT: Record<string, Record<string, RawEntry>> = {};
