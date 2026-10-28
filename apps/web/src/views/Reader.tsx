@@ -1,5 +1,6 @@
 "use client";
 
+import { countView } from "@/lib/views";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
 import Link from "next/link";
@@ -57,7 +58,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [mode, setMode] = useState<null | "dictation" | "grammar">(null);
   const run = useRef(0);
   const { markOpened } = learner;
-  useEffect(() => markOpened(story.id), [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { markOpened(story.id); if (!isUserStory(story)) countView(story.id); }, [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const recorded = hasRecording(story.id);
   const voice = recorded || canSpeak();

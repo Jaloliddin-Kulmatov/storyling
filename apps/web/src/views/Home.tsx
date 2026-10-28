@@ -1,5 +1,6 @@
 "use client";
 
+import { compact, useViews } from "@/lib/views";
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
@@ -21,6 +22,8 @@ export function Home({ lang }: { lang: LangCode }) {
   const [level, setLevel] = useState("for-you");
   const [topic, setTopic] = useState("all");
   const [query, setQuery] = useState("");
+  const [day, setDay] = useState(0); // 0 = today, 1 = yesterday, ...
+  const views = useViews();
 
   const minutes = Math.floor((learner.log[today()]?.seconds ?? 0) / 60);
   const goal = settings.dailyGoalMinutes;
@@ -29,12 +32,14 @@ export function Home({ lang }: { lang: LangCode }) {
 
   const levelItems = useMemo(
     () =>
-      level === "for-you"
+      level === "daily"
+        ? dailyPicks(ranked.filter((r) => !isUserStory(r.story)), dayKey(day), learner.level ?? 0, meta.levels)
+        : level === "for-you"
         ? ranked.filter((r) => !isUserStory(r.story))
         : level === "mine"
           ? ranked.filter((r) => isUserStory(r.story))
           : ranked.filter((r) => !isUserStory(r.story) && r.story.level === level),
-    [ranked, level],
+    [ranked, level, day, learner.level, meta.levels],
   );
   const topics = ["all", ...new Set(levelItems.map(topicOf))];
   const q = query.trim().toLowerCase();
@@ -73,6 +78,7 @@ export function Home({ lang }: { lang: LangCode }) {
 
       <div className="level-tabs" role="tablist" aria-label="Level">
         <button role="tab" aria-selected={level === "for-you"} onClick={() => { setLevel("for-you"); setTopic("all"); }}>For you</button>
+        <button role="tab" aria-selected={level === "daily"} onClick={() => { setLevel("daily"); setTopic("all"); }}>Daily</button>
         {meta.levels.map((l) => (
           <button key={l} role="tab" aria-selected={level === l} onClick={() => { setLevel(l); setTopic("all"); }}>
             {l} <small>{countAt(l)}</small>
@@ -82,6 +88,13 @@ export function Home({ lang }: { lang: LangCode }) {
           <button role="tab" aria-selected={level === "mine"} onClick={() => { setLevel("mine"); setTopic("all"); }}>My texts</button>
         )}
       </div>
+      {level === "daily" && (
+        <div className="filters" role="group" aria-label="Day" style={{ marginTop: 12 }}>
+          {[0, 1, 2, 3, 4].map((d) => (
+            <button key={d} className="chip" aria-pressed={day === d} onClick={() => setDay(d)}>{d === 0 ? "Today" : d === 1 ? "Yesterday" : dayLabel(d)}</button>
+          ))}
+        </div>
+      )}
       <div className="filters" role="group" aria-label="Topic" style={{ margin: "12px 0 16px" }}>
         {topics.map((t) => (
           <button key={t} className="chip" aria-pressed={topic === t} onClick={() => setTopic(t)}>{t === "all" ? "All topics" : TOPIC_LABEL[t] ?? t}</button>
@@ -90,10 +103,10 @@ export function Home({ lang }: { lang: LangCode }) {
 
       {featured ? (
         <>
-          <Featured r={featured} lang={lang} saved={learner.favorites.includes(featured.story.id)} onSave={() => learner.toggleFavorite(featured.story.id)} />
+          <Featured r={featured} lang={lang} views={views[featured.story.id]} saved={learner.favorites.includes(featured.story.id)} onSave={() => learner.toggleFavorite(featured.story.id)} />
           <div className="feed">
             {rest.map((r) => (
-              <FeedRow key={r.story.id} r={r} lang={lang} saved={learner.favorites.includes(r.story.id)} onSave={() => learner.toggleFavorite(r.story.id)} />
+              <FeedRow key={r.story.id} r={r} lang={lang} views={views[r.story.id]} saved={learner.favorites.includes(r.story.id)} onSave={() => learner.toggleFavorite(r.story.id)} />
             ))}
           </div>
         </>
@@ -117,7 +130,7 @@ function SaveButton({ saved, onSave }: { saved: boolean; onSave: () => void }) {
   );
 }
 
-function Featured({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void }) {
+function Featured({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void; views?: number }) {
   const s = r.story;
   const topic = isUserStory(s) ? "mine" : s.topic;
   return (
@@ -129,6 +142,7 @@ function Featured({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved
             <span className="lvl">{s.level}</span>
             <span className="tag">{TOPIC_LABEL[topic] ?? topic}</span>
             <span className="tag">{s.minutes} min</span>
+            {!!views && <span className="tag">{compact(views)} reads</span>}
             {r.read && <span className="tag">Read</span>}
           </span>
           <span className="t" lang={lang}>{s.title}</span>
@@ -146,7 +160,7 @@ function Featured({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved
   );
 }
 
-function FeedRow({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void }) {
+function FeedRow({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void; views?: number }) {
   const s = r.story;
   const topic = isUserStory(s) ? "mine" : s.topic;
   return (
@@ -159,6 +173,7 @@ function FeedRow({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved:
         <span className="row small muted">
           <span>{s.minutes} min read</span>
           <span>· {s.date}</span>
+          {!!views && <span>· {compact(views)} reads</span>}
         </span>
       </span>
       <span className="fr-side">
@@ -167,4 +182,25 @@ function FeedRow({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved:
       </span>
     </Link>
   );
+}
+
+
+/** "YYYY-MM-DD" for today minus `back` days. */
+const dayKey = (back: number) => today(new Date(Date.now() - back * 864e5));
+const dayLabel = (back: number) => new Date(Date.now() - back * 864e5).toLocaleDateString("en", { month: "short", day: "numeric" });
+
+const hash = (s: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+};
+
+/**
+ * A fresh reading list for each day: 8 stories near the learner's level (their level and one above),
+ * picked by a hash of the date so everyone sees the same list on a given day and it changes tomorrow.
+ */
+function dailyPicks(pool: Ranked[], day: string, level: number, levels: string[]): Ranked[] {
+  const near = pool.filter((r) => Math.abs(levels.indexOf(r.story.level) - Math.min(level + 1, levels.length - 1)) <= 1);
+  const from = near.length >= 8 ? near : pool;
+  return [...from].sort((a, b) => hash(day + a.story.id) - hash(day + b.story.id)).slice(0, 8);
 }

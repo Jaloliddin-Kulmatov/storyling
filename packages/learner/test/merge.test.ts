@@ -5,7 +5,7 @@ const mem = () => {
   const m = new Map<string, string>();
   return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) };
 };
-const profile = (over: object) => ({ level: 1, words: {}, finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {}, history: [], ...over });
+const profile = (over: object) => ({ level: 1, words: {}, finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {}, history: [], exams: [], ...over });
 const word = (lemma: string, over: object = {}) => ({ lemma, pKnown: 0.5, encounters: 1, taps: 0, ...over });
 
 describe("sync merge", () => {

@@ -65,6 +65,18 @@ interface LangProfile {
   games: Record<string, { played: number; best: number }>;
   /** Stories the learner opened, newest first. */
   history: { id: string; at: number }[];
+  /** Finished mock exams, newest first. */
+  exams: ExamRecord[];
+}
+
+/** One finished mock exam paper. */
+export interface ExamRecord {
+  level: string;
+  /** Percent correct overall. */
+  pct: number;
+  /** Section name → [right, of]. */
+  sections: Record<string, [number, number]>;
+  at: number;
 }
 
 export interface Settings {
@@ -122,6 +134,7 @@ function revive(store: Store): Store {
     profile.favorites ??= [];
     profile.games ??= {};
     profile.history ??= [];
+    profile.exams ??= [];
     for (const w of Object.values(profile.words)) {
       if (w.card) {
         w.card.due = new Date(w.card.due);
@@ -237,6 +250,7 @@ function mergeProfile(a: LangProfile, b: LangProfile): LangProfile {
     quiz: { right: Math.max(a.quiz.right, b.quiz.right), total: Math.max(a.quiz.total, b.quiz.total) },
     favorites: [...new Set([...a.favorites, ...b.favorites])],
     games,
+    exams: [...new Map([...a.exams, ...b.exams].map((e) => [e.at, e])).values()].sort((x, y) => y.at - x.at).slice(0, 100),
     history: [...history.entries()].map(([id, at]) => ({ id, at })).sort((x, y) => y.at - x.at).slice(0, 200),
   };
 }
@@ -317,7 +331,7 @@ export function useLearner(lang: LangCode) {
         lang,
         profiles: {
           ...s.profiles,
-          [lang]: existing ?? { level, words: known ? Object.fromEntries([...new Set([...starterWords(lang), ...known])].map((l) => [l, newUserWord(l, STARTER_P)])) : seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {}, history: [] },
+          [lang]: existing ?? { level, words: known ? Object.fromEntries([...new Set([...starterWords(lang), ...known])].map((l) => [l, newUserWord(l, STARTER_P)])) : seedWords(lang, level), finished: [], stories: [], log: {}, quiz: { right: 0, total: 0 }, favorites: [], games: {}, history: [], exams: [] },
         },
       });
     },
@@ -459,6 +473,11 @@ export function useLearner(lang: LangCode) {
   );
 
   /** Record a practice game result; keeps the best score. */
+  const recordExam = useCallback(
+    (rec: Omit<ExamRecord, "at">) => update((p) => ({ ...p, exams: [{ ...rec, at: Date.now() }, ...p.exams].slice(0, 100) })),
+    [update],
+  );
+
   const recordGame = useCallback(
     (game: string, score: number) =>
       update((p) => {
@@ -489,6 +508,7 @@ export function useLearner(lang: LangCode) {
     quiz: profile?.quiz ?? { right: 0, total: 0 },
     favorites: profile?.favorites ?? [],
     history: profile?.history ?? [],
+    exams: profile?.exams ?? [],
     games: profile?.games ?? {},
     knownCount: words.filter((w) => displayState(w) === "known").length,
     learningCount: words.filter((w) => w.saved === "learning").length,
@@ -509,6 +529,7 @@ export function useLearner(lang: LangCode) {
     markOpened,
     addWords,
     recordGame,
+    recordExam,
     addStory,
     removeStory,
     reset,

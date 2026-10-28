@@ -37,6 +37,10 @@ export async function db(): Promise<NeonQueryFunction<false, false>> {
       out text NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     )`;
+    await q`CREATE TABLE IF NOT EXISTS story_views (
+      story_id text PRIMARY KEY,
+      views integer NOT NULL DEFAULT 0
+    )`;
   })().catch((e) => {
     ready = null;
     throw e;

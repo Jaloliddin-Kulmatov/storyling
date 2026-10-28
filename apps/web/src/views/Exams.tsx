@@ -58,6 +58,22 @@ export function Exams({ lang }: { lang: LangCode }) {
             );
           })}
         </div>
+        {learner.exams.length > 0 && (
+          <section style={{ marginTop: 24 }} aria-label="Your past papers">
+            <h2 style={{ fontSize: 18 }}>Your past papers</h2>
+            <div className="table">
+              {learner.exams.slice(0, 10).map((e) => (
+                <div className="trow" key={e.at}>
+                  <span>
+                    <b>{e.level}</b> <span className="muted small">{new Date(e.at).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })}</span>
+                    <span className="small muted" style={{ display: "block" }}>{Object.entries(e.sections).map(([n, [r, of]]) => `${n} ${r}/${of}`).join(" · ")}</span>
+                  </span>
+                  <b style={{ color: e.pct >= PASS ? "var(--primary)" : undefined }}>{e.pct}%</b>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </>
     );
 
@@ -148,7 +164,12 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
   }, [done]);
   useEffect(() => { if (left <= 0 && !done) setDone(true); }, [left, done]);
   useEffect(() => {
-    if (done && !saved.current) { saved.current = true; learner.recordGame(`exam-${level}`, pct); stopAudio(); }
+    if (done && !saved.current) {
+      saved.current = true;
+      learner.recordGame(`exam-${level}`, pct);
+      learner.recordExam({ level, pct, sections: Object.fromEntries(sections.map((s) => [s.name, [s.right, s.of] as [number, number]])) });
+      stopAudio();
+    }
   }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => stopAudio(), []);
 

@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { TRANSLATE_TARGETS } from "@storyling/learner";
 import { useSyncAgent } from "@/lib/account";
+import { CHANGELOG } from "@/lib/changelog";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
 import { Icon, Logo } from "./ui";
 
@@ -146,6 +147,17 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
         <label className="row" style={{ fontWeight: 600 }}>
           <input type="checkbox" checked={settings.showTranslations} onChange={(e) => set({ showTranslations: e.target.checked })} /> Show translations under sentences
         </label>
+        <details>
+          <summary style={{ fontWeight: 600, cursor: "pointer" }}>What's new</summary>
+          <div className="stack" style={{ marginTop: 8 }}>
+            {CHANGELOG.map((c) => (
+              <div key={c.version}>
+                <b>v{c.version}</b> <span className="muted small">{c.date}</span>
+                <ul className="small" style={{ margin: "4px 0 0", paddingLeft: 18 }}>{c.items.map((x) => <li key={x}>{x}</li>)}</ul>
+              </div>
+            ))}
+          </div>
+        </details>
         <div className="row">
           <button className="btn sm" onClick={exportCsv}>Export my {meta.name} words (CSV)</button>
           <Link className="btn sm" href="/start" onClick={() => ref.current?.close()}>Change language</Link>
