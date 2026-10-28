@@ -14,7 +14,7 @@ import { Icon, StoryRow } from "@/components/ui";
 type Tab = "words" | "saved" | "history" | "texts";
 type Filter = "learning" | "known" | "ignored";
 
-const days = (n: number) => (n < 1 ? "today" : n < 30 ? `in ${Math.round(n)}d` : `in ${Math.round(n / 30)}mo`);
+const days = (n: number) => (n <= 0 ? "now" : n < 1 / 24 ? `in ${Math.max(1, Math.round(n * 1440))} min` : n < 1 ? `in ${Math.round(n * 24)}h` : n < 30 ? `in ${Math.round(n)}d` : `in ${Math.round(n / 30)}mo`);
 
 /** Notebook: saved words, saved (bookmarked) stories and the learner's own texts. */
 export function Notebook({ lang }: { lang: LangCode }) {
@@ -27,6 +27,8 @@ export function Notebook({ lang }: { lang: LangCode }) {
   const setTab = (t: Tab) => router.replace(`/${lang}/words${t === "words" ? "" : `?tab=${t}`}`, { scroll: false });
   const [filter, setFilter] = useState<Filter>("learning");
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState<"due" | "az" | "seen">("due");
+  const due = learner.dueWords().length;
 
   const counts = {
     learning: learner.allWords.filter((w) => w.saved === "learning").length,
@@ -38,8 +40,14 @@ export function Notebook({ lang }: { lang: LangCode }) {
     return learner.allWords
       .filter((w) => (filter === "learning" ? w.saved === "learning" : filter === "ignored" ? w.saved === "ignored" : displayState(w) === "known"))
       .filter((w) => !s || w.lemma.toLowerCase().includes(s) || meaningOf(w)?.meaning.toLowerCase().includes(s))
-      .sort((a, b) => a.lemma.localeCompare(b.lemma));
-  }, [learner.allWords, filter, q, meaningOf]);
+      .sort((a, b) =>
+        sort === "az"
+          ? a.lemma.localeCompare(b.lemma)
+          : sort === "seen"
+            ? b.encounters - a.encounters
+            : (a.card ? new Date(a.card.due).getTime() : Infinity) - (b.card ? new Date(b.card.due).getTime() : Infinity) || a.lemma.localeCompare(b.lemma),
+      );
+  }, [learner.allWords, filter, q, meaningOf, sort]);
 
   const saved = learner.favorites.map((id) => ranked.find((r) => r.story.id === id)).filter((r) => !!r);
   const texts = ranked.filter((r) => learner.stories.some((s) => s.id === r.story.id));
@@ -65,7 +73,20 @@ export function Notebook({ lang }: { lang: LangCode }) {
 
       {tab === "words" && (
         <>
-          <div className="spread" style={{ margin: "14px 0" }}>
+          {counts.learning > 0 && (
+            <div className="review-hero" style={{ marginTop: 14 }}>
+              <span className="rh-icon" aria-hidden="true">{Icon.words}</span>
+              <span className="rh-body">
+                <b>{due ? `${due} of ${counts.learning} words are due` : `${counts.learning} words saved, none due`}</b>
+                <span className="muted small">Flashcards bring each word back just before you would forget it.</span>
+              </span>
+              <span className="row">
+                <Link className="btn sm" href={`/${lang}/practice?mode=match`}>Match game</Link>
+                <Link className="btn primary sm" href={`/${lang}/practice?mode=review`}>{due ? "Review now" : "Review anyway"}</Link>
+              </span>
+            </div>
+          )}
+          <div className="spread" style={{ margin: "14px 0", flexWrap: "wrap", gap: 8 }}>
             <div className="filters">
               {(["learning", "known", "ignored"] as Filter[]).map((f) => (
                 <button key={f} className="chip" aria-pressed={filter === f} onClick={() => setFilter(f)}>
@@ -73,7 +94,14 @@ export function Notebook({ lang }: { lang: LangCode }) {
                 </button>
               ))}
             </div>
-            <input className="input" type="search" placeholder="Search words" aria-label="Search words" value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 220 }} />
+            <span className="row" style={{ flexWrap: "nowrap" }}>
+              <select className="select" aria-label="Sort words" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} style={{ width: "auto" }}>
+                <option value="due">Due first</option>
+                <option value="az">A–Z</option>
+                <option value="seen">Most seen</option>
+              </select>
+              <input className="input" type="search" placeholder="Search words" aria-label="Search words" value={q} onChange={(e) => setQ(e.target.value)} style={{ width: 180 }} />
+            </span>
           </div>
           {list.length ? (
             <div className="word-grid">
@@ -96,11 +124,16 @@ export function Notebook({ lang }: { lang: LangCode }) {
                       <span className="muted">
                         Seen {w.encounters}×{w.card && w.saved === "learning" ? ` · review ${days((new Date(w.card.due).getTime() - Date.now()) / 864e5)}` : ""}
                       </span>
-                      {filter === "learning" ? (
-                        <button className="btn sm" onClick={() => learner.setWord(w.lemma, "known")}>I know it</button>
-                      ) : (
-                        <button className="btn sm" onClick={() => learner.setWord(w.lemma, "learning")}>Learn again</button>
-                      )}
+                      <span className="row" style={{ gap: 6 }}>
+                        {filter === "learning" ? (
+                          <>
+                            <button className="btn ghost sm" aria-label={`Remove ${w.lemma} from the notebook`} onClick={() => learner.setWord(w.lemma, undefined)}>Remove</button>
+                            <button className="btn sm" onClick={() => learner.setWord(w.lemma, "known")}>I know it</button>
+                          </>
+                        ) : (
+                          <button className="btn sm" onClick={() => learner.setWord(w.lemma, "learning")}>Learn again</button>
+                        )}
+                      </span>
                     </div>
                   </div>
                 );

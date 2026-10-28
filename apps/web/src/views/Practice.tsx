@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { canSpeak, playSentence, playWord, stopAudio } from "@/lib/audio";
+import { FUNCTION_POS } from "@storyling/learner";
 import { useLearner, type StoredWord } from "@/lib/learner";
 import { isUserStory, lookupIn, PUNCT, textOf, useStories, type AnyStory } from "@/lib/stories";
 import { highlight, shuffle, useWordInfo } from "@/lib/words";
@@ -23,18 +24,22 @@ interface PoolWord {
   sentence: number;
 }
 
-const GAMES: { mode: Mode; title: string; text: string; icon: keyof typeof Icon }[] = [
-  { mode: "review", title: "Flashcards", text: "Review saved words when they are due.", icon: "words" },
-  { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "spark" },
-  { mode: "order", title: "Build the sentence", text: "Put the words of a story sentence in order.", icon: "library" },
-  { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker" },
-  { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker" },
-  { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress" },
-];
+interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string }
 
-const LINKS: { href: string; title: string; text: string; icon: keyof typeof Icon }[] = [
-  { href: "/grammar", title: "Grammar", text: "Short rules and exercises by level.", icon: "library" },
-  { href: "/exams", title: "Mock exams", text: "Timed paper: listening, reading, vocabulary, grammar.", icon: "progress" },
+const SECTIONS: { title: string; cards: Card[] }[] = [
+  { title: "Words", cards: [
+    { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "spark", tone: "t1", mins: "1 min" },
+    { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress", tone: "t1", mins: "3 min" },
+  ] },
+  { title: "Listening and writing", cards: [
+    { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker", tone: "t2", mins: "2 min" },
+    { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker", tone: "t2", mins: "4 min" },
+    { mode: "order", title: "Build the sentence", text: "Put the words of a story sentence in order.", icon: "library", tone: "t2", mins: "2 min" },
+  ] },
+  { title: "Grammar and exams", cards: [
+    { href: "/grammar", title: "Grammar", text: "Short rules with exercises, by level.", icon: "library", tone: "t3", mins: "5 min" },
+    { href: "/exams", title: "Mock exams", text: "A timed paper: listening, reading, vocabulary, grammar.", icon: "progress", tone: "t3", mins: "20 min" },
+  ] },
 ];
 
 export function Practice({ lang }: { lang: LangCode }) {
@@ -53,33 +58,48 @@ export function Practice({ lang }: { lang: LangCode }) {
   if (mode === "dictation") return <Shell title="Dictation" onBack={back}><DictationGame lang={lang} onBack={back} /></Shell>;
   if (mode === "test") return <Shell title="Level test" onBack={back}><LevelTest lang={lang} /></Shell>;
 
+  const anyGame = Object.values(learner.games).reduce((n, g) => n + g.played, 0);
   return (
     <>
       <div className="page-head">
-        <div><div className="eyebrow">{meta.name} · {learner.learningCount} words to learn</div><h1>Practice</h1></div>
+        <div><div className="eyebrow">{meta.name} · {learner.learningCount} saved words</div><h1>Practice</h1></div>
+        <Link className="btn sm" href={`/${lang}/words`}>{Icon.notebook} Notebook</Link>
       </div>
-      <div className="game-grid">
-        {GAMES.map((g) => {
-          const best = learner.games[g.mode];
-          return (
-            <Link key={g.mode} href={`/${lang}/practice?mode=${g.mode}`} className="game-card">
-              <span className="gi" aria-hidden="true">{Icon[g.icon]}</span>
-              <span className="t">{g.title}</span>
-              <span className="muted small">{g.text}</span>
-              <span className="small gm">
-                {g.mode === "review" ? (due ? <b>{due} due now</b> : "Nothing due") : best ? `Best ${best.best}% · played ${best.played}×` : "Not played yet"}
-              </span>
-            </Link>
-          );
-        })}
-        {LINKS.map((g) => (
-          <Link key={g.href} href={`/${lang}${g.href}`} className="game-card">
-            <span className="gi" aria-hidden="true">{Icon[g.icon]}</span>
-            <span className="t">{g.title}</span>
-            <span className="muted small">{g.text}</span>
-          </Link>
-        ))}
+
+      <div className="review-hero">
+        <span className="rh-icon" aria-hidden="true">{Icon.words}</span>
+        <span className="rh-body">
+          <b>{due ? `${due} ${due === 1 ? "word is" : "words are"} ready to review` : learner.learningCount ? "You're up to date" : "Start your word list"}</b>
+          <span className="muted small">
+            {due ? "A few minutes of flashcards keeps them in memory." : learner.learningCount ? "Nothing is due. You can still go over your saved words." : "Tap words while reading and press Review. They will come back here."}
+          </span>
+        </span>
+        {learner.learningCount ? (
+          <Link className="btn primary" href={`/${lang}/practice?mode=review`}>{due ? "Start review" : "Review anyway"}</Link>
+        ) : (
+          <Link className="btn primary" href={`/${lang}`}>Read a story</Link>
+        )}
       </div>
+
+      {SECTIONS.map((sec) => (
+        <section key={sec.title} className="game-section" aria-label={sec.title}>
+          <h2>{sec.title}</h2>
+          <div className="game-grid">
+            {sec.cards.map((g) => {
+              const best = g.mode ? learner.games[g.mode] : undefined;
+              return (
+                <Link key={g.title} href={g.mode ? `/${lang}/practice?mode=${g.mode}` : `/${lang}${g.href}`} className={`game-card ${g.tone}`}>
+                  <span className="spread"><span className="gi" aria-hidden="true">{Icon[g.icon]}</span><span className="small muted">{g.mins}</span></span>
+                  <span className="t">{g.title}</span>
+                  <span className="muted small">{g.text}</span>
+                  {g.mode && <span className="small gm">{best ? `Best ${best.best}% · played ${best.played}×` : "Not played yet"}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+      {!anyGame && <p className="muted small">Tip: every game uses the words and sentences from the stories you read, so read a story first for the best practice.</p>}
     </>
   );
 }
@@ -113,7 +133,9 @@ function usePool(lang: LangCode, level?: string) {
     const add = (story: AnyStory, lemma: string, sentence: number) => {
       if (out.has(lemma)) return;
       const e = lookupIn(story, lemma);
-      if (e && e.pos !== "name") out.set(lemma, { lemma, display: e.display, meaning: e.meaning, story, sentence });
+      // Content words only, and no meanings that give the answer away ("this (dieser / diese)").
+      if (e && !FUNCTION_POS.has(e.pos) && !e.meaning.toLowerCase().includes(e.display.toLowerCase()))
+        out.set(lemma, { lemma, display: e.display, meaning: e.meaning, story, sentence });
     };
     if (!level) {
       for (const w of learner.allWords.filter((w) => w.saved === "learning")) {
@@ -121,9 +143,12 @@ function usePool(lang: LangCode, level?: string) {
         if (st) add(st, w.lemma, w.source?.sentence ?? st.sentences.findIndex((x) => x.tokens.some((t) => t.lemma === w.lemma)));
       }
     }
+    const saved = out.size;
     for (const st of source)
       st.sentences.forEach((x, i) => x.tokens.forEach((t) => t.lemma && !t.isName && add(st, t.lemma, i)));
-    return [...out.values()];
+    // Saved words first (shuffled), then the rest (shuffled): games show your own words before others.
+    const all = [...out.values()];
+    return [...shuffle(all.slice(0, saved)), ...shuffle(all.slice(saved))];
   }, [stories, learner.allWords, learner.level, level, lang]);
 }
 
@@ -162,6 +187,30 @@ function Done({ score, total, onAgain, note }: { score: number; total: number; o
  * Build a round once and keep it until `key` changes. Games must not reshuffle when the learner's
  * data changes mid-game (a wrong answer saves the word, which updates the store).
  */
+/** Keyboard shortcuts for a game screen (ignored while typing in a field). */
+function useKeys(on: (key: string) => void) {
+  const ref = useRef(on);
+  ref.current = on;
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === " ") e.preventDefault();
+      ref.current(e.key);
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+}
+
+/** Number keys pick an answer, Enter presses the main button (Check / Next). */
+function useChoiceKeys() {
+  useKeys((k) => {
+    if (/^[1-6]$/.test(k)) document.querySelectorAll<HTMLButtonElement>(".flash .choices button:not(:disabled)")[Number(k) - 1]?.click();
+    else if (k === "Enter") document.querySelector<HTMLButtonElement>(".flash > .btn.primary.block:not(:disabled)")?.click();
+  });
+}
+
 function useFrozen<T>(build: () => T, key: string): T {
   const ref = useRef<{ key: string; value: T } | null>(null);
   if (!ref.current || ref.current.key !== key) ref.current = { key, value: build() };
@@ -183,7 +232,10 @@ const interval = (ms: number) => {
 function Review({ lang }: { lang: LangCode }) {
   const learner = useLearner(lang);
   const { meaningOf, contextOf } = useWordInfo(lang);
-  const [queue, setQueue] = useState<string[]>(() => learner.dueWords().map((w) => w.lemma));
+  const [queue, setQueue] = useState<string[]>(() => {
+    const due = learner.dueWords().map((w) => w.lemma);
+    return due.length ? due : shuffle(learner.allWords.filter((w) => w.saved === "learning").map((w) => w.lemma)).slice(0, 20);
+  });
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(0);
   const word = queue[0] ? learner.word(queue[0]) : undefined;
@@ -201,13 +253,14 @@ function Review({ lang }: { lang: LangCode }) {
   }
 
   function grade(g: ReviewGrade) {
-    learner.grade(word!.lemma, g);
+    if (!word) return;
+    learner.grade(word.lemma, g);
     setFlipped(false);
     setDone((n) => n + 1);
     setQueue((q) => (g === "again" ? [...q.slice(1), q[0]!] : q.slice(1)));
   }
 
-  return <FlashCard key={word.lemma} word={word} lang={lang} meaning={meaningOf(word)} ctx={contextOf(word)} flipped={flipped} onFlip={() => setFlipped(true)} onGrade={grade} left={queue.length} />;
+  return <FlashCard key={`${word.lemma}-${done}`} word={word} lang={lang} meaning={meaningOf(word)} ctx={contextOf(word)} flipped={flipped} onFlip={() => setFlipped(true)} onGrade={grade} left={queue.length} />;
 }
 
 function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }: {
@@ -221,6 +274,10 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
   left: number;
 }) {
   const intervals = word.card ? previewIntervals(word.card) : undefined;
+  useKeys((k) => {
+    if (!flipped && (k === " " || k === "Enter")) onFlip();
+    else if (flipped && "1234".includes(k)) onGrade(GRADES[Number(k) - 1]!.g);
+  });
   const parts = ctx ? highlight(ctx.text, ctx.surface) : null;
   return (
     <div className="flash">
@@ -231,7 +288,7 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
       </div>
       {ctx && <div className="ctx" lang={lang}>{parts ? <>{parts[0]}<mark>{parts[1]}</mark>{parts[2]}</> : ctx.text}</div>}
       {!flipped ? (
-        <button className="btn primary block" onClick={onFlip} autoFocus>Show meaning</button>
+        <button className="btn primary block" onClick={onFlip} autoFocus>Show meaning <kbd>Space</kbd></button>
       ) : (
         <>
           <div>
@@ -241,13 +298,14 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
             {ctx?.translation && <p className="muted" style={{ margin: "8px 0 0" }}><Tr>{ctx.translation}</Tr></p>}
           </div>
           <div className="grades">
-            {GRADES.map(({ g, label, cls }) => (
-              <button key={g} className={`btn ${cls}`} onClick={() => onGrade(g)}>
+            {GRADES.map(({ g, label, cls }, i) => (
+              <button key={g} className={`btn ${cls}`} onClick={() => onGrade(g)} title={`Key ${i + 1}`}>
                 {label}
                 {intervals && <small>{interval(intervals[g])}</small>}
               </button>
             ))}
           </div>
+          <span className="small muted">Keyboard: 1 Again · 2 Hard · 3 Good · 4 Easy</span>
         </>
       )}
     </div>
@@ -262,7 +320,7 @@ function Match({ lang }: { lang: LangCode }) {
   const { pairs, right } = useFrozen(() => {
     const seen = new Set<string>();
     // Different meanings only, so every pair is unambiguous.
-    const pairs = shuffle(pool).filter((p) => (seen.has(p.meaning) ? false : (seen.add(p.meaning), true))).slice(0, 6);
+    const pairs = pool.filter((p) => (seen.has(p.meaning) ? false : (seen.add(p.meaning), true))).slice(round * 6 % Math.max(6, pool.length - 6)).slice(0, 6);
     return { pairs, right: shuffle(pairs) };
   }, `match-${round}`);
   const [picked, setPicked] = useState<string | null>(null);
@@ -316,6 +374,7 @@ function Match({ lang }: { lang: LangCode }) {
 const ROUNDS = 5;
 
 function Order({ lang }: { lang: LangCode }) {
+  useChoiceKeys();
   const sentences = useSentences(lang);
   const learner = useLearner(lang);
   const noSpace = language(lang).noSpace;
@@ -335,6 +394,17 @@ function Order({ lang }: { lang: LangCode }) {
   }
 
   const join = (xs: string[]) => xs.join(noSpace ? "" : " ");
+  // Hint: keep the correct start of what was built, then add the next right word.
+  const hintAt = (b: number[]) => {
+    let k = 0;
+    while (k < b.length && words[b[k]!]!.surface === words[k]!.surface) k++;
+    return k < words.length ? k : -1;
+  };
+  const correctIdx = (b: number[], k: number) => {
+    const used = new Set(b.slice(0, k));
+    const next = words.findIndex((t, i) => !used.has(i) && t.surface === words[k]!.surface);
+    return next >= 0 ? [next] : [];
+  };
   const answer = join(words.map((t) => t.surface));
   function check() {
     const ok = join(built.map((i) => words[i]!.surface)) === answer;
@@ -365,6 +435,13 @@ function Order({ lang }: { lang: LangCode }) {
           <button key={i} className="tile sm" disabled={built.includes(i) || checked !== null} onClick={() => setBuilt([...built, i])}>{words[i]!.surface}</button>
         ))}
       </div>
+      {checked === null && (
+        <div className="row" style={{ justifyContent: "center", gap: 8 }}>
+          <button className="btn ghost sm" onClick={() => playSentence(cur.story.id, lang, cur.i, textOf(cur.story, cur.s))}>{Icon.speaker} Listen</button>
+          <button className="btn ghost sm" disabled={hintAt(built) < 0} onClick={() => { const k = hintAt(built); if (k >= 0) setBuilt([...built.slice(0, k), ...correctIdx(built, k)]); }}>Hint</button>
+          <button className="btn ghost sm" disabled={!built.length} onClick={() => setBuilt([])}>Clear</button>
+        </div>
+      )}
       {checked === null ? (
         <button className="btn primary block" disabled={built.length !== words.length} onClick={check}>Check</button>
       ) : (
@@ -379,6 +456,7 @@ function Order({ lang }: { lang: LangCode }) {
 
 // ── Listening ──
 function Listen({ lang }: { lang: LangCode }) {
+  useChoiceKeys();
   const sentences = useSentences(lang);
   const learner = useLearner(lang);
   const [game, setGame] = useState(0);
@@ -398,7 +476,6 @@ function Listen({ lang }: { lang: LangCode }) {
     if (cur) play();
   }, [cur]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!canSpeak()) return <div className="empty"><p className="muted">This browser can't play speech. Try Chrome, Safari or Edge.</p></div>;
   if (!cur) {
     if (rounds.length) return <Done score={score} total={rounds.length} onAgain={() => { setGame((g) => g + 1); setN(0); setScore(0); setChosen(null); }} />;
     return <div className="empty"><p className="muted">No sentences to practice yet.</p></div>;
@@ -436,6 +513,7 @@ function Listen({ lang }: { lang: LangCode }) {
 
 // ── Level test ──
 function LevelTest({ lang }: { lang: LangCode }) {
+  useChoiceKeys();
   const meta = language(lang);
   const learner = useLearner(lang);
   const stories = useStories(lang);

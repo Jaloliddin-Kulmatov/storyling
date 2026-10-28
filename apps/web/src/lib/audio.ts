@@ -60,6 +60,20 @@ async function playSpan(file: string, [start, end]: Span, rate = 1): Promise<boo
 
 export const canSpeak = () => typeof speechSynthesis !== "undefined";
 
+/**
+ * The most natural-sounding installed voice for a language: neural/online voices (Edge "Natural", Chrome "Google",
+ * Safari "Premium"/"Enhanced") before the basic system ones, then an exact region match.
+ */
+function bestVoice(tag: string): SpeechSynthesisVoice | undefined {
+  const base = tag.slice(0, 2).toLowerCase();
+  const score = (v: SpeechSynthesisVoice) =>
+    (/natural|neural|premium|enhanced|online/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 2 : 0) + (v.lang?.toLowerCase() === tag.toLowerCase() ? 1 : 0);
+  return speechSynthesis
+    .getVoices()
+    .filter((v) => v.lang?.toLowerCase().replace("_", "-").startsWith(base))
+    .sort((a, b) => score(b) - score(a))[0];
+}
+
 /** Browser text-to-speech. Resolves true when finished. */
 export function speak(text: string, lang: LangCode, rate = 1): Promise<boolean> {
   stopAudio();
@@ -70,7 +84,7 @@ export function speak(text: string, lang: LangCode, rate = 1): Promise<boolean> 
     const tag = language(lang).tts;
     u.lang = tag;
     u.rate = rate;
-    const voice = speechSynthesis.getVoices().find((v) => v.lang?.toLowerCase().startsWith(tag.slice(0, 2)));
+    const voice = bestVoice(tag);
     if (voice) u.voice = voice;
     u.onend = () => resolve(mine === token);
     u.onerror = () => resolve(false);
