@@ -151,3 +151,5 @@ export function coverOf(id: string): string | undefined {
 
 export * from "./videos";
 export * from "./grammar";
+export * from "./gender";
+export * from "./reviews";

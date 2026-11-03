@@ -2,7 +2,8 @@
 
 import { countView } from "@/lib/views";
 import { AskPanel, SpeakRun, WritePanel } from "@/components/StoryTools";
-import { romanize, splitKorean } from "@storyling/learner";
+import { koreanLabels, romanize, splitKorean } from "@storyling/learner";
+import { ARTICLE, DE_GENDER, reviewOf } from "@storyling/content";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
 import Link from "next/link";
@@ -127,6 +128,7 @@ function StoryReader({ story }: { story: AnyStory }) {
             <button aria-label="Larger text" onClick={() => setSettings({ fontScale: Math.min(1.4, +(settings.fontScale + 0.1).toFixed(2)) })}>A+</button>
           </div>
           <button className="chip" aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>Translation</button>
+          {lang === "de" && <button className="chip" aria-pressed={settings.genderColors} onClick={() => setSettings({ genderColors: !settings.genderColors })} title="Colour nouns: der blue, die red, das green">der/die/das</button>}
           {lang === "ko" && <button className="chip" aria-pressed={settings.romanize} onClick={() => setSettings({ romanize: !settings.romanize })}>Romanization</button>}
           <button className="chip" aria-pressed={settings.highlightNew} onClick={() => setSettings({ highlightNew: !settings.highlightNew })}>Highlights</button>
           <button className="chip" aria-pressed={settings.levelUnderline} onClick={() => setSettings({ levelUnderline: !settings.levelUnderline })}>Levels</button>
@@ -145,6 +147,9 @@ function StoryReader({ story }: { story: AnyStory }) {
           </div>
           <h1 lang={lang} style={{ marginTop: 6 }}>{story.title}</h1>
           {story.titleEnglish && <p className="muted" style={{ margin: "4px 0 0" }}>{story.titleEnglish}</p>}
+          {!isUserStory(story) && (reviewOf(story.id)
+            ? <p className="small review-ok" style={{ margin: "6px 0 0" }}>✓ Checked by a native speaker</p>
+            : <p className="small muted" style={{ margin: "6px 0 0" }}>Written by Storyling. Not yet checked by a native speaker.</p>)}
 
           <div className={`text${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
             {story.sentences.map((s, i) => (
@@ -157,10 +162,11 @@ function StoryReader({ story }: { story: AnyStory }) {
                   const state = ws === "learning" && learner.word(t.lemma)?.saved !== "learning" ? "new" : ws;
                   const sel = picked?.lemma === t.lemma && picked.sentence === i;
                   const lv = wordLevelOf(lang, t.lemma);
+                  const gender = lang === "de" && settings.genderColors && !t.isName ? genderOf(story, t.lemma) : undefined;
                   return (
                     <span key={j}>
                       {space}
-                      <button className={`w ${state}${lv !== undefined && !t.isName ? ` lv${Math.min(lv, 4)}` : ""}${sel ? " selected" : ""}`} onClick={() => pick(t, i)}>{t.surface}</button>
+                      <button className={`w ${state}${lv !== undefined && !t.isName ? ` lv${Math.min(lv, 4)}` : ""}${gender ? ` g-${gender}` : ""}${sel ? " selected" : ""}`} onClick={() => pick(t, i)}>{t.surface}</button>
                     </span>
                   );
                 })}
@@ -313,7 +319,10 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
         <button className="icon-btn close" aria-label="Close" onClick={onClose}>{Icon.close}</button>
       </div>
       <div className="row" style={{ alignItems: "center" }}>
-        <span className="lemma" lang={lang}>{entry?.display ?? picked.lemma}</span>
+        <span className="lemma" lang={lang}>
+          {lang === "de" && entry?.pos === "noun" && DE_GENDER[entry.display] && <span className={`art g-${DE_GENDER[entry.display]}`}>{ARTICLE[DE_GENDER[entry.display]!]} </span>}
+          {entry?.display ?? picked.lemma}
+        </span>
         <button className="icon-btn" aria-label="Hear the word" onClick={() => playWord(lang, picked.lemma, picked.surface)}>{Icon.speaker}</button>
       </div>
       {entry?.reading && <span className="reading">{entry.reading}</span>}
@@ -324,6 +333,15 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
           <div className="ko-split" aria-label="Word parts">
             <span lang="ko"><b>{sp.stem}</b> + <b className="ko-end">{sp.ending}</b></span>
             {sp.gloss && <span className="muted small">{sp.ending}: {sp.gloss}</span>}
+            {(() => {
+              const lb = koreanLabels(picked.surface);
+              return lb.honorific || lb.speech ? (
+                <span className="row small" style={{ gap: 6, flexWrap: "wrap" }}>
+                  {lb.honorific && <span className="pill" title="Shows respect to the person the verb is about">honorific</span>}
+                  {lb.speech && <span className="pill">{lb.speech}</span>}
+                </span>
+              ) : null;
+            })()}
           </div>
         ) : null;
       })()}
@@ -582,4 +600,12 @@ function Examples({ story, lemma }: { story: AnyStory; lemma: string }) {
       </div>
     </div>
   );
+}
+
+
+/** Gender of a German noun in the dictionary, for der/die/das colours. */
+function genderOf(story: AnyStory, lemma?: string) {
+  if (!lemma) return undefined;
+  const e = lookupIn(story, lemma);
+  return e?.pos === "noun" ? DE_GENDER[e.display] : undefined;
 }

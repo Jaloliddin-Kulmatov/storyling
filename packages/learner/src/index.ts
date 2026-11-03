@@ -105,6 +105,8 @@ export interface Settings {
   uiLang: string;
   /** Show romanization under Korean text (for beginners). */
   romanize: boolean;
+  /** Colour German nouns by gender: der (blue), die (red), das (green). */
+  genderColors: boolean;
 }
 
 interface Store {
@@ -128,6 +130,7 @@ export const defaultSettings: Settings = {
   translateTo: "en",
   uiLang: "en",
   romanize: false,
+  genderColors: true,
 };
 
 const EMPTY: Store = { profiles: {}, settings: defaultSettings };

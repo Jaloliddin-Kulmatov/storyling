@@ -52,6 +52,23 @@ export interface KoreanSplit {
   gloss?: string;
 }
 
+export interface KoreanLabels {
+  /** The verb shows respect to the person it is about (-시-, 께, 드리다 …). */
+  honorific: boolean;
+  /** Speech level of a sentence-final form. */
+  speech?: "formal polite (합니다)" | "polite (해요)";
+}
+
+const HONORIFIC = /(시[다고며면니]|셨|세요|셔요|께서|께|드리|드렸|드려|계시|계세|주무|잡수|댁)/;
+
+/** Honorific and speech-level labels for a word as written (surface). */
+export function koreanLabels(surface: string): KoreanLabels {
+  return {
+    honorific: HONORIFIC.test(surface),
+    ...(/(니다|니까)$/.test(surface) ? { speech: "formal polite (합니다)" as const } : /요$/.test(surface) ? { speech: "polite (해요)" as const } : {}),
+  };
+}
+
 /**
  * Split a word as written (surface) against its dictionary form (lemma): 준호는 / 준호 → 준호 + 는 (topic particle);
  * 갔어요 / 가다 → 가 + ㅆ어요. Returns undefined when nothing is attached.

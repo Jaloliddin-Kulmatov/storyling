@@ -433,3 +433,23 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 .bubble { padding: 10px 12px; border-radius: 14px; background: var(--surface-2); line-height: 1.5; white-space: pre-wrap; max-width: 92%; }
 .bubble.me { background: var(--primary-soft); justify-self: end; }
 .fab-bar { flex-wrap: wrap; justify-content: center; }
+
+/* German noun genders: der / die / das */
+:root { --g-m: #2563eb; --g-f: #dc2626; --g-n: #16a34a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g-m: #7aa2ff; --g-f: #ff8a8a; --g-n: #5fd38d; } }
+:root[data-theme="dark"] { --g-m: #7aa2ff; --g-f: #ff8a8a; --g-n: #5fd38d; }
+.w.g-m, .art.g-m { color: var(--g-m); }
+.w.g-f, .art.g-f { color: var(--g-f); }
+.w.g-n, .art.g-n { color: var(--g-n); }
+.art { font-size: 0.6em; font-weight: 700; vertical-align: middle; }
+
+.week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.week-cell { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--surface-2); }
+.week-cell b { font-size: 22px; }
+.week-cell .up { color: var(--primary); font-weight: 700; }
+.week-cell .down { color: var(--danger, #c0392b); font-weight: 700; }
+.lvl-bars { display: grid; gap: 8px; }
+.lvl-bar { display: flex; align-items: center; gap: 10px; }
+.lvl-bar .bar { flex: 1; height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.lvl-bar .bar span { display: block; height: 100%; background: var(--primary); border-radius: 99px; }
+.review-ok { color: var(--primary); font-weight: 700; }

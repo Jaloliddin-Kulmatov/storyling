@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { romanize, splitKorean } from "../src/korean";
+import { koreanLabels, romanize, splitKorean } from "../src/korean";
 
 describe("korean aids", () => {
   it("romanizes", () => {
@@ -7,6 +7,12 @@ describe("korean aids", () => {
     expect(romanize("감사합니다")).toBe("gamsahamnida");
     expect(romanize("먹어요")).toBe("meogeoyo");
     expect(romanize("한국어")).toBe("hangugeo");
+  });
+  it("labels honorifics and speech levels", () => {
+    expect(koreanLabels("좋아하세요")).toEqual({ honorific: true, speech: "polite (해요)" });
+    expect(koreanLabels("감사합니다")).toEqual({ honorific: false, speech: "formal polite (합니다)" });
+    expect(koreanLabels("할머니께")).toEqual({ honorific: true });
+    expect(koreanLabels("먹었어요").honorific).toBe(false);
   });
   it("splits particles and endings", () => {
     expect(splitKorean("준호는", "준호")).toEqual({ stem: "준호", ending: "는", gloss: "topic particle" });
