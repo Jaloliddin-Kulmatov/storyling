@@ -20,7 +20,7 @@ describe("sync merge", () => {
     expect(m.words.a.saved).toBe("learning");
     expect(m.words.a.encounters).toBe(5);
     expect(m.finished.sort()).toEqual(["s1", "s2"]);
-    expect(m.log["2026-10-01"]).toEqual({ seconds: 600, words: 80, stories: 1 });
+    expect(m.log["2026-10-01"]).toMatchObject({ seconds: 600, words: 80, stories: 1 });
     expect(m.games.match).toEqual({ played: 2, best: 90 });
   });
 

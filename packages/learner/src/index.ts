@@ -49,7 +49,18 @@ export interface DayLog {
   seconds: number;
   words: number;
   stories: number;
+  /** Flashcards graded that day. */
+  reviews?: number;
+  /** Dictation rounds finished that day. */
+  dictations?: number;
 }
+
+/** Add to today's counters. */
+const bumpDay = (log: Record<string, DayLog>, patch: Partial<Record<"reviews" | "dictations", number>>): Record<string, DayLog> => {
+  const day = today();
+  const cur = log[day] ?? { seconds: 0, words: 0, stories: 0 };
+  return { ...log, [day]: { ...cur, reviews: (cur.reviews ?? 0) + (patch.reviews ?? 0), dictations: (cur.dictations ?? 0) + (patch.dictations ?? 0) } };
+};
 
 interface LangProfile {
   level: Level;
@@ -90,6 +101,10 @@ export interface Settings {
   theme: "auto" | "light" | "dark";
   /** Language for translations and word meanings ("en" = as written in the content). */
   translateTo: string;
+  /** Language of the app's own buttons and headings. */
+  uiLang: string;
+  /** Show romanization under Korean text (for beginners). */
+  romanize: boolean;
 }
 
 interface Store {
@@ -111,6 +126,8 @@ export const defaultSettings: Settings = {
   levelUnderline: true,
   theme: "auto",
   translateTo: "en",
+  uiLang: "en",
+  romanize: false,
 };
 
 const EMPTY: Store = { profiles: {}, settings: defaultSettings };
@@ -230,7 +247,9 @@ function mergeProfile(a: LangProfile, b: LangProfile): LangProfile {
   const log: Record<string, DayLog> = { ...a.log };
   for (const [d, l] of Object.entries(b.log)) {
     const m = log[d];
-    log[d] = m ? { seconds: Math.max(m.seconds, l.seconds), words: Math.max(m.words, l.words), stories: Math.max(m.stories, l.stories) } : l;
+    log[d] = m
+      ? { seconds: Math.max(m.seconds, l.seconds), words: Math.max(m.words, l.words), stories: Math.max(m.stories, l.stories), reviews: Math.max(m.reviews ?? 0, l.reviews ?? 0), dictations: Math.max(m.dictations ?? 0, l.dictations ?? 0) }
+      : l;
   }
   const games = { ...a.games };
   for (const [g, v] of Object.entries(b.games)) {
@@ -439,6 +458,7 @@ export function useLearner(lang: LangCode) {
         return {
           ...p,
           words: { ...p.words, [lemma]: graduated ? { ...w, card, saved: undefined, pKnown: Math.max(w.pKnown, STARTER_P) } : { ...w, card } },
+          log: bumpDay(p.log, { reviews: 1 }),
         };
       }),
     [update],
@@ -482,7 +502,11 @@ export function useLearner(lang: LangCode) {
     (game: string, score: number) =>
       update((p) => {
         const g = p.games[game] ?? { played: 0, best: 0 };
-        return { ...p, games: { ...p.games, [game]: { played: g.played + 1, best: Math.max(g.best, score) } } };
+        return {
+          ...p,
+          games: { ...p.games, [game]: { played: g.played + 1, best: Math.max(g.best, score) } },
+          ...(game === "dictation" ? { log: bumpDay(p.log, { dictations: 1 }) } : {}),
+        };
       }),
     [update],
   );
@@ -541,3 +565,4 @@ export * from "./dictation";
 export * from "./subtitles";
 export * from "./targets";
 export * from "./translate";
+export * from "./korean";

@@ -8,16 +8,17 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { TRANSLATE_TARGETS } from "@storyling/learner";
 import { useSyncAgent } from "@/lib/account";
 import { CHANGELOG } from "@/lib/changelog";
+import { UI_LANGS, useT } from "@/lib/i18n";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
 import { Icon, Logo } from "./ui";
 
 const NAV = [
-  { href: "", label: "Home", icon: Icon.home },
-  { href: "/words", label: "Notebook", icon: Icon.notebook },
-  { href: "/watch", label: "Watch", icon: Icon.video },
-  { href: "/practice", label: "Practice", icon: Icon.practice },
-  { href: "/dictionary", label: "Dictionary", icon: Icon.dict },
-  { href: "/progress", label: "Me", icon: Icon.me },
+  { href: "", label: "nav.home", icon: Icon.home },
+  { href: "/words", label: "nav.notebook", icon: Icon.notebook },
+  { href: "/watch", label: "nav.watch", icon: Icon.video },
+  { href: "/practice", label: "nav.practice", icon: Icon.practice },
+  { href: "/dictionary", label: "nav.dictionary", icon: Icon.dict },
+  { href: "/progress", label: "nav.me", icon: Icon.me },
 ] as const;
 
 // Phones get five tabs; Dictionary is reached from the Notebook there.
@@ -29,6 +30,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   const hydrated = useHydrated();
   const learner = useLearner(lang);
   const meta = language(lang);
+  const t = useT();
   useSyncAgent();
   const reading = path.includes("/read/");
   const due = hydrated ? learner.dueWords().length : 0;
@@ -50,7 +52,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   const link = (n: (typeof NAV)[number]) => (
     <Link key={n.label} href={`/${lang}${n.href}`} aria-current={isActive(n.href) ? "page" : undefined}>
       {n.icon}
-      <span>{n.label}</span>
+      <span>{t(n.label)}</span>
       {n.href === "/practice" && due > 0 && <span className="badge">{due}</span>}
     </Link>
   );
@@ -71,7 +73,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
         <nav className="nav" aria-label="Main">{NAV.map(link)}</nav>
         <div className="side-foot">
           <button className="btn ghost sm" onClick={() => settingsRef.current?.showModal()} style={{ justifyContent: "flex-start" }}>
-            <span style={{ width: 18, height: 18, display: "inline-grid" }}>{Icon.settings}</span> Settings
+            <span style={{ width: 18, height: 18, display: "inline-grid" }}>{Icon.settings}</span> {t("nav.settings")}
           </button>
         </div>
       </aside>
@@ -96,6 +98,7 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
   const learner = useLearner(lang);
   const router = useRouter();
   const meta = language(lang);
+  const t = useT();
 
   function exportCsv() {
     const rows = [["word", "status", "met in stories", "times looked up"]];
@@ -113,31 +116,42 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
     <dialog ref={ref} className="sheet" aria-labelledby="settings-h">
       <div className="in">
         <div className="spread">
-          <h2 id="settings-h" style={{ fontSize: 22 }}>Settings</h2>
+          <h2 id="settings-h" style={{ fontSize: 22 }}>{t("set.title")}</h2>
           <button className="icon-btn" aria-label="Close" onClick={() => ref.current?.close()}>{Icon.close}</button>
         </div>
         <label className="field">
-          Text size
+          {t("set.text")}
           <input type="range" min={0.85} max={1.4} step={0.05} value={settings.fontScale} onChange={(e) => set({ fontScale: Number(e.target.value) })} />
         </label>
         <label className="field">
-          Translations and meanings in
+          {t("set.ui")}
+          <select className="select" value={settings.uiLang} onChange={(e) => set({ uiLang: e.target.value })}>
+            {UI_LANGS.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
+          </select>
+        </label>
+        <label className="field">
+          {t("set.translate")}
           <select className="select" value={settings.translateTo} onChange={(e) => set({ translateTo: e.target.value })}>
             {TRANSLATE_TARGETS.map((t) => <option key={t.code} value={t.code}>{t.native === t.name ? t.name : `${t.name} · ${t.native}`}</option>)}
           </select>
         </label>
         <label className="field">
-          Daily goal
+          {t("set.goal")}
           <select className="select" value={settings.dailyGoalMinutes} onChange={(e) => set({ dailyGoalMinutes: Number(e.target.value) })}>
             {[5, 10, 15, 20, 30].map((m) => <option key={m} value={m}>{m} minutes a day</option>)}
           </select>
         </label>
         <div className="field">
-          Theme
+          {t("set.theme")}
           <div className="seg" role="group" aria-label="Theme">
             {(["auto", "light", "dark"] as const).map((t) => <button key={t} aria-pressed={settings.theme === t} onClick={() => set({ theme: t })}>{t === "auto" ? "Auto" : t === "light" ? "Light" : "Dark"}</button>)}
           </div>
         </div>
+        {lang === "ko" && (
+          <label className="row" style={{ fontWeight: 600 }}>
+            <input type="checkbox" checked={settings.romanize} onChange={(e) => set({ romanize: e.target.checked })} /> {t("set.romanize")}
+          </label>
+        )}
         <label className="row" style={{ fontWeight: 600 }}>
           <input type="checkbox" checked={settings.levelUnderline} onChange={(e) => set({ levelUnderline: e.target.checked })} /> Underline words by level
         </label>

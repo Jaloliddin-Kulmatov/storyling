@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
 import { Tr } from "@/lib/translate";
 import { language } from "@storyling/content";
 import { previewIntervals, type LangCode, type ReviewGrade, type Sentence } from "@storyling/core";
@@ -26,17 +27,17 @@ interface PoolWord {
 
 interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string }
 
-const SECTIONS: { title: string; cards: Card[] }[] = [
-  { title: "Words", cards: [
+const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
+  { title: "Words", key: "prac.words", cards: [
     { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "spark", tone: "t1", mins: "1 min" },
     { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress", tone: "t1", mins: "3 min" },
   ] },
-  { title: "Listening and writing", cards: [
+  { title: "Listening and writing", key: "prac.listen", cards: [
     { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker", tone: "t2", mins: "2 min" },
     { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker", tone: "t2", mins: "4 min" },
     { mode: "order", title: "Build the sentence", text: "Put the words of a story sentence in order.", icon: "library", tone: "t2", mins: "2 min" },
   ] },
-  { title: "Grammar and exams", cards: [
+  { title: "Grammar and exams", key: "prac.exams", cards: [
     { href: "/grammar", title: "Grammar", text: "Short rules with exercises, by level.", icon: "library", tone: "t3", mins: "5 min" },
     { href: "/exams", title: "Mock exams", text: "A timed paper: listening, reading, vocabulary, grammar.", icon: "progress", tone: "t3", mins: "20 min" },
   ] },
@@ -59,11 +60,12 @@ export function Practice({ lang }: { lang: LangCode }) {
   if (mode === "test") return <Shell title="Level test" onBack={back}><LevelTest lang={lang} /></Shell>;
 
   const anyGame = Object.values(learner.games).reduce((n, g) => n + g.played, 0);
+  const t = useT();
   return (
     <>
       <div className="page-head">
-        <div><div className="eyebrow">{meta.name} · {learner.learningCount} saved words</div><h1>Practice</h1></div>
-        <Link className="btn sm" href={`/${lang}/words`}>{Icon.notebook} Notebook</Link>
+        <div><div className="eyebrow">{meta.name} · {learner.learningCount} saved words</div><h1>{t("prac.title")}</h1></div>
+        <Link className="btn sm" href={`/${lang}/words`}>{Icon.notebook} {t("prac.notebook")}</Link>
       </div>
 
       <div className="review-hero">
@@ -83,7 +85,7 @@ export function Practice({ lang }: { lang: LangCode }) {
 
       {SECTIONS.map((sec) => (
         <section key={sec.title} className="game-section" aria-label={sec.title}>
-          <h2>{sec.title}</h2>
+          <h2>{t(sec.key)}</h2>
           <div className="game-grid">
             {sec.cards.map((g) => {
               const best = g.mode ? learner.games[g.mode] : undefined;

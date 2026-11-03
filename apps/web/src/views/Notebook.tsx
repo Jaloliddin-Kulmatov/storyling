@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
 import { Tr } from "@/lib/translate";
 import { displayState, type LangCode } from "@storyling/core";
 import Link from "next/link";
@@ -26,6 +27,7 @@ export function Notebook({ lang }: { lang: LangCode }) {
   const tab = (params.get("tab") as Tab) || "words";
   const setTab = (t: Tab) => router.replace(`/${lang}/words${t === "words" ? "" : `?tab=${t}`}`, { scroll: false });
   const [filter, setFilter] = useState<Filter>("learning");
+  const t = useT();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"due" | "az" | "seen">("due");
   const due = learner.dueWords().length;
@@ -56,7 +58,7 @@ export function Notebook({ lang }: { lang: LangCode }) {
   return (
     <>
       <div className="page-head">
-        <div><div className="eyebrow">Your collection</div><h1>Notebook</h1></div>
+        <div><div className="eyebrow">Your collection</div><h1>{t("note.title")}</h1></div>
         <div className="row">
           <Link className="btn sm" href={`/${lang}/packs`}>{Icon.library} Word packs</Link>
           <Link className="btn sm" href={`/${lang}/dictionary`}>{Icon.dict} Dictionary</Link>
@@ -65,10 +67,10 @@ export function Notebook({ lang }: { lang: LangCode }) {
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Notebook">
-        <button role="tab" aria-selected={tab === "words"} onClick={() => setTab("words")}>Words <small>{counts.learning}</small></button>
-        <button role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>Saved stories <small>{saved.length}</small></button>
-        <button role="tab" aria-selected={tab === "history"} onClick={() => setTab("history")}>History <small>{history.length}</small></button>
-        <button role="tab" aria-selected={tab === "texts"} onClick={() => setTab("texts")}>My texts <small>{texts.length}</small></button>
+        <button role="tab" aria-selected={tab === "words"} onClick={() => setTab("words")}>{t("note.words")} <small>{counts.learning}</small></button>
+        <button role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>{t("note.saved")} <small>{saved.length}</small></button>
+        <button role="tab" aria-selected={tab === "history"} onClick={() => setTab("history")}>{t("note.history")} <small>{history.length}</small></button>
+        <button role="tab" aria-selected={tab === "texts"} onClick={() => setTab("texts")}>{t("note.texts")} <small>{texts.length}</small></button>
       </div>
 
       {tab === "words" && (

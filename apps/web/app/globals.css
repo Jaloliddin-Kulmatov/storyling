@@ -403,3 +403,25 @@ a:hover .cover > img { transform: scale(1.04); }
 kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5px; border: 1px solid currentColor; opacity: 0.7; margin-left: 6px; }
 .word-card { transition: box-shadow 0.15s, transform 0.15s; }
 .word-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+
+/* landing: level picker, demo switch, ui language */
+.level-pick { display: grid; gap: 12px; margin-bottom: 28px; }
+.level-chip { text-decoration: none; font-size: 15px; padding: 7px 16px; }
+.level-chip:hover { border-color: var(--primary); color: var(--primary); }
+.demo-switch { display: inline-flex; }
+.lang-opt.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.ui-lang .select { width: auto; min-height: 38px; padding-block: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.ko-split { display: grid; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); font-size: 15px; }
+.ko-split .ko-end { color: var(--primary); }
+.rom { display: block; font-family: var(--f-ui, inherit); font-size: 13.5px; color: var(--muted); letter-spacing: 0.01em; margin: -2px 0 6px; }
+
+/* daily plan */
+.plan { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); margin: 0 0 18px; }
+.plan-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.plan-steps li { display: flex; align-items: center; gap: 10px; }
+.plan-steps li.done .plan-label { color: var(--muted); text-decoration: line-through; }
+.plan-dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: var(--surface-2); flex: none; }
+.plan-steps li.done .plan-dot { background: var(--primary); color: #fff; }
+.plan-label { flex: 1; min-width: 0; }

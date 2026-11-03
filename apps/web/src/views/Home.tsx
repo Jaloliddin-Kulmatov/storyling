@@ -1,9 +1,11 @@
 "use client";
 
 import { compact, useViews } from "@/lib/views";
+import { useT } from "@/lib/i18n";
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
@@ -19,11 +21,16 @@ export function Home({ lang }: { lang: LangCode }) {
   const [settings] = useSettings();
   const ranked = useRankedStories(lang);
   const meta = language(lang);
-  const [level, setLevel] = useState("for-you");
+  const params = useSearchParams();
+  const [level, setLevel] = useState(() => {
+    const l = params.get("level");
+    return l && meta.levels.includes(l) ? l : "for-you";
+  });
   const [topic, setTopic] = useState("all");
   const [query, setQuery] = useState("");
   const [day, setDay] = useState(0); // 0 = today, 1 = yesterday, ...
   const views = useViews();
+  const t = useT();
 
   const minutes = Math.floor((learner.log[today()]?.seconds ?? 0) / 60);
   const goal = settings.dailyGoalMinutes;
@@ -56,29 +63,31 @@ export function Home({ lang }: { lang: LangCode }) {
       <div className="home-top">
         <div>
           <div className="eyebrow">{meta.name} · {new Date().toLocaleDateString("en", { weekday: "long", day: "numeric", month: "long" })}</div>
-          <h1>Read today</h1>
+          <h1>{t("home.title")}</h1>
         </div>
         <div className="row">
-          <input className="input" type="search" placeholder="Search stories" aria-label="Search stories" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 200 }} />
-          <Link className="btn sm" href={`/${lang}/add`}>{Icon.add} Add text</Link>
+          <input className="input" type="search" placeholder={t("home.search")} aria-label={t("home.search")} value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 200 }} />
+          <Link className="btn sm" href={`/${lang}/add`}>{Icon.add} {t("home.addText")}</Link>
         </div>
       </div>
 
       <div className="strip" role="group" aria-label="Today's progress">
         <span className="ring" style={{ ["--p" as string]: Math.min(1, minutes / goal) }} aria-hidden="true" />
-        <span><b>{minutes}/{goal}</b> min today</span>
+        <span><b>{minutes}/{goal}</b> {t("home.minToday")}</span>
         <span className="dot" aria-hidden="true" />
-        <span><b>{learner.streak}</b> day streak</span>
+        <span><b>{learner.streak}</b> {t("home.streak")}</span>
         <span className="dot" aria-hidden="true" />
-        <span><b>{learner.knownCount}</b> words known</span>
+        <span><b>{learner.knownCount}</b> {t("home.known")}</span>
         {due > 0 && (
-          <Link href={`/${lang}/practice?mode=review`} className="strip-cta">{due} to review {Icon.next}</Link>
+          <Link href={`/${lang}/practice?mode=review`} className="strip-cta">{due} {t("home.toReview")} {Icon.next}</Link>
         )}
       </div>
 
+      <DailyPlan lang={lang} next={ranked.find((r) => !isUserStory(r.story) && !r.read)} />
+
       <div className="level-tabs" role="tablist" aria-label="Level">
-        <button role="tab" aria-selected={level === "for-you"} onClick={() => { setLevel("for-you"); setTopic("all"); }}>For you</button>
-        <button role="tab" aria-selected={level === "daily"} onClick={() => { setLevel("daily"); setTopic("all"); }}>Daily</button>
+        <button role="tab" aria-selected={level === "for-you"} onClick={() => { setLevel("for-you"); setTopic("all"); }}>{t("home.forYou")}</button>
+        <button role="tab" aria-selected={level === "daily"} onClick={() => { setLevel("daily"); setTopic("all"); }}>{t("home.daily")}</button>
         {meta.levels.map((l) => (
           <button key={l} role="tab" aria-selected={level === l} onClick={() => { setLevel(l); setTopic("all"); }}>
             {l} <small>{countAt(l)}</small>
@@ -203,4 +212,42 @@ function dailyPicks(pool: Ranked[], day: string, level: number, levels: string[]
   const near = pool.filter((r) => Math.abs(levels.indexOf(r.story.level) - Math.min(level + 1, levels.length - 1)) <= 1);
   const from = near.length >= 8 ? near : pool;
   return [...from].sort((a, b) => hash(day + a.story.id) - hash(day + b.story.id)).slice(0, 8);
+}
+
+
+/** Today's plan: one story, five words, one dictation (about 10 minutes). Each step ticks itself off. */
+function DailyPlan({ lang, next }: { lang: LangCode; next?: Ranked }) {
+  const learner = useLearner(lang);
+  const t = useT();
+  const day = learner.log[today()];
+  const steps = [
+    { key: "story", label: t("plan.story"), done: (day?.stories ?? 0) > 0, href: next ? `/${lang}/read/${next.story.id}` : `/${lang}`, note: next?.story.title },
+    { key: "words", label: t("plan.words"), done: (day?.reviews ?? 0) >= 5, href: `/${lang}/practice?mode=review`, note: `${Math.min(5, day?.reviews ?? 0)}/5` },
+    { key: "dictation", label: t("plan.dictation"), done: (day?.dictations ?? 0) > 0, href: `/${lang}/practice?mode=dictation` },
+  ];
+  const done = steps.filter((s) => s.done).length;
+  return (
+    <section className="plan" aria-label={t("plan.title")}>
+      <div className="spread">
+        <span><b>{t("plan.title")}</b> <span className="muted small">· {t("plan.sub")}</span></span>
+        <span className="small muted">{done}/3</span>
+      </div>
+      {done === 3 ? (
+        <p className="small" style={{ margin: 0 }}>🎉 {t("plan.done")}</p>
+      ) : (
+        <ol className="plan-steps">
+          {steps.map((s, i) => (
+            <li key={s.key} className={s.done ? "done" : ""}>
+              <span className="plan-dot" aria-hidden="true">{s.done ? "✓" : i + 1}</span>
+              <span className="plan-label">
+                {s.label}
+                {s.note && <span className="muted small" lang={s.key === "story" ? lang : undefined}> · {s.note}</span>}
+              </span>
+              {!s.done && <Link className="btn sm" href={s.href}>{t("plan.go")}</Link>}
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
 }

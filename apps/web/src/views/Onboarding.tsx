@@ -4,10 +4,11 @@ import { language, languages, storiesFor } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { placementResult, placementWords, type PlacementWord } from "@storyling/learner";
 import { useHydrated, useLearner, type Level } from "@/lib/learner";
 import { Logo } from "@/components/ui";
+import { FEATURED } from "@/views/Landing";
 
 const LEVELS: { level: Level; title: string; detail: (first: string) => string }[] = [
   { level: 0, title: "Just starting", detail: () => "I know a few words and can read the script." },
@@ -23,6 +24,7 @@ export function Onboarding() {
   const [lang, setLang] = useState<LangCode | null>(valid);
   const [level, setLevel] = useState<Level>(1);
   const [step, setStep] = useState(valid ? 1 : 0);
+  const levelName = params.get("level");
 
   return (
     <div className="center">
@@ -34,7 +36,7 @@ export function Onboarding() {
         {step === 0 || !lang ? (
           <LanguageStep value={lang} onPick={(l) => setLang(l)} onNext={() => setStep(1)} />
         ) : (
-          <LevelStep lang={lang} level={level} setLevel={setLevel} onBack={() => setStep(0)} />
+          <LevelStep lang={lang} level={level} setLevel={setLevel} onBack={() => setStep(0)} levelName={levelName} />
         )}
       </div>
     </div>
@@ -49,10 +51,10 @@ function LanguageStep({ value, onPick, onNext }: { value: LangCode | null; onPic
         <p className="muted" style={{ fontSize: 17, marginTop: 8 }}>Explanations are in English. You can switch languages anytime.</p>
       </div>
       <div className="langs" role="radiogroup" aria-label="Languages">
-        {languages.map((l) => (
+        {[...languages].sort((a, b) => Number(FEATURED.includes(b.code)) - Number(FEATURED.includes(a.code))).map((l) => (
           <button key={l.code} role="radio" aria-checked={value === l.code} aria-pressed={value === l.code} className="lang-opt" onClick={() => onPick(l.code)}>
             <span className="nat" lang={l.code}>{l.native}</span>
-            <b>{l.name}</b>
+            <b>{l.name} {!FEATURED.includes(l.code) && <span className="pill">Beta</span>}</b>
             <span className="muted small">{storiesFor(l.code).length} stories · {l.levels[0]}–{l.levels[l.levels.length - 1]}</span>
           </button>
         ))}
@@ -66,13 +68,23 @@ function LanguageStep({ value, onPick, onNext }: { value: LangCode | null; onPic
   );
 }
 
-function LevelStep({ lang, level, setLevel, onBack }: { lang: LangCode; level: Level; setLevel: (l: Level) => void; onBack: () => void }) {
+function LevelStep({ lang, level, setLevel, onBack, levelName }: { lang: LangCode; level: Level; setLevel: (l: Level) => void; onBack: () => void; levelName?: string | null }) {
   const meta = language(lang);
   const learner = useLearner(lang);
   const hydrated = useHydrated();
   const router = useRouter();
 
   const [testing, setTesting] = useState(false);
+
+  // From the landing page's level picker: start at that level and open its stories right away.
+  useEffect(() => {
+    if (!hydrated || !levelName) return;
+    const i = meta.levels.indexOf(levelName);
+    if (i < 0) return;
+    if (!learner.started) learner.start((Math.min(i, 2)) as Level);
+    else learner.select();
+    router.replace(`/${lang}?level=${encodeURIComponent(levelName)}`);
+  }, [hydrated, levelName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function go() {
     learner.start(level);

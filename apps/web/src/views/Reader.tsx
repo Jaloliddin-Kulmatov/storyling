@@ -1,6 +1,7 @@
 "use client";
 
 import { countView } from "@/lib/views";
+import { romanize, splitKorean } from "@storyling/learner";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
 import Link from "next/link";
@@ -125,6 +126,7 @@ function StoryReader({ story }: { story: AnyStory }) {
             <button aria-label="Larger text" onClick={() => setSettings({ fontScale: Math.min(1.4, +(settings.fontScale + 0.1).toFixed(2)) })}>A+</button>
           </div>
           <button className="chip" aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>Translation</button>
+          {lang === "ko" && <button className="chip" aria-pressed={settings.romanize} onClick={() => setSettings({ romanize: !settings.romanize })}>Romanization</button>}
           <button className="chip" aria-pressed={settings.highlightNew} onClick={() => setSettings({ highlightNew: !settings.highlightNew })}>Highlights</button>
           <button className="chip" aria-pressed={settings.levelUnderline} onClick={() => setSettings({ levelUnderline: !settings.levelUnderline })}>Levels</button>
         </div>
@@ -172,6 +174,7 @@ function StoryReader({ story }: { story: AnyStory }) {
                     {Icon.translate}
                   </button>
                 )}
+                {lang === "ko" && settings.romanize && <span className="rom">{romanize(textOf(story, s))}</span>}
                 {s.translation && (settings.showTranslations || shown.has(i)) && <span className="tr" lang={settings.translateTo}>{trs.texts[i]}</span>}
               </span>
             ))}
@@ -297,6 +300,16 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
         <button className="icon-btn" aria-label="Hear the word" onClick={() => playWord(lang, picked.lemma, picked.surface)}>{Icon.speaker}</button>
       </div>
       {entry?.reading && <span className="reading">{entry.reading}</span>}
+      {lang === "ko" && <span className="reading">{romanize(entry?.display ?? picked.lemma)}</span>}
+      {lang === "ko" && (() => {
+        const sp = splitKorean(picked.surface, picked.lemma);
+        return sp ? (
+          <div className="ko-split" aria-label="Word parts">
+            <span lang="ko"><b>{sp.stem}</b> + <b className="ko-end">{sp.ending}</b></span>
+            {sp.gloss && <span className="muted small">{sp.ending}: {sp.gloss}</span>}
+          </div>
+        ) : null;
+      })()}
       {picked.surface !== (entry?.display ?? picked.lemma) && <span className="muted small">In the text: <span lang={lang}>{picked.surface}</span></span>}
       <div style={{ fontSize: 18, fontWeight: 600 }}>{tr.texts[0] ?? <span className="muted">No meaning in the dictionary yet.</span>}</div>
 
