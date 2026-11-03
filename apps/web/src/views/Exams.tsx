@@ -24,8 +24,26 @@ interface Q {
   means?: string;
 }
 
-const PER_SECTION = 5;
-const MINUTES = 20;
+/** Paper layout per language: TOPIK I-style for Korean, Goethe B1-style for German, a general paper otherwise. */
+interface Format { name: string; minutes: number; count: Record<Section, number>; label: Record<Section, string>; note: string }
+const GENERAL: Format = {
+  name: "Mock exam", minutes: 20, count: { Listening: 5, Reading: 5, Vocabulary: 5, Grammar: 5 },
+  label: { Listening: "Listening", Reading: "Reading", Vocabulary: "Vocabulary", Grammar: "Grammar" },
+  note: "Listening, reading, vocabulary and grammar.",
+};
+const FORMATS: Partial<Record<LangCode, Format>> = {
+  ko: {
+    name: "TOPIK I-style practice", minutes: 40, count: { Listening: 10, Reading: 10, Vocabulary: 5, Grammar: 0 },
+    label: { Listening: "듣기 Listening", Reading: "읽기 Reading", Vocabulary: "어휘 Vocabulary", Grammar: "문법 Grammar" },
+    note: "Shaped like TOPIK I: listening and reading, with a short vocabulary part. A short practice paper, not the full 100-minute test.",
+  },
+  de: {
+    name: "Goethe B1-style practice", minutes: 30, count: { Listening: 6, Reading: 8, Vocabulary: 4, Grammar: 8 },
+    label: { Listening: "Hören", Reading: "Lesen", Vocabulary: "Wortschatz", Grammar: "Sprachbausteine" },
+    note: "Shaped like the Goethe-Zertifikat B1 modules Hören and Lesen, plus Sprachbausteine (grammar gaps) and Wortschatz. Practice only, not an official paper.",
+  },
+};
+export const formatFor = (lang: LangCode): Format => FORMATS[lang] ?? GENERAL;
 const PASS = 60;
 const FUNCTION = new Set(["pron", "det", "prep", "conj", "part", "aux", "num", "intj", "name"]);
 /** Only nouns and verbs are blanked in Reading: other classes (pronouns, adjectives) often have several valid answers. */
@@ -39,12 +57,15 @@ export function Exams({ lang }: { lang: LangCode }) {
   const [level, setLevel] = useState<string | null>(null);
   const [run, setRun] = useState(0);
 
+  const fmt = formatFor(lang);
+  const total = Object.values(fmt.count).reduce((a, b) => a + b, 0);
   const counts = useMemo(() => Object.fromEntries(meta.levels.map((l) => [l, stories.filter((s) => s.level === l && !isUserStory(s)).length])), [meta, stories]);
 
   if (!level)
     return (
       <>
-        <div className="page-head"><div><div className="eyebrow">{meta.name} · {MINUTES} minutes · 4 sections</div><h1>Mock exams</h1></div></div>
+        <div className="page-head"><div><div className="eyebrow">{meta.name} · {fmt.minutes} minutes</div><h1>{fmt.name}</h1></div></div>
+        <p className="muted" style={{ marginTop: -8 }}>{fmt.note}</p>
         <p className="muted" style={{ marginTop: -8 }}>Exam-style practice in the structure of the big language exams: Listening, Reading, Vocabulary and Grammar. Pass mark {PASS}%. These papers are written by Storyling from its own texts, they are not official Goethe, Telc or other exam papers.</p>
         <div className="game-grid">
           {meta.levels.map((l) => {
@@ -52,7 +73,7 @@ export function Exams({ lang }: { lang: LangCode }) {
             return (
               <button key={l} className="game-card" disabled={counts[l]! < 6} style={{ textAlign: "left" }} onClick={() => { setLevel(l); setRun((r) => r + 1); }}>
                 <span className="t">{l}</span>
-                <span className="muted small">{counts[l]} texts · {PER_SECTION * 4} questions</span>
+                <span className="muted small">{counts[l]} texts · {total} questions</span>
                 <span className="small gm">{best ? `Best ${best.best}% · taken ${best.played}×` : "Not taken yet"}</span>
               </button>
             );
@@ -81,12 +102,13 @@ export function Exams({ lang }: { lang: LangCode }) {
 }
 
 function build(lang: LangCode, level: string, stories: ReturnType<typeof useStories>): Q[] {
+  const fmt = formatFor(lang);
   const pool = stories.filter((s) => s.level === level && !isUserStory(s));
   const sents = pool.flatMap((story) => story.sentences.map((s, i) => ({ story, s, i, text: textOf(story, s) })).filter((x) => x.s.tokens.length >= 4 && x.text.length < 120));
   const out: Q[] = [];
 
   // Listening: hear a sentence, pick what was said.
-  for (const x of shuffle(sents).slice(0, PER_SECTION)) {
+  for (const x of shuffle(sents).slice(0, fmt.count.Listening)) {
     const others = shuffle(sents.filter((y) => y.text !== x.text)).slice(0, 2).map((y) => y.text);
     out.push({ section: "Listening", prompt: "Listen. What do you hear?", say: { storyId: x.story.id, index: x.i, text: x.text }, options: shuffle([x.text, ...others]), answer: x.text, ...(x.s.translation ? { note: x.s.translation } : {}) });
   }
@@ -100,7 +122,7 @@ function build(lang: LangCode, level: string, stories: ReturnType<typeof useStor
     }
   const reading: Q[] = [];
   for (const x of shuffle(sents)) {
-    if (reading.length >= PER_SECTION) break;
+    if (reading.length >= fmt.count.Reading) break;
     const cands = x.s.tokens.filter((t) => {
       const e = t.lemma ? lookup(lang, t.lemma) : undefined;
       return e && GAP.has(e.pos) && t.surface.length > 2 && (bank.get(e.pos)?.length ?? 0) > 6;
@@ -123,15 +145,17 @@ function build(lang: LangCode, level: string, stories: ReturnType<typeof useStor
       if (e && !FUNCTION.has(e.pos)) words.set(e.lemma, { display: e.display, meaning: e.meaning });
     }
   const meanings = [...new Set([...words.values()].map((w) => w.meaning))];
-  for (const w of shuffle([...words.values()]).slice(0, PER_SECTION))
+  for (const w of shuffle([...words.values()]).slice(0, fmt.count.Vocabulary))
     out.push({ section: "Vocabulary", prompt: w.display, options: shuffle([w.meaning, ...shuffle(meanings.filter((m) => m !== w.meaning)).slice(0, 3)]), answer: w.meaning });
 
   // Grammar: written exercises when the language has them; otherwise meaning-to-sentence.
   const topics = grammarFor(lang).filter((g) => g.level === level);
-  const items = shuffle(topics.flatMap((t) => t.items)).slice(0, PER_SECTION);
-  if (items.length >= PER_SECTION) for (const it of items) out.push({ section: "Grammar", prompt: it.q, options: shuffle(it.o), answer: it.a, note: it.why });
+  const items = shuffle(topics.flatMap((t) => t.items)).slice(0, fmt.count.Grammar);
+  if (!fmt.count.Grammar) {
+    // no grammar part in this format
+  } else if (items.length >= fmt.count.Grammar) for (const it of items) out.push({ section: "Grammar", prompt: it.q, options: shuffle(it.o), answer: it.a, note: it.why });
   else
-    for (const x of shuffle(sents.filter((y) => y.s.translation)).slice(0, PER_SECTION)) {
+    for (const x of shuffle(sents.filter((y) => y.s.translation)).slice(0, fmt.count.Grammar)) {
       const others = shuffle(sents.filter((y) => y.text !== x.text)).slice(0, 2).map((y) => y.text);
       out.push({ section: "Grammar", prompt: "Which sentence means:", means: x.s.translation, options: shuffle([x.text, ...others]), answer: x.text });
     }
@@ -144,12 +168,13 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
   const qs = useMemo(() => build(lang, level, stories), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [answers, setAnswers] = useState<(string | null)[]>(() => qs.map(() => null));
   const [n, setN] = useState(0);
-  const [left, setLeft] = useState(MINUTES * 60);
+  const [left, setLeft] = useState(formatFor(lang).minutes * 60);
   const [done, setDone] = useState(false);
   const saved = useRef(false);
 
   const total = qs.length;
-  const sections = (["Listening", "Reading", "Vocabulary", "Grammar"] as Section[]).map((name) => {
+  const fmtLabels = formatFor(lang).label;
+  const sections = (["Listening", "Reading", "Vocabulary", "Grammar"] as Section[]).filter((name) => qs.some((q) => q.section === name)).map((name) => {
     const idx = qs.map((q, i) => (q.section === name ? i : -1)).filter((i) => i >= 0);
     const right = idx.filter((i) => answers[i] === qs[i]!.answer).length;
     return { name, right, of: idx.length };
@@ -190,7 +215,7 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
           <p className="muted" style={{ margin: 0 }}>{right} of {total} correct. Pass mark {PASS}%.</p>
           <div className="table" style={{ textAlign: "left" }}>
             {sections.map((s) => (
-              <div className="trow" key={s.name}><span>{s.name}</span><span><b>{s.right}</b> / {s.of}</span></div>
+              <div className="trow" key={s.name}><span>{fmtLabels[s.name]}</span><span><b>{s.right}</b> / {s.of}</span></div>
             ))}
           </div>
           <details style={{ textAlign: "left" }}>
@@ -214,11 +239,11 @@ function Paper({ lang, level, onExit, onAgain }: { lang: LangCode; level: string
   return (
     <>
       <div className="page-head">
-        <div className="row"><button className="btn ghost sm" onClick={onExit}>← Exams</button><h1 style={{ fontSize: 26 }}>{level} mock exam</h1></div>
+        <div className="row"><button className="btn ghost sm" onClick={onExit}>← Exams</button><h1 style={{ fontSize: 26 }}>{level} · {formatFor(lang).name}</h1></div>
         <span className="pill" style={{ fontVariantNumeric: "tabular-nums", color: left < 120 ? "var(--danger, #c0392b)" : undefined }}>{mm}:{ss}</span>
       </div>
       <div className="flash" style={{ textAlign: "left" }}>
-        <div className="spread small muted"><span>{q2.section} · question {n + 1} of {total}</span><span>{answered} answered</span></div>
+        <div className="spread small muted"><span>{fmtLabels[q2.section]} · question {n + 1} of {total}</span><span>{answered} answered</span></div>
         <div className="meter" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
           {qs.map((_, i) => <span key={i} className={answers[i] ? "on" : ""} />)}
         </div>

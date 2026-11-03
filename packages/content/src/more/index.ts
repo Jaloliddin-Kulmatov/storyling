@@ -15,6 +15,7 @@ import * as ru2 from "./ru2";
 import * as zh2 from "./zh2";
 import * as ja2 from "./ja2";
 import * as ko2 from "./ko2";
+import * as ko3 from "./ko3";
 import * as es from "./es";
 import * as fr from "./fr";
 import * as tr from "./tr";
@@ -61,6 +62,7 @@ const PACKS: Pack[] = [
   { lang: "zh", ...zh2 },
   { lang: "ja", ...ja2 },
   { lang: "ko", ...ko2 },
+  { lang: "ko", ...ko3 },
   { lang: "tr", ...tr2 },
 ];
 

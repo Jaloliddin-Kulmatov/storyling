@@ -425,3 +425,11 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 .plan-dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: var(--surface-2); flex: none; }
 .plan-steps li.done .plan-dot { background: var(--primary); color: #fff; }
 .plan-label { flex: 1; min-width: 0; }
+
+/* story tools */
+.fixes { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.fixes s { color: var(--danger, #c0392b); }
+.chat { display: grid; gap: 12px; max-height: 50vh; overflow-y: auto; }
+.bubble { padding: 10px 12px; border-radius: 14px; background: var(--surface-2); line-height: 1.5; white-space: pre-wrap; max-width: 92%; }
+.bubble.me { background: var(--primary-soft); justify-self: end; }
+.fab-bar { flex-wrap: wrap; justify-content: center; }

@@ -1,6 +1,7 @@
 "use client";
 
 import { countView } from "@/lib/views";
+import { AskPanel, SpeakRun, WritePanel } from "@/components/StoryTools";
 import { romanize, splitKorean } from "@storyling/learner";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
@@ -56,7 +57,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [toast, setToast] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [shown, setShown] = useState<Set<number>>(() => new Set());
-  const [mode, setMode] = useState<null | "dictation" | "grammar">(null);
+  const [mode, setMode] = useState<null | "dictation" | "grammar" | "speak" | "write" | "ask">(null);
   const run = useRef(0);
   const { markOpened } = learner;
   useEffect(() => { markOpened(story.id); if (!isUserStory(story)) countView(story.id); }, [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -207,6 +208,9 @@ function StoryReader({ story }: { story: AnyStory }) {
           <button aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>{Icon.translate} Translation</button>
           {voice && <button onClick={() => { stop(); setMode("dictation"); }}>{Icon.speaker} Dictation</button>}
           <button onClick={() => setMode("grammar")}>{Icon.spark} Grammar</button>
+          <button onClick={() => { stop(); setMode("speak"); }}>🎙 Speak</button>
+          <button onClick={() => setMode("write")}>✍️ Write</button>
+          <button onClick={() => setMode("ask")}>💬 Ask</button>
         </div>
       )}
       {mode === "dictation" && (
@@ -218,6 +222,19 @@ function StoryReader({ story }: { story: AnyStory }) {
               rate={settings.rate}
               onFinish={(score) => { learner.recordGame("dictation", score); setMode(null); setToast(`Dictation finished · ${score}%`); }}
             />
+          </div>
+        </div>
+      )}
+      {(mode === "speak" || mode === "write" || mode === "ask") && (
+        <div className="overlay" role="dialog" aria-label={mode === "speak" ? "Read aloud" : mode === "write" ? "Write about the story" : "Ask the story"} onClick={(e) => e.target === e.currentTarget && setMode(null)}>
+          <div className="sheet-in">
+            <div className="spread">
+              <b style={{ fontSize: 18 }}>{mode === "speak" ? "Read aloud" : mode === "write" ? "Write about the story" : "Ask the story"}</b>
+              <button className="icon-btn" aria-label="Close" onClick={() => setMode(null)}>{Icon.close}</button>
+            </div>
+            {mode === "speak" && <SpeakRun story={story} onFinish={(score) => { learner.recordGame("speak", score); setMode(null); setToast(`Reading aloud · ${score}% understood`); }} />}
+            {mode === "write" && <WritePanel story={story} ai={ai} />}
+            {mode === "ask" && <AskPanel story={story} ai={ai} />}
           </div>
         </div>
       )}
