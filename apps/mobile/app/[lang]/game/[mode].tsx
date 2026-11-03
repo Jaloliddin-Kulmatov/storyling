@@ -1,15 +1,15 @@
 import { language } from "@storyling/content";
 import { previewIntervals, type LangCode, type ReviewGrade, type Sentence } from "@storyling/core";
-import { highlight, isUserStory, lookupIn, PUNCT, shuffle, textOf, useLearner, useStories, useWordInfo, type AnyStory, type StoredWord } from "@storyling/learner";
+import { checkDictation, highlight, isUserStory, lookupIn, PUNCT, shuffle, textOf, useLearner, useStories, useWordInfo, type AnyStory, type DictationResult, type StoredWord } from "@storyling/learner";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { playSentenceAny, playWordAny, stopAll } from "../../../src/audio";
 import { READ_FONT, useTheme } from "../../../src/theme";
 import { Button, Icon, Tx } from "../../../src/ui";
 
-const TITLES: Record<string, string> = { review: "Flashcards", match: "Match words", order: "Build the sentence", listen: "Listening", test: "Level test" };
+const TITLES: Record<string, string> = { review: "Flashcards", match: "Match words", order: "Build the sentence", listen: "Listening", dictation: "Dictation", test: "Level test" };
 const ROUNDS = 5;
 
 interface PoolWord {
@@ -36,6 +36,7 @@ export default function Game() {
         {mode === "match" && <Match lang={lang} />}
         {mode === "order" && <Order lang={lang} />}
         {mode === "listen" && <Listen lang={lang} />}
+        {mode === "dictation" && <Dictation lang={lang} />}
         {mode === "test" && <LevelTest lang={lang} />}
       </ScrollView>
     </SafeAreaView>
@@ -423,6 +424,64 @@ function LevelTest({ lang }: { lang: LangCode }) {
           <Button kind="primary" label={n + 1 >= questions.length ? "See result" : "Next"} onPress={() => {
             if (n + 1 >= questions.length) learner.recordGame(`test-${level}`, Math.round((score / questions.length) * 100));
             setN(n + 1); setChosen(null);
+          }} />
+        </>
+      )}
+    </Card>
+  );
+}
+
+
+/** Dictation: hear a sentence, type it, and see which words were right. */
+function Dictation({ lang }: { lang: LangCode }) {
+  const t = useTheme();
+  const sentences = useSentences(lang);
+  const learner = useLearner(lang);
+  const noSpace = language(lang).noSpace;
+  const [game, setGame] = useState(0);
+  const rounds = useFrozen(() => shuffle(sentences).slice(0, ROUNDS), `dictation-${game}`);
+  const [n, setN] = useState(0);
+  const [typed, setTyped] = useState("");
+  const [result, setResult] = useState<DictationResult | null>(null);
+  const [scores, setScores] = useState<number[]>([]);
+  const cur = rounds[n];
+  const expected = cur ? textOf(cur.story, cur.s) : "";
+  const play = (rate = 1) => cur && playSentenceAny(cur.story.id, lang, cur.i, expected, rate);
+  useEffect(() => { if (cur) play(); }, [cur]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!cur) {
+    const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    if (rounds.length) return <Done score={avg} total={100} note="Average words correct (%)." onAgain={() => { setGame((g) => g + 1); setN(0); setScores([]); }} />;
+    return <Text style={{ color: t.muted }}>No sentences to practice yet.</Text>;
+  }
+  return (
+    <Card>
+      <Text style={{ color: t.muted }}>Sentence {n + 1} of {rounds.length}</Text>
+      <View style={{ flexDirection: "row", gap: 10, justifyContent: "center" }}>
+        <Button kind="primary" icon="play" label="Play" onPress={() => play()} />
+        <Button label="Slow" onPress={() => play(0.75)} />
+      </View>
+      {!result ? (
+        <>
+          <TextInput value={typed} onChangeText={setTyped} placeholder="Type what you hear" placeholderTextColor={t.muted} multiline autoCorrect={false} autoCapitalize="none"
+            style={{ minHeight: 80, borderWidth: 1, borderColor: t.line, borderRadius: 12, padding: 12, color: t.ink, fontFamily: READ_FONT, fontSize: 18 }} />
+          <Button kind="primary" label="Check" disabled={!typed.trim()} onPress={() => setResult(checkDictation(expected, typed, noSpace))} />
+          <Button kind="ghost" label="Show the answer" onPress={() => setResult(checkDictation(expected, "", noSpace))} />
+        </>
+      ) : (
+        <>
+          <Text style={{ fontFamily: READ_FONT, fontSize: 19, lineHeight: 30 }}>
+            {result.words.map((w, i) => <Text key={i} style={{ color: w.ok ? t.primary : t.danger, fontWeight: "600" }}>{w.word}{noSpace ? "" : " "}</Text>)}
+          </Text>
+          <Text style={{ color: t.ink }}>{result.score}% of the words are right.</Text>
+          {!!cur.s.translation && <Tx style={{ color: t.muted }}>{cur.s.translation}</Tx>}
+          <Button kind="primary" label={n + 1 >= rounds.length ? "See result" : "Next sentence"} onPress={() => {
+            const next = [...scores, result.score];
+            setScores(next);
+            if (n + 1 >= rounds.length) learner.recordGame("dictation", Math.round(next.reduce((a, b) => a + b, 0) / next.length));
+            setResult(null);
+            setTyped("");
+            setN(n + 1);
           }} />
         </>
       )}

@@ -76,6 +76,7 @@ export default function Home() {
           <Text style={{ color: t.muted, fontSize: 11.5 }}>known</Text>
         </View>
       </View>
+      <DailyPlan lang={lang} next={ranked.find((r) => !isUserStory(r.story) && !r.read)} />
       {due > 0 && (
         <Pressable onPress={() => router.push(`/${lang}/game/review`)} accessibilityRole="button"
           style={{ marginTop: 10, backgroundColor: t.learningSoft, borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -190,5 +191,41 @@ function Row({ r, lang, saved, onSave }: { r: Ranked; lang: LangCode; saved: boo
         <SaveButton saved={saved} onSave={onSave} />
       </Pressable>
     
+  );
+}
+
+
+/** Today's plan: one story, five words, one dictation. Each step ticks itself off. */
+function DailyPlan({ lang, next }: { lang: LangCode; next?: Ranked }) {
+  const t = useTheme();
+  const router = useRouter();
+  const learner = useLearner(lang);
+  const day = learner.log[today()];
+  const steps = [
+    { key: "story", label: "Read one story", done: (day?.stories ?? 0) > 0, go: () => router.push(next ? `/${lang}/read/${next.story.id}` : `/${lang}`) },
+    { key: "words", label: `Review 5 words (${Math.min(5, day?.reviews ?? 0)}/5)`, done: (day?.reviews ?? 0) >= 5, go: () => router.push(`/${lang}/game/review`) },
+    { key: "dictation", label: "Do one dictation", done: (day?.dictations ?? 0) > 0, go: () => router.push(`/${lang}/game/dictation`) },
+  ];
+  const done = steps.filter((s) => s.done).length;
+  return (
+    <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1, borderRadius: 16, padding: 12, marginTop: 12, gap: 8 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={{ color: t.ink, fontWeight: "800" }}>Today&apos;s plan <Text style={{ color: t.muted, fontWeight: "400" }}>· about 10 min</Text></Text>
+        <Text style={{ color: t.muted }}>{done}/3</Text>
+      </View>
+      {done === 3 ? (
+        <Text style={{ color: t.ink }}>🎉 Done for today. See you tomorrow!</Text>
+      ) : (
+        steps.map((s, i) => (
+          <Pressable key={s.key} onPress={s.done ? undefined : s.go} accessibilityRole="button" style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: s.done ? t.primary : t.surface2 }}>
+              <Text style={{ color: s.done ? "#fff" : t.ink, fontWeight: "800", fontSize: 12 }}>{s.done ? "✓" : i + 1}</Text>
+            </View>
+            <Text style={{ flex: 1, color: s.done ? t.muted : t.ink, textDecorationLine: s.done ? "line-through" : "none" }}>{s.label}</Text>
+            {!s.done && <Icon name="chevron-forward" size={16} />}
+          </Pressable>
+        ))
+      )}
+    </View>
   );
 }

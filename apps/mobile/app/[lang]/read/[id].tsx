@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { language } from "@storyling/content";
+import { ARTICLE, DE_GENDER, language, reviewOf } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
-import { isUserStory, lookupIn, PUNCT, shuffle, textOf, useLearner, useRankedStories, useSettings, useStory, useTranslated, type AnyStory } from "@storyling/learner";
+import { isUserStory, koreanLabels, lookupIn, PUNCT, romanize, shuffle, splitKorean, textOf, useLearner, useRankedStories, useSettings, useStory, useTranslated, type AnyStory } from "@storyling/learner";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, View } from "react-native";
@@ -127,6 +127,17 @@ function StoryReader({ story }: { story: AnyStory }) {
           </View>
           <Text style={{ color: t.ink, fontFamily: READ_FONT, fontSize: 30, marginTop: 8 }}>{story.title}</Text>
           {!!story.titleEnglish && <Text style={{ color: t.muted, marginTop: 2 }}>{story.titleEnglish}</Text>}
+          {!isUserStory(story) && (
+            <Text style={{ color: reviewOf(story.id) ? t.primary : t.muted, fontSize: 12.5, marginTop: 6, fontWeight: reviewOf(story.id) ? "700" : "400" }}>
+              {reviewOf(story.id) ? "✓ Checked by a native speaker" : "Written by Storyling. Not yet checked by a native speaker."}
+            </Text>
+          )}
+          {(story.lang === "ko" || story.lang === "de") && (
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+              {story.lang === "ko" && <Pressable onPress={() => setSettings({ romanize: !settings.romanize })} style={{ borderWidth: 1, borderColor: settings.romanize ? t.ink : t.line, backgroundColor: settings.romanize ? t.ink : t.surface, borderRadius: 99, paddingHorizontal: 12, paddingVertical: 5 }}><Text style={{ color: settings.romanize ? t.bg : t.inkSoft, fontWeight: "600", fontSize: 13 }}>Romanization</Text></Pressable>}
+              {story.lang === "de" && <Pressable onPress={() => setSettings({ genderColors: !settings.genderColors })} style={{ borderWidth: 1, borderColor: settings.genderColors ? t.ink : t.line, backgroundColor: settings.genderColors ? t.ink : t.surface, borderRadius: 99, paddingHorizontal: 12, paddingVertical: 5 }}><Text style={{ color: settings.genderColors ? t.bg : t.inkSoft, fontWeight: "600", fontSize: 13 }}>der/die/das</Text></Pressable>}
+            </View>
+          )}
 
           <View style={{ marginTop: 16 }}>
             {story.sentences.map((s, i) => (
@@ -140,13 +151,15 @@ function StoryReader({ story }: { story: AnyStory }) {
                     const ws = tk.isName ? "known" : learner.wordState(lemma);
                     const state = ws === "learning" && learner.word(lemma)?.saved !== "learning" ? "new" : ws;
                     const sel = picked?.lemma === lemma && picked.sentence === i;
+                    const e = story.lang === "de" && settings.genderColors && !tk.isName ? lookupIn(story, lemma) : undefined;
+                    const gender = e?.pos === "noun" ? DE_GENDER[e.display] : undefined;
                     const look = !settings.highlightNew ? null
                       : state === "new" ? { backgroundColor: t.newWordSoft, textDecorationLine: "underline" as const, textDecorationColor: t.newWord }
                         : state === "learning" ? { backgroundColor: t.learningSoft } : null;
                     return (
                       <Text key={j}>
                         {space}
-                        <Text onPress={() => pick(tk, i)} accessibilityRole="button" style={[look, sel && { color: t.primary, fontWeight: "700" }]}>{tk.surface}</Text>
+                        <Text onPress={() => pick(tk, i)} accessibilityRole="button" style={[look, gender && { color: GENDER_COLOR[gender] }, sel && { color: t.primary, fontWeight: "700" }]}>{tk.surface}</Text>
                       </Text>
                     );
                   })}
@@ -157,6 +170,7 @@ function StoryReader({ story }: { story: AnyStory }) {
                       onPress={() => setShown((x) => { const n = new Set(x); if (n.has(i)) n.delete(i); else n.add(i); return n; })} accessibilityLabel={`Translate sentence ${i + 1}`} /></Text>
                   )}
                 </Text>
+                {story.lang === "ko" && settings.romanize && <Text style={{ color: t.muted, fontSize: 13.5, marginBottom: 4 }}>{romanize(textOf(story, s))}</Text>}
                 {!!s.translation && (settings.showTranslations || shown.has(i)) && (
                   <Text style={{ color: t.muted, fontSize: 14.5, borderLeftWidth: 3, borderColor: t.primarySoft, paddingLeft: 8, marginBottom: 4 }}>{trs.texts[i]}</Text>
                 )}
@@ -227,13 +241,28 @@ function WordSheet({ story, picked, onClose, bottom }: { story: AnyStory; picked
         <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close"><Icon name="close" /></Pressable>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Text style={{ color: t.ink, fontFamily: READ_FONT, fontSize: 30 }}>{entry?.display ?? picked.lemma}</Text>
+        <Text style={{ color: t.ink, fontFamily: READ_FONT, fontSize: 30 }}>
+          {lang === "de" && entry?.pos === "noun" && DE_GENDER[entry.display] && <Text style={{ fontSize: 18, color: GENDER_COLOR[DE_GENDER[entry.display]!] }}>{ARTICLE[DE_GENDER[entry.display]!]} </Text>}
+          {entry?.display ?? picked.lemma}
+        </Text>
         <Pressable onPress={() => playWordAny(lang, picked.lemma, picked.surface)} accessibilityLabel="Hear the word"
           style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: t.line, alignItems: "center", justifyContent: "center" }}>
           <Icon name="volume-high" size={18} />
         </Pressable>
       </View>
       {!!entry?.reading && <Text style={{ color: t.muted }}>{entry.reading}</Text>}
+      {lang === "ko" && <Text style={{ color: t.muted }}>{romanize(entry?.display ?? picked.lemma)}</Text>}
+      {lang === "ko" && (() => {
+        const sp = splitKorean(picked.surface, picked.lemma);
+        const lb = koreanLabels(picked.surface);
+        if (!sp && !lb.honorific && !lb.speech) return null;
+        return (
+          <View style={{ backgroundColor: t.surface2, borderRadius: 10, padding: 10, gap: 4 }}>
+            {sp && <Text style={{ color: t.ink }}>{sp.stem} + <Text style={{ color: t.primary, fontWeight: "700" }}>{sp.ending}</Text>{sp.gloss ? <Text style={{ color: t.muted }}>  · {sp.gloss}</Text> : null}</Text>}
+            {(lb.honorific || lb.speech) && <Text style={{ color: t.muted, fontSize: 13 }}>{[lb.honorific && "honorific", lb.speech].filter(Boolean).join(" · ")}</Text>}
+          </View>
+        );
+      })()}
       <Tx style={{ color: t.ink, fontSize: 18, fontWeight: "600" }}>{entry?.meaning ?? "No meaning in the dictionary yet."}</Tx>
       {picked.surface !== (entry?.display ?? picked.lemma) && <Text style={{ color: t.muted, fontSize: 13 }}>In the text: {picked.surface}</Text>}
       <View style={{ flexDirection: "row", gap: 3 }}>
@@ -379,3 +408,5 @@ function WatchMore({ story }: { story: AnyStory }) {
     </View>
   );
 }
+
+const GENDER_COLOR: Record<string, string> = { m: "#2563eb", f: "#dc2626", n: "#16a34a", pl: "#8b5cf6" };

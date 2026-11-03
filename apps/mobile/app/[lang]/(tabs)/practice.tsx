@@ -11,6 +11,7 @@ const GAMES: { mode: string; title: string; text: string; icon: IconName }[] = [
   { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "git-compare" },
   { mode: "order", title: "Build the sentence", text: "Put a story sentence back in order.", icon: "reorder-four" },
   { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "headset" },
+  { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "create-outline" },
   { mode: "test", title: "Level test", text: "10 questions on one level's words.", icon: "ribbon" },
 ];
 
