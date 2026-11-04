@@ -41,10 +41,14 @@ const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
     { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker", tone: "t2", mins: "2 min" },
     { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker", tone: "t2", mins: "4 min" },
   ] },
-  { title: "Tests, grammar and exams", key: "prac.exams", cards: [
-    { mode: "test", title: "Level test", text: "10 questions on the words of one level.", icon: "progress", tone: "t3", mins: "3 min" },
+  { title: "Level test", key: "prac.level", cards: [
+    { mode: "test", title: "Level test", text: "10 quick questions on the words of one level. Find out where you are.", icon: "progress", tone: "t1", mins: "3 min" },
+  ] },
+  { title: "Mock exams", key: "prac.exams", cards: [
+    { href: "/exams", title: "Mock exams", text: "Goethe-style papers: Hören, Lesen, Wortschatz, Sprachbausteine, plus Schreiben and Sprechen graded by AI.", icon: "progress", tone: "t3", mins: "20 min" },
+  ] },
+  { title: "Grammar", key: "prac.grammar", cards: [
     { href: "/grammar", title: "Grammar", text: "Short rules with exercises, by level.", icon: "library", tone: "t3", mins: "5 min" },
-    { href: "/exams", title: "Mock exams", text: "A timed paper: listening, reading, vocabulary, grammar.", icon: "progress", tone: "t3", mins: "20 min" },
   ] },
 ];
 

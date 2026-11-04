@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "corepack enable && pnpm install --frozen-lockfile --filter @storyling/web...",
-  "buildCommand": "next build"
+  "buildCommand": "next build",
+  "crons": [
+    {
+      "path": "/api/cron/remind",
+      "schedule": "0 17 * * *"
+    }
+  ]
 }

@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
+
 import type { LangCode } from "@storyling/core";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useStories } from "@/lib/stories";
 import { AccountCard } from "@/components/AccountCard";
+import { Reminders } from "@/components/Reminders";
 import { language } from "@storyling/content";
 import { wordLevels } from "@storyling/learner";
 import { useMemo } from "react";
@@ -30,6 +33,8 @@ export function Progress({ lang }: { lang: LangCode }) {
       <div className="page-head"><div><div className="eyebrow">Your reading</div><h1>Progress</h1></div></div>
 
       <AccountCard lang={lang} />
+      <Reminders lang={lang} />
+      <p className="small" style={{ marginTop: 10 }}><Link href="/pricing">Plans and Pro →</Link></p>
       <WeeklyReport lang={lang} />
       <LevelEstimate lang={lang} />
 

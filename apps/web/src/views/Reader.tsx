@@ -2,10 +2,10 @@
 
 import { countView } from "@/lib/views";
 import { AskPanel, SpeakRun, WritePanel } from "@/components/StoryTools";
-import { FUNCTION_POS, koreanLabels, romanize, shuffle, splitKorean } from "@storyling/learner";
+import { FUNCTION_POS, germanNotes, koreanLabels, romanize, shuffle, splitKorean } from "@storyling/learner";
 import { ARTICLE, DE_GENDER, reviewOf } from "@storyling/content";
 import { language } from "@storyling/content";
-import type { LangCode, Token } from "@storyling/core";
+import type { LangCode, Sentence, Token } from "@storyling/core";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,6 +19,7 @@ import { Cover, Icon, Toast } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
 import { Tr, useTranslated } from "@/lib/translate";
+import { usePlan } from "@/lib/plan";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -30,6 +31,14 @@ interface Picked {
 
 export function Reader({ lang, id }: { lang: LangCode; id: string }) {
   const story = useStory(lang, id);
+  const learner = useLearner(lang);
+  const plan = usePlan();
+  if (story && plan.enabled && !plan.pro && !isUserStory(story)) {
+    // Free plan: a few new stories a day; stories already opened today stay open.
+    const since = new Date().setHours(0, 0, 0, 0);
+    const others = learner.history.filter((h) => h.at >= since && h.id !== story.id).length;
+    if (others >= plan.limits.storiesPerDay) return <Paywall lang={lang} limit={plan.limits.storiesPerDay} />;
+  }
   if (!story) {
     return (
       <div className="empty" style={{ marginTop: 40 }}>
@@ -42,6 +51,20 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
   return <StoryReader key={story.id} story={story} />;
 }
 
+function Paywall({ lang, limit }: { lang: LangCode; limit: number }) {
+  return (
+    <div className="empty paywall" style={{ marginTop: 40 }}>
+      <span style={{ fontSize: 44 }}>📚</span>
+      <h2 style={{ fontSize: 22 }}>You've read {limit} new stories today</h2>
+      <p className="muted">That's the free plan's daily limit. Come back tomorrow, re-read today's stories, or go Pro for unlimited stories, AI exam grading and the AI tutor.</p>
+      <div className="row" style={{ justifyContent: "center" }}>
+        <Link className="btn primary" href="/pricing">See Pro</Link>
+        <Link className="btn" href={`/${lang}/practice`}>Play games instead</Link>
+      </div>
+    </div>
+  );
+}
+
 function StoryReader({ story }: { story: AnyStory }) {
   const lang = story.lang;
   const meta = language(lang);
@@ -50,6 +73,8 @@ function StoryReader({ story }: { story: AnyStory }) {
   const ai = useAiEnabled();
   const router = useRouter();
   const trs = useTranslated(story.sentences.map((x) => x.translation));
+  // Grammar colours replace the other underlines and highlights so the text stays readable.
+  const gram = lang === "de" && settings.grammarView;
 
   const [picked, setPicked] = useState<Picked | null>(null);
   const [tapped, setTapped] = useState<Set<string>>(() => new Set());
@@ -143,22 +168,25 @@ function StoryReader({ story }: { story: AnyStory }) {
             ? <p className="small review-ok" style={{ margin: "6px 0 0" }}>✓ Checked by a native speaker</p>
             : <p className="small muted" style={{ margin: "6px 0 0" }}>Written by Storyling. Not yet checked by a native speaker.</p>)}
 
-          <div className={`text${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
-            {story.sentences.map((s, i) => (
+          <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
+            {story.sentences.map((s, i) => {
+              const gmarks = gram ? grammarMarks(s) : undefined;
+              return (
               <span key={i} id={`s-${i}`} className={`sent${playing === i ? " playing" : ""}`}>
                 {s.tokens.map((t, j) => {
                   const space = !meta.noSpace && j > 0 && !PUNCT.test(t.surface) ? " " : "";
+                  const gm = gmarks?.[j] ? ` ${gmarks[j]}` : "";
                   if (!t.lemma) return <span key={j}>{space}{t.surface}</span>;
                   // Only words the learner saved get the "review" style; words met before but not yet known stay "new".
                   const ws = t.isName ? "known" : learner.wordState(t.lemma);
                   const state = ws === "learning" && learner.word(t.lemma)?.saved !== "learning" ? "new" : ws;
                   const sel = picked?.lemma === t.lemma && picked.sentence === i;
                   const lv = wordLevelOf(lang, t.lemma);
-                  const gender = lang === "de" && settings.genderColors && !t.isName ? genderOf(story, t.lemma) : undefined;
+                  const gender = lang === "de" && settings.genderColors && !gram && !t.isName ? genderOf(story, t.lemma) : undefined;
                   return (
                     <span key={j}>
                       {space}
-                      <button className={`w ${state}${lv !== undefined && !t.isName ? ` lv${Math.min(lv, 4)}` : ""}${gender ? ` g-${gender}` : ""}${sel ? " selected" : ""}`} onClick={() => pick(t, i)}>{t.surface}</button>
+                      <button className={`w ${state}${lv !== undefined && !t.isName ? ` lv${Math.min(lv, 4)}` : ""}${gender ? ` g-${gender}` : ""}${sel ? " selected" : ""}${gm}`} onClick={() => pick(t, i)}>{t.surface}</button>
                     </span>
                   );
                 })}
@@ -176,7 +204,8 @@ function StoryReader({ story }: { story: AnyStory }) {
                 {lang === "ko" && settings.romanize && <span className="rom">{romanize(textOf(story, s))}</span>}
                 {s.translation && (settings.showTranslations || shown.has(i)) && <span className="tr" lang={settings.translateTo}>{trs.texts[i]}</span>}
               </span>
-            ))}
+              );
+            })}
           </div>
 
 
@@ -224,6 +253,7 @@ function StoryReader({ story }: { story: AnyStory }) {
             </div>
             <Toggle label="Show all translations" hint="A line in your language under every sentence" on={settings.showTranslations} set={(v) => setSettings({ showTranslations: v })} />
             {lang === "de" && <Toggle label="der / die / das colours" hint={<><b className="g-m">der</b> · <b className="g-f">die</b> · <b className="g-n">das</b></>} on={settings.genderColors} set={(v) => setSettings({ genderColors: v })} />}
+            {lang === "de" && <Toggle label="Grammar colours" hint={<><span className="gc-Akk">Akkusativ</span> · <span className="gc-Dat">Dativ</span> · <span className="gc-Gen">Genitiv</span> · <span className="gv">verb</span></>} on={settings.grammarView} set={(v) => setSettings({ grammarView: v })} />}
             {lang === "ko" && <Toggle label="Romanization" hint="Latin letters under each sentence" on={settings.romanize} set={(v) => setSettings({ romanize: v })} />}
             <Toggle label="Highlight new words" hint={<><span className="hl"><span className="w new">new</span></span> not known yet · <span className="hl"><span className="w learning">word</span></span> saved for review</>} on={settings.highlightNew} set={(v) => setSettings({ highlightNew: v })} />
             <Toggle label="Underline words by level" hint={<span className="lvl-dots">{meta.levels.slice(0, 5).map((l, k) => <span key={l}><i style={{ background: `var(--lv${k})` }} />{l}</span>)}</span>} on={settings.levelUnderline} set={(v) => setSettings({ levelUnderline: v })} />
@@ -376,6 +406,7 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
       {sentence.translation && (
         <div className="box"><div className="eyebrow" style={{ marginBottom: 4 }}>Sentence</div>{tr.texts[1]}</div>
       )}
+      {lang === "de" && <SentenceGrammar sentence={sentence} />}
       <Examples story={story} lemma={picked.lemma} />
 
       {ai && (
@@ -394,6 +425,30 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
         </div>
       )}
     </aside>
+  );
+}
+
+/** Token index → CSS class for the grammar view (cases underlined by colour, verbs in position 2 / at the end). */
+function grammarMarks(s: Sentence): Record<number, string> {
+  const out: Record<number, string> = {};
+  for (const n of germanNotes(s)) for (const i of n.at) if (!out[i]) out[i] = n.case ? `gc-${n.case}` : "gv";
+  return out;
+}
+
+/** Instant, rule-based grammar notes for the tapped sentence (German). */
+function SentenceGrammar({ sentence }: { sentence: Sentence }) {
+  const notes = germanNotes(sentence);
+  if (!notes.length) return null;
+  return (
+    <div className="box grammar-box">
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Grammar in this sentence</div>
+      {notes.map((n, k) => (
+        <div key={k} className="gnote">
+          <b lang="de" className={n.case ? `gc-${n.case}` : "gv"}>{n.label}</b>
+          <span className="small muted">{n.why}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 

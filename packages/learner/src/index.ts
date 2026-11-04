@@ -107,6 +107,8 @@ export interface Settings {
   romanize: boolean;
   /** Colour German nouns by gender: der (blue), die (red), das (green). */
   genderColors: boolean;
+  /** German: underline cases and verb positions in the story. */
+  grammarView: boolean;
 }
 
 interface Store {
@@ -131,6 +133,7 @@ export const defaultSettings: Settings = {
   uiLang: "en",
   romanize: false,
   genderColors: true,
+  grammarView: false,
 };
 
 const EMPTY: Store = { profiles: {}, settings: defaultSettings };
@@ -569,3 +572,4 @@ export * from "./subtitles";
 export * from "./targets";
 export * from "./translate";
 export * from "./korean";
+export * from "./german";

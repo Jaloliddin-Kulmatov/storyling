@@ -100,7 +100,7 @@ export function Landing() {
         </div>
       </section>
 
-      <footer className="foot">Storyling · <Link href="/credits">Credits</Link></footer>
+      <footer className="foot">Storyling · <Link href="/learn/de">German stories A1–C1</Link> · <Link href="/learn/de/level/a1">A1 stories</Link> · <Link href="/learn/de/level/b1">B1 stories</Link> · <Link href="/credits">Credits</Link></footer>
     </div>
   );
 }

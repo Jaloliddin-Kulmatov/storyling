@@ -9,6 +9,7 @@ import { highlight, shuffle } from "@/lib/words";
 import { isUserStory, textOf, useStories } from "@/lib/stories";
 import { Icon } from "@/components/ui";
 import { Tr } from "@/lib/translate";
+import { ExamSkills } from "@/components/ExamSkills";
 
 type Section = "Listening" | "Reading" | "Vocabulary" | "Grammar";
 interface Q {
@@ -79,6 +80,7 @@ export function Exams({ lang }: { lang: LangCode }) {
             );
           })}
         </div>
+        <ExamSkills lang={lang} />
         {learner.exams.length > 0 && (
           <section style={{ marginTop: 24 }} aria-label="Your past papers">
             <h2 style={{ fontSize: 18 }}>Your past papers</h2>

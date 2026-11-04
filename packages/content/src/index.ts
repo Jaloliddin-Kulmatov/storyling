@@ -75,8 +75,10 @@ export function parseSentence(lang: LangCode, [text, translation]: RawSentence):
   const tokens: Token[] = text.split(" ").map((raw) => {
     // Punctuation and numbers ("1889", "15.") are shown but are not words to learn.
     if (PUNCT.test(raw) || NUMBER.test(raw)) return { surface: raw };
-    const [surface, lemma] = raw.split("=") as [string, string | undefined];
-    const l = lemma ?? surface;
+    const [written, lemma] = raw.split("=") as [string, string | undefined];
+    // "zu#a" without "=" is the surface "zu" with the sense-marked lemma "zu#a".
+    const surface = lemma === undefined ? written.split("#")[0]! : written;
+    const l = lemma ?? written;
     return { surface, lemma: l, isName: DICT[lang]?.[l]?.[0] === "name" };
   });
   return translation ? { tokens, translation } : { tokens };

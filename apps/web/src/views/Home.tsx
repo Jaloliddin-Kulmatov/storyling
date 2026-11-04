@@ -73,11 +73,13 @@ export function Home({ lang }: { lang: LangCode }) {
 
       <div className="strip" role="group" aria-label="Today's progress">
         <span className="ring" style={{ ["--p" as string]: Math.min(1, minutes / goal) }} aria-hidden="true" />
-        <span><b>{minutes}/{goal}</b> {t("home.minToday")}</span>
+        {minutes >= goal ? <span className="goal-done">✓ Daily goal reached</span> : <span><b>{minutes}/{goal}</b> {t("home.minToday")}</span>}
         <span className="dot" aria-hidden="true" />
         <span><b>{learner.streak}</b> {t("home.streak")}</span>
         <span className="dot" aria-hidden="true" />
         <span><b>{learner.knownCount}</b> {t("home.known")}</span>
+        <span className="dot" aria-hidden="true" />
+        <Link href={`/${lang}/leaderboard`}>🏆 League</Link>
         {due > 0 && (
           <Link href={`/${lang}/practice?mode=review`} className="strip-cta">{due} {t("home.toReview")} {Icon.next}</Link>
         )}
