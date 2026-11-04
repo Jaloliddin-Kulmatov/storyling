@@ -19,8 +19,11 @@ const LEVELS: { level: Level; title: string; detail: (first: string) => string }
 /** Step 1: pick a language. Step 2: pick a level (skipped for languages already started). */
 export function Onboarding() {
   const params = useSearchParams();
+  const router = useRouter();
   const preset = params.get("lang") as LangCode | null;
-  const valid = preset && FEATURED.includes(preset) ? preset : null;
+  // With a single language on offer, skip the language step and go straight to the level.
+  const only = FEATURED.length === 1 ? FEATURED[0]! : null;
+  const valid = preset && FEATURED.includes(preset) ? preset : only;
   const [lang, setLang] = useState<LangCode | null>(valid);
   const [level, setLevel] = useState<Level>(1);
   const [step, setStep] = useState(valid ? 1 : 0);
@@ -31,12 +34,12 @@ export function Onboarding() {
       <div className="onb">
         <div className="spread" style={{ marginBottom: 28 }}>
           <Link href="/" className="logo"><Logo />Storyling</Link>
-          <span className="muted small">Step {step + 1} of 2</span>
+          {!only && <span className="muted small">Step {step + 1} of 2</span>}
         </div>
         {step === 0 || !lang ? (
           <LanguageStep value={lang} onPick={(l) => setLang(l)} onNext={() => setStep(1)} />
         ) : (
-          <LevelStep lang={lang} level={level} setLevel={setLevel} onBack={() => setStep(0)} levelName={levelName} />
+          <LevelStep lang={lang} level={level} setLevel={setLevel} onBack={() => (only ? router.push("/") : setStep(0))} levelName={levelName} />
         )}
       </div>
     </div>
@@ -110,7 +113,7 @@ function LevelStep({ lang, level, setLevel, onBack, levelName }: { lang: LangCod
         <h1 style={{ fontSize: 32, fontWeight: 800 }}>Welcome back to {meta.name}</h1>
         <p className="muted">You already know {learner.knownCount} {meta.name} words here.</p>
         <div className="row">
-          <button className="btn ghost" onClick={onBack}>Pick another language</button>
+          {FEATURED.length > 1 && <button className="btn ghost" onClick={onBack}>Pick another language</button>}
           <button className="btn primary" onClick={() => { learner.select(); router.push(`/${lang}`); }}>Continue</button>
         </div>
       </div>
