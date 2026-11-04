@@ -11,6 +11,25 @@ import { useLearner } from "@/lib/learner";
 import { Tr } from "@/lib/translate";
 import { Icon } from "@/components/ui";
 
+/**
+ * Older saved auto-captions are YouTube's overlapping two-row windows (a few words each, cut mid-sentence).
+ * Join neighbouring rows into fuller lines; captions saved with word timing already have clean lines.
+ */
+function tidyAuto(cues: Cue[]): Cue[] {
+  const overlapping = cues.filter((c, i) => cues[i + 1] && c.end > cues[i + 1]!.start + 0.5).length > cues.length / 2;
+  if (!overlapping) return cues;
+  const out: Cue[] = [];
+  for (const c of cues) {
+    const last = out[out.length - 1];
+    if (last && last.text.split(" ").length < 9) {
+      last.text = `${last.text} ${c.text}`;
+      last.end = c.end;
+    } else out.push({ ...c, text: c.text[0]!.toUpperCase() + c.text.slice(1) });
+  }
+  out.forEach((c, i) => { if (out[i + 1]) c.end = out[i + 1]!.start; });
+  return out;
+}
+
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 /** Dictionary entry for a word as heard (lower-case auto captions: try the capitalised noun too). */
@@ -114,7 +133,7 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
       .then((d) => (d.cues?.length ? d : get(`/api/captions?v=${videoId}&lang=${lang}`)))
       .then((d) => {
         if (dead || !d.cues?.length) return;
-        setSaved({ cues: d.cues, tr: {} });
+        setSaved({ cues: d.auto ? tidyAuto(d.cues) : d.cues, tr: {} });
         setAuto(!!d.auto);
       })
       .catch(() => {})
@@ -182,7 +201,7 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
   return (
     <>
       <div className="yt" role="region" aria-label={title}><div ref={host} style={{ position: "absolute", inset: 0 }} /></div>
-      <div className="pc-body" style={{ gap: 10 }}>
+      <div className="pc-body pc-subs" style={{ gap: 10 }}>
         {saved.cues.length > 0 ? (
           <>
             <div className="spread">

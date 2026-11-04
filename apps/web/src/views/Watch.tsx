@@ -27,6 +27,8 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
   const start: Band | "all" = (learner.level ?? 0) <= 1 && bands.includes("beginner") ? "beginner" : "all";
   const [band, setBand] = useState<Band | "all">(start);
   const [channel, setChannel] = useState<string>("all");
+  // Only channels that have videos at the chosen level, so a filter never ends empty.
+  const shownChannels = useMemo(() => channels.filter((c) => videos.some((v) => v.channelId === c.id && (band === "all" || v.band === band))), [channels, videos, band]);
   const list = useMemo(
     () => videos.filter((v) => (band === "all" || v.band === band) && (channel === "all" || v.channelId === channel)),
     [videos, band, channel],
@@ -41,17 +43,17 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Difficulty">
-        <button role="tab" aria-selected={band === "all"} onClick={() => { setBand("all"); setPlaying(null); }}>All</button>
+        <button role="tab" aria-selected={band === "all"} onClick={() => { setBand("all"); setPlaying(null); }}>All <small>{videos.length}</small></button>
         {bands.map((b) => (
-          <button key={b} role="tab" aria-selected={band === b} onClick={() => { setBand(b); setPlaying(null); }}>
+          <button key={b} role="tab" aria-selected={band === b} onClick={() => { setBand(b); setPlaying(null); if (channel !== "all" && !videos.some((v) => v.channelId === channel && v.band === b)) setChannel("all"); }}>
             {BAND_LABEL[b]} <small>{videos.filter((v) => v.band === b).length}</small>
           </button>
         ))}
       </div>
-      {channels.length > 1 && (
+      {shownChannels.length > 1 && (
         <div className="filters" role="group" aria-label="Channel" style={{ margin: "12px 0 16px" }}>
           <button className="chip" aria-pressed={channel === "all"} onClick={() => { setChannel("all"); setPlaying(null); }}>All channels</button>
-          {channels.map((c) => (
+          {shownChannels.map((c) => (
             <button key={c.id} className="chip" aria-pressed={channel === c.id} onClick={() => { setChannel(c.id); setPlaying(null); }}>{c.name}</button>
           ))}
         </div>
@@ -60,7 +62,7 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
       {current ? (
         <div className="player-card">
           <VideoWithTranscript lang={lang} videoId={current.id} title={current.title} />
-          <div className="pc-body">
+          <div className="pc-body pc-info">
             <span className="row small"><span className="lvl">{BAND_LABEL[current.band]}</span><span className="muted">{current.channel} · {ago(current.published)}</span></span>
             <b className="pc-title">{current.title}</b>
             <span className="muted small">Tip: slow the video down with the gear icon if it is too fast.</span>

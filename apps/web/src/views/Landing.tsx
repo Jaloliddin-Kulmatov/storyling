@@ -7,6 +7,18 @@ import { useSettings } from "@/lib/learner";
 import { UI_LANGS, useT } from "@/lib/i18n";
 import { ContinueButton } from "@/views/ContinueButton";
 import { Logo } from "@/components/ui";
+import { useEffect } from "react";
+
+/** Cards fade up as they scroll into view. */
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
+    if (!("IntersectionObserver" in window)) return els.forEach((el) => el.classList.add("in"));
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))), { threshold: 0.15 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
 
 /** Only German is shown to visitors for now; the other languages stay in the code for later. */
 export const FEATURED: LangCode[] = ["de"];
@@ -22,7 +34,8 @@ export function Landing() {
   const demo = "de" as const;
   const pickLang: LangCode = "de";
   const d = DEMOS[demo];
-  
+  useReveal();
+
   return (
     <div className="landing">
       <header>
@@ -40,18 +53,18 @@ export function Landing() {
 
       <section className="hero">
         <div>
-          <div className="eyebrow" style={{ color: "var(--primary)" }}>{t("land.eyebrow")}</div>
-          <h1 style={{ marginTop: 12 }}>
+          <div className="hero-badge enter" style={{ ["--d" as string]: "0s" }}><span className="ping" aria-hidden="true"><i /><i /></span>{t("land.eyebrow")}</div>
+          <h1 className="enter" style={{ marginTop: 12, ["--d" as string]: ".08s" }}>
             {t("land.title1")} <em>{t("land.title2")}</em> {t("land.title3")}
           </h1>
-          <p>{t("land.lead")}</p>
-          <div className="row">
-            <Link className="btn primary" href="/start" style={{ minHeight: 50, padding: "0 22px", fontSize: 16.5 }}>{t("land.start")}</Link>
+          <p className="enter" style={{ ["--d" as string]: ".18s" }}>{t("land.lead")}</p>
+          <div className="row enter" style={{ ["--d" as string]: ".28s" }}>
+            <Link className="btn primary glow" href="/start" style={{ minHeight: 50, padding: "0 22px", fontSize: 16.5 }}>{t("land.start")}</Link>
             <a className="btn" href="#how" style={{ minHeight: 50 }}>{t("land.how")}</a>
           </div>
-          <p className="muted small" style={{ margin: "16px 0 0" }}>{t("land.note")}</p>
+          <p className="muted small enter" style={{ margin: "16px 0 0", ["--d" as string]: ".38s" }}>{t("land.note")}</p>
         </div>
-        <div className="demo" aria-label="Example of the reader">
+        <div className="demo enter-side" aria-label="Example of the reader">
           <div className="spread small muted" style={{ marginTop: 10 }}><span>{d.label}</span><span className="pill fit-just_right">{d.fit}</span></div>
           <p lang={demo} className="hl" style={{ fontFamily: "var(--f-read)", fontSize: 24, lineHeight: 2.05, margin: "14px 0 0" }}>
             {d.before}<span className="w learning">{d.learning}</span>{d.mid}<span className="w new">{d.fresh}</span>{d.after}
@@ -63,7 +76,7 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="card level-pick" aria-labelledby="pick-h">
+      <section className="card level-pick reveal" aria-labelledby="pick-h">
         <h2 id="pick-h" style={{ fontSize: 22, margin: 0 }}>{t("land.pick")}</h2>
         <div className="row" style={{ flexWrap: "wrap", gap: 10 }}>
           <span className="muted small">{t("land.level")}</span>
@@ -79,11 +92,11 @@ export function Landing() {
 
       <section id="how" className="features">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div className="card" key={i}><h3>{t(`land.f${i}t`)}</h3><p className="muted">{t(`land.f${i}`)}</p></div>
+          <div className="card reveal" key={i} style={{ ["--d" as string]: `${(i - 1) * 0.07}s` }}><h3>{t(`land.f${i}t`)}</h3><p className="muted">{t(`land.f${i}`)}</p></div>
         ))}
       </section>
 
-      <section className="card" style={{ marginBottom: 20 }}>
+      <section className="card reveal" style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 22, marginBottom: 10 }}>{t("land.anyLang")}</h2>
         <div className="langs">
           {FEATURED.map((c) => {

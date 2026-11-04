@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { cuesFromJson3, type Json3 } from "@/lib/captions";
 
 interface Track { baseUrl: string; languageCode: string; kind?: string }
-interface Json3 { events?: { tStartMs?: number; dDurationMs?: number; segs?: { utf8?: string }[] }[] }
 
 const ID = /^[A-Za-z0-9_-]{11}$/;
 const LANG = /^[a-z]{2,3}$/;
@@ -54,13 +54,7 @@ export async function GET(req: Request) {
     log.push(`timedtext: ${res.status} ${body.length}`);
     if (!body) return NextResponse.json({ cues: [], ...(url.searchParams.has("debug") ? { log } : {}) });
     const data = JSON.parse(body) as Json3;
-    const cues = (data.events ?? [])
-      .map((e) => ({
-        start: (e.tStartMs ?? 0) / 1000,
-        end: ((e.tStartMs ?? 0) + (e.dDurationMs ?? 0)) / 1000,
-        text: (e.segs ?? []).map((s) => s.utf8 ?? "").join("").replace(/\s+/g, " ").trim(),
-      }))
-      .filter((c) => c.text && c.text !== "[Musik]" && c.text !== "[Music]");
+    const cues = cuesFromJson3(data, track.kind === "asr");
     return NextResponse.json({ cues, auto: track.kind === "asr" }, { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" } });
   } catch (e) {
     return NextResponse.json({ cues: [], ...(url.searchParams.has("debug") ? { log, error: String(e) } : {}) });

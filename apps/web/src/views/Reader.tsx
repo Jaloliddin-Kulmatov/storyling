@@ -87,6 +87,12 @@ function StoryReader({ story }: { story: AnyStory }) {
   const run = useRef(0);
   const { markOpened } = learner;
   useEffect(() => { markOpened(story.id); if (!isUserStory(story)) countView(story.id); }, [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Esc closes the word card.
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => e.key === "Escape" && setPicked(null);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
 
   const recorded = hasRecording(story.id);
   const voice = recorded || canSpeak();
@@ -168,7 +174,8 @@ function StoryReader({ story }: { story: AnyStory }) {
             ? <p className="small review-ok" style={{ margin: "6px 0 0" }}>✓ Checked by a native speaker</p>
             : <p className="small muted" style={{ margin: "6px 0 0" }}>Written by Storyling. Not yet checked by a native speaker.</p>)}
 
-          <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}>
+          <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}
+            onClick={(e) => { if (!(e.target as HTMLElement).closest("button")) setPicked(null); }}>
             {story.sentences.map((s, i) => {
               const gmarks = gram ? grammarMarks(s) : undefined;
               return (

@@ -20,10 +20,27 @@ export const CHANNELS: Record<LangCode, Channel[]> = {
     { id: "UCvgLaFuTGGRXl0eyvBRCifA", name: "Easy English", band: "intermediate", note: "Street interviews with subtitles" },
   ],
   de: [
+    // Beginner (A1–A2)
     { id: "nicos-weg", playlist: "PLs7zUO7VPyJ5DV1iBRgSw2uDl832n0bLg", name: "Nicos Weg (DW)", band: "beginner", note: "The DW telenovela course, episode by episode, A1 to B1" },
+    { id: "eg-a1", playlist: "PLk1fjOl39-50kWobutO8NVFzbw9PHtbbg", name: "Easy German A1", band: "beginner", note: "Easy German for absolute beginners, with German and English subtitles" },
+    { id: "eg-a2", playlist: "PLk1fjOl39-5201BUdhtOM_x23poNvLouT", name: "Easy German A2", band: "beginner", note: "Everyday situations for advanced beginners" },
+    { id: "eg-slow", playlist: "PLk1fjOl39-53Sy0xxIHKnQoZLHWb8rbl9", name: "Slow German", band: "beginner", note: "Easy German videos spoken slowly and clearly" },
+    { id: "eg-super", playlist: "PLk1fjOl39-53GxQIn1Hxdouokf0J0SDpl", name: "Super Easy German", band: "beginner", note: "Short grammar and vocabulary lessons for beginners" },
     { id: "german-made-easy", playlist: "PLvr84R8yDNJZxVFRhIAdv-UGEj2KOA86n", name: "German Made Easy", band: "beginner", note: "Step-by-step beginner lessons in English, from the alphabet up" },
-    { id: "UCxUWIEL-USsiPak0Qy6_vVg", name: "DW Deutsch lernen", band: "intermediate", note: "Deutsche Welle news and job German, about B1" },
-    { id: "UCbxb2fqe9oNgglAoYqsYOtQ", name: "Easy German", band: "intermediate", note: "Street interviews and Super Easy German for beginners" },
+    { id: "UClBrbJXNh2sFxOuvH4o5H9g", playlist: "UULFlBrbJXNh2sFxOuvH4o5H9g", name: "lingoni GERMAN", band: "beginner", note: "Clear lessons from A1 to B1 with a German teacher" },
+    { id: "UCZwegPHTG4gvnR0WLzaq5OQ", playlist: "UULFZwegPHTG4gvnR0WLzaq5OQ", name: "Learn German with Anja", band: "beginner", note: "Fun beginner lessons, vocabulary and culture" },
+    { id: "UCzxztVPUVqd6iI1wGZcyalg", playlist: "UULFzxztVPUVqd6iI1wGZcyalg", name: "YourGermanTeacher", band: "beginner", note: "Grammar explained simply, for beginners" },
+    // Intermediate (B1)
+    { id: "eg-b1", playlist: "PLk1fjOl39-53yooogv6RaJAK29mx7nz1d", name: "Easy German B1", band: "intermediate", note: "Street interviews for intermediate learners" },
+    { id: "UCbxb2fqe9oNgglAoYqsYOtQ", playlist: "UULFbxb2fqe9oNgglAoYqsYOtQ", name: "Easy German", band: "intermediate", note: "Street interviews and everyday German" },
+    { id: "UCxUWIEL-USsiPak0Qy6_vVg", playlist: "UULFxUWIEL-USsiPak0Qy6_vVg", name: "DW Deutsch lernen", band: "intermediate", note: "Deutsche Welle news and job German, about B1" },
+    { id: "UCCAI6jmeW5hWz2-jaLPqLUQ", playlist: "UULFCAI6jmeW5hWz2-jaLPqLUQ", name: "Deutsch mit Marija", band: "intermediate", note: "Grammar and speaking, all in German" },
+    { id: "UC1xaY8XtSMaJN38RYJoGGCg", playlist: "UULF1xaY8XtSMaJN38RYJoGGCg", name: "Deutsch mit Benjamin", band: "intermediate", note: "Natural German explained in German" },
+    { id: "UCesZBmRS6IgZ3uuiB8RdX0A", playlist: "UULFesZBmRS6IgZ3uuiB8RdX0A", name: "Get Germanized", band: "intermediate", note: "Life in Germany, culture and language" },
+    // Advanced (B2–C1)
+    { id: "eg-b2", playlist: "PLk1fjOl39-51lvdiuQYsLW-0aGIdNNknA", name: "Easy German B2", band: "advanced", note: "Longer conversations for upper-intermediate learners" },
+    { id: "eg-c1", playlist: "PLk1fjOl39-53pjPz2VLCeu5vjOUMKZ22O", name: "Easy German C1", band: "advanced", note: "Politics, society and culture for advanced learners" },
+    { id: "UC5NOEUbkLheQcaaRldYW5GA", playlist: "UULF5NOEUbkLheQcaaRldYW5GA", name: "tagesschau", band: "advanced", note: "The main German TV news" },
   ],
   es: [
     { id: "UCouyFdE9-Lrjo3M_2idKq1A", name: "Dreaming Spanish", band: "beginner", note: "Comprehensible input, from superbeginner up" },
@@ -67,9 +84,10 @@ export interface Video {
 
 /** A title that names a level wins over the channel's default. */
 export function bandFor(title: string, fallback: Band): Band {
-  if (/\bB1\b|\bB2\b|kurz und leicht/i.test(title)) return "intermediate";
+  if (/\bB2\b|\bC1\b|\bC2\b/i.test(title)) return "advanced";
+  if (/\bB1\b|kurz und leicht/i.test(title)) return "intermediate";
   if (/super ?easy|superbeginner|beginner|anfänger|débutant|principiante|\bA1\b|\bA2\b|slow/i.test(title)) return "beginner";
-  if (/advanced|fortgeschritten|avancé|avanzado|\bC1\b|\bC2\b/i.test(title)) return "advanced";
+  if (/advanced|fortgeschritten|avancé|avanzado/i.test(title)) return "advanced";
   if (/intermediate|\bB1\b|\bB2\b/i.test(title)) return "intermediate";
   return fallback;
 }
