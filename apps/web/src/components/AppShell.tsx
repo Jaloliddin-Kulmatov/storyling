@@ -66,7 +66,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   );
 
   return (
-    <div className={`shell${reading ? " reading" : ""}`}>
+    <div className={`shell${reading ? " is-reading" : ""}`}>
       <aside className="side">
         <Link href={`/${lang}`} className="logo"><Logo />Storyling</Link>
         {langPill}

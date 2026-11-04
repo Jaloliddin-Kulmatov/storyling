@@ -95,9 +95,9 @@ img { max-width: 100%; }
   .tabbar a[aria-current="page"] { color: var(--primary); font-weight: 700; }
   .tabbar svg { width: 22px; height: 22px; }
   .tabbar .badge { position: absolute; top: 0; left: 56%; }
-  .shell.reading .tabbar, .shell.reading .topbar { display: none; }
+  .shell.is-reading .tabbar, .shell.is-reading .topbar { display: none; }
 }
-.shell.reading .main { padding-bottom: 140px; }
+.shell.is-reading .main { padding-bottom: 200px; }
 
 /* ── story cards and lists ── */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 22px; }
@@ -432,7 +432,6 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 .chat { display: grid; gap: 12px; max-height: 50vh; overflow-y: auto; }
 .bubble { padding: 10px 12px; border-radius: 14px; background: var(--surface-2); line-height: 1.5; white-space: pre-wrap; max-width: 92%; }
 .bubble.me { background: var(--primary-soft); justify-self: end; }
-.fab-bar { flex-wrap: wrap; justify-content: center; }
 
 /* German noun genders: der / die / das */
 :root { --g-m: #2563eb; --g-f: #dc2626; --g-n: #16a34a; }
@@ -513,3 +512,22 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 :root[data-theme="dark"] .word-test { background: linear-gradient(135deg, #3b2a12, #2f2210); color: #fde68a; border-color: #d97706; }
 :root[data-theme="dark"] .word-test .muted, :root[data-theme="dark"] .word-test span { color: #fcd34d; }
 .auth-tabs { display: flex; } .auth-tabs button { flex: 1; font-size: 15px; padding: 9px; }
+
+/* reading tools: one scrollable row, never covering the text */
+.fab-bar { flex-wrap: nowrap; max-width: min(720px, calc(100vw - 24px)); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.fab-bar::-webkit-scrollbar { display: none; }
+.fab-bar button { flex: none; white-space: nowrap; }
+@media (max-width: 899px) {
+  .fab-bar { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); padding: 5px; gap: 2px; }
+  .fab-bar button { padding: 8px 11px; font-size: 13px; }
+}
+/* reader top bar: light toggles that show on/off with a dot, in one scrollable row on phones */
+.reader-bar .chip[aria-pressed="true"]:not(.save-chip) { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 45%, transparent); color: var(--primary); }
+.reader-bar .chip:not(.save-chip)::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background 0.2s; }
+.reader-bar .chip[aria-pressed="true"]:not(.save-chip)::before { background: var(--primary); }
+@media (max-width: 899px) {
+  .reader-bar { flex-wrap: nowrap; gap: 8px; }
+  .reader-bar > .row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .reader-bar > .row::-webkit-scrollbar { display: none; }
+  .reader-bar > .row > * { flex: none; }
+}
