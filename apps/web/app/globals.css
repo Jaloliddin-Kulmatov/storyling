@@ -512,3 +512,4 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .word-test { background: linear-gradient(135deg, #3b2a12, #2f2210); color: #fde68a; border-color: #d97706; } :root:not([data-theme="light"]) .word-test .muted, :root:not([data-theme="light"]) .word-test span { color: #fcd34d; } }
 :root[data-theme="dark"] .word-test { background: linear-gradient(135deg, #3b2a12, #2f2210); color: #fde68a; border-color: #d97706; }
 :root[data-theme="dark"] .word-test .muted, :root[data-theme="dark"] .word-test span { color: #fcd34d; }
+.auth-tabs { display: flex; } .auth-tabs button { flex: 1; font-size: 15px; padding: 9px; }
