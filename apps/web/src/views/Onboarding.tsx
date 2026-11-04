@@ -20,7 +20,7 @@ const LEVELS: { level: Level; title: string; detail: (first: string) => string }
 export function Onboarding() {
   const params = useSearchParams();
   const preset = params.get("lang") as LangCode | null;
-  const valid = preset && languages.some((l) => l.code === preset) ? preset : null;
+  const valid = preset && FEATURED.includes(preset) ? preset : null;
   const [lang, setLang] = useState<LangCode | null>(valid);
   const [level, setLevel] = useState<Level>(1);
   const [step, setStep] = useState(valid ? 1 : 0);
@@ -51,7 +51,7 @@ function LanguageStep({ value, onPick, onNext }: { value: LangCode | null; onPic
         <p className="muted" style={{ fontSize: 17, marginTop: 8 }}>Explanations are in English. You can switch languages anytime.</p>
       </div>
       <div className="langs" role="radiogroup" aria-label="Languages">
-        {[...languages].sort((a, b) => Number(FEATURED.includes(b.code)) - Number(FEATURED.includes(a.code))).map((l) => (
+        {languages.filter((l) => FEATURED.includes(l.code)).map((l) => (
           <button key={l.code} role="radio" aria-checked={value === l.code} aria-pressed={value === l.code} className="lang-opt" onClick={() => onPick(l.code)}>
             <span className="nat" lang={l.code}>{l.native}</span>
             <b>{l.name} {!FEATURED.includes(l.code) && <span className="pill">Beta</span>}</b>

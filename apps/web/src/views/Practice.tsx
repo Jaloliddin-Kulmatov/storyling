@@ -175,9 +175,11 @@ function useSentences(lang: LangCode) {
 
 function Done({ score, total, onAgain, note }: { score: number; total: number; onAgain: () => void; note?: string }) {
   const pct = Math.round((score / Math.max(1, total)) * 100);
+  const shown = useCountUp(pct);
   return (
-    <div className="flash">
-      <div className="score-ring" style={{ ["--p" as string]: pct / 100 }}><b>{pct}%</b></div>
+    <div className="flash done-card">
+      {pct >= 80 && <Confetti />}
+      <div className="score-ring anim" style={{ ["--p" as string]: pct / 100 }}><b>{shown}%</b></div>
       <h2 style={{ fontSize: 22 }}>{pct >= 80 ? "Great job!" : pct >= 50 ? "Good work!" : "Keep practicing!"}</h2>
       <p className="muted" style={{ margin: 0 }}>{score} of {total} correct.{note ? ` ${note}` : ""}</p>
       <button className="btn primary block" onClick={onAgain}>Play again</button>
@@ -189,6 +191,61 @@ function Done({ score, total, onAgain, note }: { score: number; total: number; o
  * Build a round once and keep it until `key` changes. Games must not reshuffle when the learner's
  * data changes mid-game (a wrong answer saves the word, which updates the store).
  */
+/** Counts from 0 up to `to` over about a second, for result screens. */
+function useCountUp(to: number) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return setV(to);
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 900);
+      setV(Math.round(to * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return v;
+}
+
+const CONFETTI_COLORS = ["#2f9e6e", "#f59e0b", "#3b82f6", "#ef4444", "#a855f7", "#10b981"];
+
+/** A short burst of confetti for a good score (CSS only, hidden with reduced motion). */
+function Confetti() {
+  const bits = useMemo(
+    () => Array.from({ length: 28 }, (_, i) => ({ x: Math.round((Math.random() - 0.5) * 520), y: Math.round(-120 - Math.random() * 220), r: Math.round(Math.random() * 720 - 360), c: CONFETTI_COLORS[i % CONFETTI_COLORS.length], d: Math.random() * 0.15 })),
+    [],
+  );
+  return (
+    <div className="confetti" aria-hidden="true">
+      {bits.map((b, i) => (
+        <i key={i} style={{ ["--x" as string]: `${b.x}px`, ["--y" as string]: `${b.y}px`, ["--r" as string]: `${b.r}deg`, background: b.c, animationDelay: `${b.d}s` }} />
+      ))}
+    </div>
+  );
+}
+
+/** Correct answers in a row; shown as a small flame badge from 2 up. */
+function useCombo() {
+  const [combo, setCombo] = useState(0);
+  return [combo, (ok: boolean) => setCombo((c) => (ok ? c + 1 : 0))] as const;
+}
+
+function Combo({ n }: { n: number }) {
+  if (n < 2) return null;
+  return <span key={n} className="combo" aria-live="polite">🔥 {n} in a row</span>;
+}
+
+/** Animated progress bar for a round of questions. */
+function Progress({ done, total }: { done: number; total: number }) {
+  return (
+    <div className="g-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
+      <span style={{ width: `${(done / Math.max(1, total)) * 100}%` }} />
+    </div>
+  );
+}
+
 /** Keyboard shortcuts for a game screen (ignored while typing in a field). */
 function useKeys(on: (key: string) => void) {
   const ref = useRef(on);
@@ -293,7 +350,7 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
         <button className="btn primary block" onClick={onFlip} autoFocus>Show meaning <kbd>Space</kbd></button>
       ) : (
         <>
-          <div>
+          <div className="reveal">
             {meaning?.reading && <div className="reading">{meaning.reading}</div>}
             <div style={{ fontSize: 22, fontWeight: 700 }}>{meaning?.meaning ? <Tr>{meaning.meaning}</Tr> : "—"}</div>
             {meaning?.pos && <div className="muted small">{meaning.pos}</div>}
@@ -316,6 +373,7 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
 
 // ── Match words ──
 function Match({ lang }: { lang: LangCode }) {
+  const [combo, hit] = useCombo();
   const pool = usePool(lang);
   const learner = useLearner(lang);
   const [round, setRound] = useState(0);
@@ -344,7 +402,9 @@ function Match({ lang }: { lang: LangCode }) {
     if (picked === lemma) {
       setSolved((s) => new Set(s).add(lemma));
       setPicked(null);
+      hit(true);
     } else {
+      hit(false);
       setMistakes((m) => m + 1);
       setWrong(lemma);
       setTimeout(() => setWrong(null), 500);
@@ -367,7 +427,8 @@ function Match({ lang }: { lang: LangCode }) {
           ))}
         </div>
       </div>
-      <p className="small muted">{solved.size}/{pairs.length} matched · {mistakes} {mistakes === 1 ? "mistake" : "mistakes"}</p>
+      <Progress done={solved.size} total={pairs.length} />
+      <p className="small muted">{solved.size}/{pairs.length} matched · {mistakes} {mistakes === 1 ? "mistake" : "mistakes"} <Combo n={combo} /></p>
     </div>
   );
 }
@@ -377,6 +438,7 @@ const ROUNDS = 5;
 
 function Order({ lang }: { lang: LangCode }) {
   useChoiceKeys();
+  const [combo, hit] = useCombo();
   const sentences = useSentences(lang);
   const learner = useLearner(lang);
   const noSpace = language(lang).noSpace;
@@ -411,6 +473,7 @@ function Order({ lang }: { lang: LangCode }) {
   function check() {
     const ok = join(built.map((i) => words[i]!.surface)) === answer;
     setChecked(ok);
+    hit(ok);
     if (ok) setScore((s) => s + 1);
     playSentence(cur!.story.id, lang, cur!.i, textOf(cur!.story, cur!.s));
   }
@@ -423,8 +486,8 @@ function Order({ lang }: { lang: LangCode }) {
   }
 
   return (
-    <div className="flash" style={{ textAlign: "left" }}>
-      <div className="spread small muted"><span>Sentence {n + 1} of {rounds.length}</span><span>{cur.story.title}</span></div>
+    <div className="flash" style={{ textAlign: "left" }} key={n}>
+      <div className="spread small muted"><span>Sentence {n + 1} of {rounds.length} <Combo n={combo} /></span><span>{cur.story.title}</span></div>
       {cur.s.translation && <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}><Tr>{cur.s.translation}</Tr></p>}
       <div className={`build${checked === true ? " ok" : checked === false ? " no" : ""}`} lang={lang}>
         {built.map((i, k) => (
@@ -459,6 +522,7 @@ function Order({ lang }: { lang: LangCode }) {
 // ── Listening ──
 function Listen({ lang }: { lang: LangCode }) {
   useChoiceKeys();
+  const [combo, hit] = useCombo();
   const sentences = useSentences(lang);
   const learner = useLearner(lang);
   const [game, setGame] = useState(0);
@@ -484,8 +548,9 @@ function Listen({ lang }: { lang: LangCode }) {
   }
 
   return (
-    <div className="flash">
-      <div className="spread small muted"><span>Question {n + 1} of {rounds.length}</span><span>What did you hear?</span></div>
+    <div className="flash" key={n}>
+      <div className="spread small muted"><span>Question {n + 1} of {rounds.length}</span><span><Combo n={combo} /> What did you hear?</span></div>
+      <Progress done={n} total={rounds.length} />
       <button className="icon-btn play big" aria-label="Play the sentence again" onClick={play}>{Icon.play}</button>
       <div className="choices" style={{ textAlign: "left" }} lang={lang}>
         {options.map((o, k) => {
@@ -493,7 +558,7 @@ function Listen({ lang }: { lang: LangCode }) {
           return (
             <button key={k} disabled={chosen !== null}
               className={`choice${chosen !== null && isRight ? " ok" : ""}${chosen === k && !isRight ? " no" : ""}`}
-              onClick={() => { setChosen(k); if (isRight) setScore((s) => s + 1); }}>
+              onClick={() => { setChosen(k); hit(isRight); if (isRight) setScore((s) => s + 1); }}>
               {textOf(o.story, o.s)}
             </button>
           );
@@ -516,6 +581,7 @@ function Listen({ lang }: { lang: LangCode }) {
 // ── Level test ──
 function LevelTest({ lang }: { lang: LangCode }) {
   useChoiceKeys();
+  const [combo, hit] = useCombo();
   const meta = language(lang);
   const learner = useLearner(lang);
   const stories = useStories(lang);
@@ -561,11 +627,9 @@ function LevelTest({ lang }: { lang: LangCode }) {
   const parts = ctx ? highlight(ctxText, ctx.tokens.find((t) => t.lemma === q.p.lemma)?.surface ?? q.p.display) : null;
 
   return (
-    <div className="flash" style={{ textAlign: "left" }}>
-      <div className="spread small muted"><span>{level} · question {n + 1} of {questions.length}</span><span>{score} correct</span></div>
-      <div className="meter" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${questions.length}, minmax(0, 1fr))` }}>
-        {questions.map((_, i) => <span key={i} className={i < n ? "on" : ""} />)}
-      </div>
+    <div className="flash" style={{ textAlign: "left" }} key={n}>
+      <div className="spread small muted"><span>{level} · question {n + 1} of {questions.length}</span><span><Combo n={combo} /> {score} correct</span></div>
+      <Progress done={n} total={questions.length} />
       <div className="row"><span className="lemma" lang={lang}>{q.p.display}</span><button className="icon-btn" aria-label="Hear the word" onClick={() => playWord(lang, q.p.lemma, q.p.display)}>{Icon.speaker}</button></div>
       {parts && <div className="ctx muted" lang={lang} style={{ textAlign: "left" }}>{parts[0]}<mark>{parts[1]}</mark>{parts[2]}</div>}
       <div className="choices">
@@ -574,6 +638,7 @@ function LevelTest({ lang }: { lang: LangCode }) {
             className={`choice${chosen !== null && o === q.p.meaning ? " ok" : ""}${chosen === o && o !== q.p.meaning ? " no" : ""}`}
             onClick={() => {
               setChosen(o);
+              hit(o === q.p.meaning);
               if (o === q.p.meaning) setScore((s) => s + 1);
               else learner.setWord(q.p.lemma, "learning", { storyId: q.p.story.id, sentence: q.p.sentence });
             }}><Tr>{o}</Tr></button>

@@ -1,16 +1,15 @@
 "use client";
 
-import { language, languages, storiesFor } from "@storyling/content";
+import { language, storiesFor } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
-import { useState } from "react";
 import { useSettings } from "@/lib/learner";
 import { UI_LANGS, useT } from "@/lib/i18n";
 import { ContinueButton } from "@/views/ContinueButton";
 import { Logo } from "@/components/ui";
 
-/** German and Korean get the most content and care; the other languages are marked as beta. */
-export const FEATURED: LangCode[] = ["de", "ko"];
+/** Only German is shown to visitors for now; the other languages stay in the code for later. */
+export const FEATURED: LangCode[] = ["de"];
 
 const DEMOS: Record<"de" | "ko", { label: string; fit: string; before: string; learning: string; mid: string; fresh: string; after: string; word: string; pos: string; meaning: string }> = {
   de: { label: "Deutsch · Die große Prüfung · A2", fit: "Just right · 96%", before: "Morgen hat Ben eine wichtige ", learning: "Prüfung", mid: ". Er lernt den ganzen Nachmittag in der ", fresh: "Bibliothek", after: ".", word: "die Bibliothek", pos: "noun", meaning: "library · met 2 of about 10 times" },
@@ -20,11 +19,10 @@ const DEMOS: Record<"de" | "ko", { label: string; fit: string; before: string; l
 export function Landing() {
   const t = useT();
   const [settings, set] = useSettings();
-  const [demo, setDemo] = useState<"de" | "ko">("de");
-  const [pickLang, setPickLang] = useState<LangCode>("de");
+  const demo = "de" as const;
+  const pickLang: LangCode = "de";
   const d = DEMOS[demo];
-  const others = languages.filter((l) => !FEATURED.includes(l.code));
-
+  
   return (
     <div className="landing">
       <header>
@@ -54,10 +52,6 @@ export function Landing() {
           <p className="muted small" style={{ margin: "16px 0 0" }}>{t("land.note")}</p>
         </div>
         <div className="demo" aria-label="Example of the reader">
-          <div className="seg demo-switch" role="group" aria-label="Demo language">
-            <button aria-pressed={demo === "de"} onClick={() => setDemo("de")}>Deutsch</button>
-            <button aria-pressed={demo === "ko"} onClick={() => setDemo("ko")}>한국어</button>
-          </div>
           <div className="spread small muted" style={{ marginTop: 10 }}><span>{d.label}</span><span className="pill fit-just_right">{d.fit}</span></div>
           <p lang={demo} className="hl" style={{ fontFamily: "var(--f-read)", fontSize: 24, lineHeight: 2.05, margin: "14px 0 0" }}>
             {d.before}<span className="w learning">{d.learning}</span>{d.mid}<span className="w new">{d.fresh}</span>{d.after}
@@ -71,14 +65,6 @@ export function Landing() {
 
       <section className="card level-pick" aria-labelledby="pick-h">
         <h2 id="pick-h" style={{ fontSize: 22, margin: 0 }}>{t("land.pick")}</h2>
-        <div className="row" style={{ flexWrap: "wrap", gap: 10 }}>
-          <span className="muted small">{t("land.learning")}</span>
-          <div className="seg" role="group" aria-label={t("land.learning")}>
-            {FEATURED.map((c) => (
-              <button key={c} aria-pressed={pickLang === c} onClick={() => setPickLang(c)}>{language(c).native}</button>
-            ))}
-          </div>
-        </div>
         <div className="row" style={{ flexWrap: "wrap", gap: 10 }}>
           <span className="muted small">{t("land.level")}</span>
           {language(pickLang).levels.map((lv) => (
@@ -112,18 +98,6 @@ export function Landing() {
             );
           })}
         </div>
-        <details style={{ marginTop: 14 }}>
-          <summary className="muted" style={{ cursor: "pointer", fontWeight: 600 }}>{t("land.more")}</summary>
-          <div className="langs" style={{ marginTop: 10 }}>
-            {others.map((l) => (
-              <Link key={l.code} href={`/start?lang=${l.code}`} className="lang-opt">
-                <span className="nat" lang={l.code}>{l.native}</span>
-                <b>{l.name} <span className="pill">{t("land.beta")}</span></b>
-                <span className="muted small">{storiesFor(l.code).length} {t("land.stories")}</span>
-              </Link>
-            ))}
-          </div>
-        </details>
       </section>
 
       <footer className="foot">Storyling · <Link href="/credits">Credits</Link></footer>

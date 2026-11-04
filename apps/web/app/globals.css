@@ -453,3 +453,54 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 .lvl-bar .bar { flex: 1; height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
 .lvl-bar .bar span { display: block; height: 100%; background: var(--primary); border-radius: 99px; }
 .review-ok { color: var(--primary); font-weight: 700; }
+
+/* ── practice animations ── */
+@property --p { syntax: "<number>"; inherits: true; initial-value: 0; }
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes glow { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); } to { box-shadow: 0 0 0 12px transparent; } }
+@keyframes flip-in { from { opacity: 0; transform: perspective(600px) rotateX(-70deg); } to { opacity: 1; transform: none; } }
+@keyframes ring { from { --p: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes burst { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 45% { opacity: 1; transform: translate(calc(var(--x) * 0.6), var(--y)) rotate(calc(var(--r) * 0.5)); } 100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 320px)) rotate(var(--r)); } }
+@keyframes combo-in { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes tile-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+
+.flash { animation: card-in 0.32s cubic-bezier(.2,.8,.2,1); }
+.choice { transition: transform 0.12s, border-color 0.2s, background 0.2s; }
+.choice:not(:disabled):hover { transform: translateY(-2px); }
+.choice:not(:disabled):active { transform: scale(0.97); }
+.choice.ok { animation: pop 0.35s ease, glow 0.7s ease-out; position: relative; padding-right: 34px; }
+.choice.ok::after { content: "✓"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: 900; animation: combo-in 0.35s ease; }
+.choice.no { animation: shake 0.4s ease; position: relative; padding-right: 34px; }
+.choice.no::after { content: "✗"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--danger, #c0392b); font-weight: 900; }
+.reveal { animation: flip-in 0.4s cubic-bezier(.2,.8,.2,1); transform-origin: top; }
+.grades .btn { transition: transform 0.12s; }
+.grades .btn:active { transform: scale(0.94); }
+.tile { transition: transform 0.15s, opacity 0.3s, box-shadow 0.2s; }
+.tile.picked { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 18px -10px rgba(0,0,0,0.45); }
+.tile.solved { animation: pop 0.3s ease; opacity: 0.35; }
+.tile.wrong { animation: shake 0.4s ease; }
+.build .tile { animation: tile-in 0.22s cubic-bezier(.2,.8,.2,1); }
+.build.ok { animation: glow 0.8s ease-out; }
+.build.no { animation: shake 0.4s ease; }
+.dict-result span { display: inline-block; animation: rise 0.3s ease both; }
+.dict-result span:nth-child(2) { animation-delay: 0.04s; } .dict-result span:nth-child(3) { animation-delay: 0.08s; }
+.dict-result span:nth-child(4) { animation-delay: 0.12s; } .dict-result span:nth-child(5) { animation-delay: 0.16s; }
+.dict-result span:nth-child(6) { animation-delay: 0.2s; } .dict-result span:nth-child(n+7) { animation-delay: 0.24s; }
+.score-ring.anim { animation: ring 1s cubic-bezier(.2,.8,.2,1); }
+.done-card { position: relative; overflow: visible; }
+.confetti { position: absolute; left: 50%; top: 40px; width: 0; height: 0; pointer-events: none; z-index: 2; }
+.confetti i { position: absolute; width: 8px; height: 12px; border-radius: 2px; animation: burst 1.4s cubic-bezier(.15,.7,.3,1) forwards; }
+.combo { display: inline-block; font-weight: 800; color: #ea580c; animation: combo-in 0.35s ease; margin-right: 6px; }
+.g-progress { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.g-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), #34d399); border-radius: 99px; transition: width 0.45s cubic-bezier(.2,.8,.2,1); }
+.game-card { transition: transform 0.18s, box-shadow 0.18s; }
+.game-card:active { transform: scale(0.98); }
+.game-card .gi { transition: transform 0.25s; }
+.game-card:hover .gi { transform: rotate(-8deg) scale(1.08); }
+@media (prefers-reduced-motion: reduce) {
+  .flash, .choice.ok, .choice.no, .reveal, .tile.solved, .tile.wrong, .build .tile, .build.ok, .build.no, .dict-result span, .score-ring.anim, .combo, .choice.ok::after { animation: none !important; }
+  .confetti { display: none; }
+}
