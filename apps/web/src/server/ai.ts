@@ -18,30 +18,46 @@ export const aiEnabled = () => useGroq() || !!process.env.ANTHROPIC_API_KEY;
 
 // ── Groq (OpenAI-compatible chat completions) ──
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = () => process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+// Groq retires models from time to time; when one is gone (404) the next one is tried and remembered.
+const GROQ_MODELS = () => [...new Set([process.env.GROQ_MODEL, "llama-3.3-70b-versatile", "openai/gpt-oss-120b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant"].filter((m): m is string => !!m))];
+let groqModel: string | null = null;
 
 async function groqChat(system: string, user: string, maxTokens: number, json: boolean): Promise<string> {
-  const res = await fetch(GROQ_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: GROQ_MODEL(),
-      max_tokens: maxTokens,
-      temperature: json ? 0.3 : 0.5,
-      ...(json ? { response_format: { type: "json_object" } } : {}),
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
-  if (res.status === 429) throw new AiError("The AI service is busy. Try again in a minute.", 429);
-  if (res.status === 401) throw new AiError("The AI key on the server is invalid.", 500);
-  if (!res.ok) throw new AiError(`AI request failed (${res.status}).`, 502);
-  const data = (await res.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[] };
-  const choice = data.choices?.[0];
-  if (choice?.finish_reason === "length") throw new AiError("The text is too long for one go. Try a shorter part.", 413);
-  return choice?.message?.content?.trim() ?? "";
+  const models = groqModel ? [groqModel, ...GROQ_MODELS().filter((m) => m !== groqModel)] : GROQ_MODELS();
+  let last = "";
+  for (const model of models) {
+    const res = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        temperature: json ? 0.3 : 0.5,
+        ...(json ? { response_format: { type: "json_object" } } : {}),
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+    if (res.status === 429) throw new AiError("The AI service is busy. Try again in a minute.", 429);
+    if (res.status === 401) throw new AiError("The AI key on the server is invalid.", 500);
+    if (res.status === 404 || res.status === 400) {
+      // Model removed or not available to this key: try the next one.
+      const body = (await res.json().catch(() => ({}))) as { error?: { message?: string; code?: string } };
+      last = body.error?.message ?? `${res.status}`;
+      console.error(`Groq ${model}: ${last}`);
+      if (res.status === 400 && !/model/i.test(last)) throw new AiError(`AI request failed: ${last}`, 502);
+      continue;
+    }
+    if (!res.ok) throw new AiError(`AI request failed (${res.status}).`, 502);
+    groqModel = model;
+    const data = (await res.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[] };
+    const choice = data.choices?.[0];
+    if (choice?.finish_reason === "length") throw new AiError("The text is too long for one go. Try a shorter part.", 413);
+    return choice?.message?.content?.trim() ?? "";
+  }
+  throw new AiError(`AI request failed: ${last || "no model available"}.`, 502);
 }
 
 let client: Anthropic | null = null;
