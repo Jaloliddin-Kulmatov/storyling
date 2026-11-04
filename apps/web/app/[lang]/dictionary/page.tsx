@@ -1,10 +1,7 @@
-import type { LangCode } from "@storyling/core";
-import type { Metadata } from "next";
-import { Dictionary } from "@/views/Dictionary";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Dictionary" };
-
+/** The Dictionary is a tab of the Notebook now; keep old links working. */
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  return <Dictionary lang={lang as LangCode} />;
+  redirect(`/${lang}/words?tab=dictionary`);
 }

@@ -153,3 +153,4 @@ export * from "./videos";
 export * from "./grammar";
 export * from "./gender";
 export * from "./reviews";
+export * from "./pictures";

@@ -11,8 +11,9 @@ import { useLearner } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
 import { useWordInfo } from "@/lib/words";
 import { Icon, StoryRow } from "@/components/ui";
+import { Dictionary } from "@/views/Dictionary";
 
-type Tab = "words" | "saved" | "history" | "texts";
+type Tab = "dictionary" | "words" | "saved" | "history" | "texts";
 type Filter = "learning" | "known" | "ignored";
 
 const days = (n: number) => (n <= 0 ? "now" : n < 1 / 24 ? `in ${Math.max(1, Math.round(n * 1440))} min` : n < 1 ? `in ${Math.round(n * 24)}h` : n < 30 ? `in ${Math.round(n)}d` : `in ${Math.round(n / 30)}mo`);
@@ -61,17 +62,19 @@ export function Notebook({ lang }: { lang: LangCode }) {
         <div><div className="eyebrow">Your collection</div><h1>{t("note.title")}</h1></div>
         <div className="row">
           <Link className="btn sm" href={`/${lang}/packs`}>{Icon.library} Word packs</Link>
-          <Link className="btn sm" href={`/${lang}/dictionary`}>{Icon.dict} Dictionary</Link>
           <Link className="btn sm primary" href={`/${lang}/practice`}>{Icon.practice} Practice</Link>
         </div>
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Notebook">
+        <button role="tab" aria-selected={tab === "dictionary"} onClick={() => setTab("dictionary")}>{Icon.dict} {t("nav.dictionary")}</button>
         <button role="tab" aria-selected={tab === "words"} onClick={() => setTab("words")}>{t("note.words")} <small>{counts.learning}</small></button>
         <button role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>{t("note.saved")} <small>{saved.length}</small></button>
         <button role="tab" aria-selected={tab === "history"} onClick={() => setTab("history")}>{t("note.history")} <small>{history.length}</small></button>
         <button role="tab" aria-selected={tab === "texts"} onClick={() => setTab("texts")}>{t("note.texts")} <small>{texts.length}</small></button>
       </div>
+
+      {tab === "dictionary" && <div style={{ marginTop: 14 }}><Dictionary lang={lang} embedded /></div>}
 
       {tab === "words" && (
         <>

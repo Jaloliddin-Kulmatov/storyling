@@ -17,12 +17,11 @@ const NAV = [
   { href: "/words", label: "nav.notebook", icon: Icon.notebook },
   { href: "/watch", label: "nav.watch", icon: Icon.video },
   { href: "/practice", label: "nav.practice", icon: Icon.practice },
-  { href: "/dictionary", label: "nav.dictionary", icon: Icon.dict },
   { href: "/progress", label: "nav.me", icon: Icon.me },
 ] as const;
 
-// Phones get five tabs; Dictionary is reached from the Notebook there.
-const TABS = NAV.filter((n) => n.href !== "/dictionary");
+// The Dictionary lives inside the Notebook, so phones and desktop share the same five tabs.
+const TABS = NAV;
 
 export function AppShell({ lang, children }: { lang: LangCode; children: ReactNode }) {
   const path = usePathname();

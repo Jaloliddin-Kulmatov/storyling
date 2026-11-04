@@ -4,6 +4,7 @@ import { cueAt, parseCues, type Cue } from "@storyling/learner";
 import type { LangCode } from "@storyling/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { callAi, useAiEnabled } from "@/lib/ai";
+import { VideoQuiz } from "@/components/VideoQuiz";
 
 interface YTPlayer {
   getCurrentTime(): number;
@@ -52,7 +53,29 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
   const cuesRef = useRef<Cue[]>([]);
   cuesRef.current = saved.cues;
 
-  useEffect(() => { setSaved(read(videoId)); setNow(-1); setMsg(null); }, [videoId]);
+  const [auto, setAuto] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  useEffect(() => {
+    const local = read(videoId);
+    setSaved(local);
+    setNow(-1);
+    setMsg(null);
+    setAuto(false);
+    if (local.cues?.length) return;
+    // No subtitles saved yet: load the video's own captions from YouTube.
+    let dead = false;
+    setFetching(true);
+    fetch(`/api/captions?v=${videoId}&lang=${lang}`)
+      .then((r) => r.json() as Promise<{ cues?: Cue[]; auto?: boolean }>)
+      .then((d) => {
+        if (dead || !d.cues?.length) return;
+        setSaved({ cues: d.cues, tr: {} });
+        setAuto(!!d.auto);
+      })
+      .catch(() => {})
+      .finally(() => !dead && setFetching(false));
+    return () => { dead = true; };
+  }, [videoId, lang]);
 
   useEffect(() => {
     let dead = false;
@@ -118,7 +141,7 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
         {saved.cues.length > 0 ? (
           <>
             <div className="spread">
-              <b>Transcript</b>
+              <b>Subtitles {auto && <span className="pill">auto</span>}</b>
               <span className="row">
                 {hasTr && <button className="chip" aria-pressed={showTr} onClick={() => setShowTr(!showTr)}>English</button>}
                 {ai && <button className="btn sm" disabled={busy} onClick={translate}>{busy ? "Translating…" : hasTr ? "Translate the rest" : "Translate to English"}</button>}
@@ -134,7 +157,10 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
               ))}
             </div>
             {!ai && <span className="muted small">English translation needs AI to be turned on for this site (add GROQ_API_KEY).</span>}
+            <VideoQuiz key={videoId} lang={lang} cues={saved.cues} onPlay={(c) => { player.current?.seekTo(c.start, true); player.current?.playVideo(); }} />
           </>
+        ) : fetching ? (
+          <span className="muted small">Loading subtitles…</span>
         ) : (
           <details>
             <summary><b>Add subtitles</b> <span className="muted small">to follow along line by line</span></summary>

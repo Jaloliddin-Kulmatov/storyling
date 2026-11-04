@@ -23,7 +23,7 @@ const KEYS: Partial<Record<LangCode, string[]>> = {
 type Tab = "word" | "example";
 
 /** Dictionary: search by word or meaning, or search the example sentences in the stories. */
-export function Dictionary({ lang }: { lang: LangCode }) {
+export function Dictionary({ lang, embedded = false }: { lang: LangCode; embedded?: boolean }) {
   const learner = useLearner(lang);
   const stories = useStories(lang);
   const meta = language(lang);
@@ -78,16 +78,18 @@ export function Dictionary({ lang }: { lang: LangCode }) {
 
   return (
     <>
-      <div className="page-head">
-        <div><div className="eyebrow">{meta.name} · {all.length} words</div><h1>Dictionary</h1></div>
-      </div>
+      {!embedded && (
+        <div className="page-head">
+          <div><div className="eyebrow">{meta.name} · {all.length} words</div><h1>Dictionary</h1></div>
+        </div>
+      )}
 
       {KEYS[lang] && (
         <div className="keys" role="group" aria-label="Special letters">
           {KEYS[lang]!.map((k) => <button key={k} onClick={() => insert(k)} lang={lang} aria-label={`Insert ${k}`}>{k}</button>)}
         </div>
       )}
-      <input ref={input} className="input" type="search" autoFocus placeholder={`Search in ${meta.name} or English`} aria-label="Search the dictionary" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
+      <input ref={input} className="input" type="search" autoFocus={!embedded} placeholder={`Search ${all.length} ${meta.name} words or English`} aria-label="Search the dictionary" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
       <div className="filters" role="tablist" aria-label="Search in" style={{ marginBottom: 12 }}>
         <button role="tab" className="chip" aria-selected={tab === "word"} aria-pressed={tab === "word"} onClick={() => setTab("word")}>Word</button>
         <button role="tab" className="chip" aria-selected={tab === "example"} aria-pressed={tab === "example"} onClick={() => setTab("example")}>Examples{q.trim().length >= 2 ? ` · ${sentences.length}${sentences.length >= 40 ? "+" : ""}` : ""}</button>

@@ -506,6 +506,7 @@ function StoryPractice({ story, tapped, done, onDone }: { story: AnyStory; tappe
           <p className="muted small" style={{ margin: 0 }}>Learned words are in your Notebook under Known; missed ones come back in flashcards.</p>
           <div className="row" style={{ flexWrap: "wrap" }}>
             {next && <Link className="btn primary" href={`/${lang}/read/${next.story.id}`}>Next story: <span lang={lang}>{next.story.title}</span></Link>}
+            <Link className="btn" href={`/${lang}/practice?mode=bingo&from=s:${story.id}`}>Play games with these words</Link>
             <Link className="btn" href={`/${lang}/words`}>Notebook</Link>
           </div>
         </div>
