@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "@/lib/account";
 
-export interface Plan { enabled: boolean; pro: boolean; limits: { storiesPerDay: number; gradesPerDay: number } }
-const OPEN: Plan = { enabled: false, pro: true, limits: { storiesPerDay: 3, gradesPerDay: 1 } };
+export type Period = "monthly" | "halfyear" | "yearly";
+export interface Plan { enabled: boolean; pro: boolean; limits: { storiesPerDay: number; gradesPerDay: number }; periods: Period[] }
+const OPEN: Plan = { enabled: false, pro: true, limits: { storiesPerDay: 3, gradesPerDay: 1 }, periods: ["monthly", "halfyear", "yearly"] };
 
 let cache: { key: string; p: Promise<Plan> } | null = null;
 

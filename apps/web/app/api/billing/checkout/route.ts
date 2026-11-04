@@ -1,11 +1,11 @@
 import { accountRoute, HttpError } from "@/server/account-route";
 import { billingDb, billingEnabled, stripe } from "@/server/billing";
 
-/** POST { plan: "monthly" | "yearly" } → { url } of a Stripe Checkout page. */
+/** POST { plan: "monthly" | "halfyear" | "yearly" } → { url } of a Stripe Checkout page. */
 export const POST = accountRoute(async (user, req) => {
   if (!billingEnabled()) throw new HttpError("Paid plans are not open yet.", 503);
   const { plan } = (await req.json().catch(() => ({}))) as { plan?: string };
-  const price = plan === "yearly" ? process.env.STRIPE_PRICE_YEARLY : process.env.STRIPE_PRICE_MONTHLY;
+  const price = plan === "yearly" ? process.env.STRIPE_PRICE_YEARLY : plan === "halfyear" ? process.env.STRIPE_PRICE_HALFYEAR : process.env.STRIPE_PRICE_MONTHLY;
   if (!price) throw new HttpError("This plan is not available.");
   const origin = new URL(req.url).origin;
   const sql = await billingDb();
