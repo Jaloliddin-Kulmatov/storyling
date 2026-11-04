@@ -133,16 +133,18 @@ function usePool(lang: LangCode, level?: string) {
     const near = stories.filter((s) => isUserStory(s) || levels.indexOf(s.level) <= reach);
     const source = level ? stories.filter((s) => s.level === level) : near.length ? near : stories;
     const add = (story: AnyStory, lemma: string, sentence: number) => {
-      if (out.has(lemma)) return;
+      if (!lemma || out.has(lemma)) return;
       const e = lookupIn(story, lemma);
+      if (!e || typeof e.meaning !== "string" || typeof e.display !== "string") return;
       // Content words only, and no meanings that give the answer away ("this (dieser / diese)").
       if (e && !FUNCTION_POS.has(e.pos) && !e.meaning.toLowerCase().includes(e.display.toLowerCase()))
         out.set(lemma, { lemma, display: e.display, meaning: e.meaning, story, sentence });
     };
     if (!level) {
-      for (const w of learner.allWords.filter((w) => w.saved === "learning")) {
+      for (const w of learner.allWords.filter((w) => w?.lemma && w.saved === "learning")) {
         const st = stories.find((s) => s.id === w.source?.storyId) ?? stories.find((s) => s.sentences.some((x) => x.tokens.some((t) => t.lemma === w.lemma)));
-        if (st) add(st, w.lemma, w.source?.sentence ?? st.sentences.findIndex((x) => x.tokens.some((t) => t.lemma === w.lemma)));
+        const at = w.source?.sentence ?? st?.sentences.findIndex((x) => x.tokens.some((t) => t.lemma === w.lemma)) ?? -1;
+        if (st && st.sentences[at]) add(st, w.lemma, at);
       }
     }
     const saved = out.size;
@@ -293,7 +295,7 @@ function Review({ lang }: { lang: LangCode }) {
   const { meaningOf, contextOf } = useWordInfo(lang);
   const [queue, setQueue] = useState<string[]>(() => {
     const due = learner.dueWords().map((w) => w.lemma);
-    return due.length ? due : shuffle(learner.allWords.filter((w) => w.saved === "learning").map((w) => w.lemma)).slice(0, 20);
+    return due.length ? due : shuffle(learner.allWords.filter((w) => w?.lemma && w.saved === "learning").map((w) => w.lemma)).slice(0, 20);
   });
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(0);
@@ -382,7 +384,7 @@ function Match({ lang }: { lang: LangCode }) {
     // Different meanings only, so every pair is unambiguous.
     const pairs = pool.filter((p) => (seen.has(p.meaning) ? false : (seen.add(p.meaning), true))).slice(round * 6 % Math.max(6, pool.length - 6)).slice(0, 6);
     return { pairs, right: shuffle(pairs) };
-  }, `match-${round}`);
+  }, `match-${round}-${pool.length > 0}`);
   const [picked, setPicked] = useState<string | null>(null);
   const [solved, setSolved] = useState<Set<string>>(new Set());
   const [wrong, setWrong] = useState<string | null>(null);

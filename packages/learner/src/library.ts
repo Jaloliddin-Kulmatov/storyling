@@ -24,18 +24,23 @@ export const topicOf = (s: AnyStory) => (isUserStory(s) ? "mine" : s.topic);
 /** Catalog stories plus the learner's own texts, newest own texts first. */
 export function useStories(lang: LangCode): AnyStory[] {
   const { stories } = useLearner(lang);
-  return useMemo(() => [...stories, ...storiesFor(lang)], [stories, lang]);
+  // Synced stories can come from older versions: keep only ones with a readable shape.
+  return useMemo(() => [...stories.filter(isValidStory), ...storiesFor(lang)], [stories, lang]);
 }
 
 export function useStory(lang: LangCode, id: string): AnyStory | undefined {
   return useStories(lang).find((s) => s.id === id);
 }
 
+function isValidStory(s: AnyStory | null | undefined): s is AnyStory {
+  return !!s && typeof s.id === "string" && Array.isArray(s.sentences) && s.sentences.every((x) => x && Array.isArray(x.tokens));
+}
+
 /** Meaning of a lemma: the story's own glossary first, then the shared dictionary. */
 export function lookupIn(story: AnyStory, lemma: string): DictEntry | undefined {
   if (isUserStory(story)) {
-    const e = story.dict[lemma];
-    if (e) return { lemma, display: lemma, pos: e[0], meaning: e[1], ...(e[2] ? { reading: e[2] } : {}) };
+    const e = story.dict?.[lemma];
+    if (Array.isArray(e) && typeof e[1] === "string") return { lemma, display: lemma, pos: e[0], meaning: e[1], ...(e[2] ? { reading: e[2] } : {}) };
   }
   return lookup(story.lang, lemma);
 }
