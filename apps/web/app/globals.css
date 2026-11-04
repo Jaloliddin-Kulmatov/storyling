@@ -437,10 +437,10 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 :root { --g-m: #2563eb; --g-f: #dc2626; --g-n: #16a34a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g-m: #7aa2ff; --g-f: #ff8a8a; --g-n: #5fd38d; } }
 :root[data-theme="dark"] { --g-m: #7aa2ff; --g-f: #ff8a8a; --g-n: #5fd38d; }
-.w.g-m, .art.g-m { color: var(--g-m); }
-.w.g-f, .art.g-f { color: var(--g-f); }
-.w.g-n, .art.g-n { color: var(--g-n); }
-.art { font-size: 0.6em; font-weight: 700; vertical-align: middle; }
+.w.g-m, .g-art.g-m { color: var(--g-m); }
+.w.g-f, .g-art.g-f { color: var(--g-f); }
+.w.g-n, .g-art.g-n { color: var(--g-n); }
+.g-art { font-size: 0.6em; font-weight: 700; vertical-align: middle; }
 
 .week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
 .week-cell { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--surface-2); }
@@ -572,3 +572,14 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
 @media (max-width: 899px) { .shell.is-reading .main { padding-bottom: 230px; } }
 /* speed lives in the Aa menu on phones, so the player stays one row */
 @media (max-width: 899px) { .player .seg[aria-label="Speed"] { display: none; } .tools-fab { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); } .shell.is-reading .main { padding-bottom: 170px; } }
+
+/* reader: the story sits in the centre; the word card floats at the side only while a word is open */
+.reader { grid-template-columns: minmax(0, 1fr); max-width: 820px; margin: 0 auto; }
+.reader-bar { max-width: 820px; margin-left: auto; margin-right: auto; }
+@media (min-width: 900px) {
+  .reader > .panel { position: fixed; top: 84px; right: 24px; width: 340px; max-height: calc(100vh - 200px); overflow-y: auto; z-index: 35; box-shadow: var(--shadow); animation: card-in .25s ease; }
+  .reader > .panel.idle { display: none; }
+}
+/* words: the harder ones only, in two columns */
+.vocab { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 560px) { .vocab { grid-template-columns: 1fr; } }

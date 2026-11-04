@@ -334,7 +334,7 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
       </div>
       <div className="row" style={{ alignItems: "center" }}>
         <span className="lemma" lang={lang}>
-          {lang === "de" && entry?.pos === "noun" && DE_GENDER[entry.display] && <span className={`art g-${DE_GENDER[entry.display]}`}>{ARTICLE[DE_GENDER[entry.display]!]} </span>}
+          {lang === "de" && entry?.pos === "noun" && DE_GENDER[entry.display] && <span className={`g-art g-${DE_GENDER[entry.display]}`}>{ARTICLE[DE_GENDER[entry.display]!]} </span>}
           {entry?.display ?? picked.lemma}
         </span>
         <button className="icon-btn" aria-label="Hear the word" onClick={() => playWord(lang, picked.lemma, picked.surface)}>{Icon.speaker}</button>
@@ -432,6 +432,12 @@ type PQ =
 function makePractice(story: AnyStory, words: StoryWord[], rank: (l: string) => number): PQ[] {
   const meanings = [...new Set(words.map((w) => w.meaning))];
   if (words.length < 4) return [];
+  // Wrong options of the same kind (nouns with nouns, verbs with verbs) so the answer isn't obvious.
+  const distractors = (w: StoryWord) => {
+    const same = shuffle([...new Set(words.filter((x) => x.pos === w.pos && x.meaning !== w.meaning).map((x) => x.meaning))]);
+    const rest = shuffle(meanings.filter((m) => m !== w.meaning && !same.includes(m)));
+    return [...same, ...rest].slice(0, 3);
+  };
   const pick = [...words].sort((a, b) => rank(a.lemma) - rank(b.lemma) || Math.random() - 0.5);
   const qs: PQ[] = pick.slice(0, 4).map((w) => ({
     kind: "meaning",
@@ -439,7 +445,7 @@ function makePractice(story: AnyStory, words: StoryWord[], rank: (l: string) => 
     sentence: w.sentence,
     prompt: w.display,
     context: textOf(story, story.sentences[w.sentence]!),
-    options: shuffle([w.meaning, ...shuffle(meanings.filter((m) => m !== w.meaning)).slice(0, 3)]),
+    options: shuffle([w.meaning, ...distractors(w)]),
     answer: w.meaning,
   }));
   for (const w of pick.slice(4, 6)) {
@@ -472,8 +478,13 @@ function StoryPractice({ story, tapped, done, onDone }: { story: AnyStory; tappe
   const [chosen, setChosen] = useState<string | null>(null);
   const [results, setResults] = useState<{ lemma: string; ok: boolean }[]>([]);
   const next = useMemo(() => ranked.find((r) => !r.read && r.story.id !== story.id), [ranked, story.id]);
-  const meanings = useTranslated(words.map((w) => w.meaning));
-  const shown = all ? words : words.slice(0, 8);
+  // Only the harder words: not known yet, highest level first.
+  const hard = useMemo(
+    () => words.filter((w) => learner.wordState(w.lemma) !== "known" || results.some((r) => r.lemma === w.lemma)).sort((a, b) => (wordLevelOf(lang, b.lemma) ?? 0) - (wordLevelOf(lang, a.lemma) ?? 0)),
+    [words, lang, done], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const meanings = useTranslated(hard.map((w) => w.meaning));
+  const shown = all ? hard : hard.slice(0, 10);
 
   const finish = (res: { lemma: string; ok: boolean }[]) => {
     const r = learner.finishStory(story, tapped);
@@ -488,25 +499,7 @@ function StoryPractice({ story, tapped, done, onDone }: { story: AnyStory; tappe
 
   return (
     <section id="practice" className="story-practice" aria-label="Words and practice">
-      <div className="sp-head"><h2>Words in this story</h2><span className="muted small">{words.length} words</span></div>
-      <ul className="vocab">
-        {shown.map((w) => {
-          const st = learner.wordState(w.lemma);
-          const saved = learner.word(w.lemma)?.saved === "learning";
-          const g = lang === "de" && w.pos === "noun" ? DE_GENDER[w.display] : undefined;
-          return (
-            <li key={w.lemma} className={st === "known" ? "known" : ""}>
-              <button className="icon-btn" aria-label={`Hear ${w.display}`} onClick={() => playWord(lang, w.lemma, w.display)}>{Icon.speaker}</button>
-              <span className="v-word" lang={lang}>{g && <span className={`art g-${g}`}>{ARTICLE[g]} </span>}{w.display}</span>
-              <span className="v-mean">{meanings.texts[words.indexOf(w)]}</span>
-              <span className={`v-state ${st === "known" ? "ok" : saved ? "rev" : ""}`}>{st === "known" ? "Learned" : saved ? "Review" : "New"}</span>
-            </li>
-          );
-        })}
-      </ul>
-      {words.length > 8 && <button className="btn ghost sm" onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show all ${words.length} words`}</button>}
-
-      <div className="sp-head" style={{ marginTop: 22 }}><h2>Practice</h2>{started && q && <span className="muted small">{n + 1} / {qs.length}</span>}</div>
+      <div className="sp-head"><h2>Practice</h2>{started && q && <span className="muted small">{n + 1} / {qs.length}</span>}</div>
       {done ? (
         <div className="finish done-card">
           <h3 style={{ margin: 0 }}>✓ Story added to your read stories</h3>
@@ -561,6 +554,25 @@ function StoryPractice({ story, tapped, done, onDone }: { story: AnyStory; tappe
         </div>
       ) : null}
       {started && !done && !q && <button className="btn" onClick={() => { setRound((r) => r + 1); setN(0); setResults([]); }}>Try again</button>}
+      <div className="sp-head" style={{ marginTop: 26 }}><h2>Words to learn</h2><span className="muted small">{hard.length} of {words.length}</span></div>
+      <ul className="vocab">
+        {shown.map((w) => {
+          const st = learner.wordState(w.lemma);
+          const saved = learner.word(w.lemma)?.saved === "learning";
+          const g = lang === "de" && w.pos === "noun" ? DE_GENDER[w.display] : undefined;
+          return (
+            <li key={w.lemma} className={st === "known" ? "known" : ""}>
+              <button className="icon-btn" aria-label={`Hear ${w.display}`} onClick={() => playWord(lang, w.lemma, w.display)}>{Icon.speaker}</button>
+              <span className="v-word" lang={lang}>{g && <span className={`g-art g-${g}`}>{ARTICLE[g]} </span>}{w.display}</span>
+              <span className="v-mean">{meanings.texts[hard.indexOf(w)]}</span>
+              <span className={`v-state ${st === "known" ? "ok" : saved ? "rev" : ""}`}>{st === "known" ? "Learned" : saved ? "Review" : "New"}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {hard.length > 10 && <button className="btn ghost sm" onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show ${hard.length - 10} more`}</button>}
+
+
     </section>
   );
 }
