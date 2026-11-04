@@ -504,3 +504,11 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
   .flash, .choice.ok, .choice.no, .reveal, .tile.solved, .tile.wrong, .build .tile, .build.ok, .build.no, .dict-result span, .score-ring.anim, .combo, .choice.ok::after { animation: none !important; }
   .confetti { display: none; }
 }
+
+/* onboarding: the word test stands apart from the level options */
+.word-test { text-align: left; cursor: pointer; border: 1.5px solid #f59e0b; background: linear-gradient(135deg, #fff7e6, #ffedd5); color: #7c2d12; transition: transform 0.15s; }
+.word-test:hover { transform: translateY(-2px); }
+.word-test .muted, .word-test span { color: #9a3412; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .word-test { background: linear-gradient(135deg, #3b2a12, #2f2210); color: #fde68a; border-color: #d97706; } :root:not([data-theme="light"]) .word-test .muted, :root:not([data-theme="light"]) .word-test span { color: #fcd34d; } }
+:root[data-theme="dark"] .word-test { background: linear-gradient(135deg, #3b2a12, #2f2210); color: #fde68a; border-color: #d97706; }
+:root[data-theme="dark"] .word-test .muted, :root[data-theme="dark"] .word-test span { color: #fcd34d; }

@@ -134,8 +134,8 @@ function LevelStep({ lang, level, setLevel, onBack, levelName }: { lang: LangCod
           </button>
         ))}
       </div>
-      <button className="box" onClick={() => setTesting(true)} style={{ textAlign: "left", border: "1.5px dashed var(--primary)", background: "var(--primary-soft)", cursor: "pointer" }}>
-        <b>Not sure? Take the 1-minute word test</b>
+      <button className="box word-test" onClick={() => setTesting(true)}>
+        <b>✨ Not sure? Take the 1-minute word test</b>
         <span className="muted small" style={{ display: "block" }}>Tick the words you know. We use your answers to pick stories that fit you.</span>
       </button>
       <div className="spread">
