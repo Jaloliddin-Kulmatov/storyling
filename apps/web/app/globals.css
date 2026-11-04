@@ -744,3 +744,16 @@ span.gv, b.gv { color: var(--gc-verb); }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 .shell.is-reading .main-in > * { animation: none; }
+
+/* ── Sign in / Register ── */
+.auth { gap: 14px; }
+.auth-tabs { display: grid !important; grid-template-columns: 1fr 1fr; }
+.g-btn { display: flex; justify-content: center; min-height: 44px; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.pw { position: relative; display: block; }
+.pw .input { padding-right: 64px; width: 100%; }
+.pw-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: var(--primary); font-weight: 700; font-size: 13px; cursor: pointer; padding: 6px; }
+.link-btn { border: 0; background: none; padding: 0; color: var(--primary); font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: underline; }
+.auth-err { margin: 0; color: var(--danger); }
+.auth-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-soft); }

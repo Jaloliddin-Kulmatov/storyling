@@ -77,6 +77,22 @@ export async function signIn(mode: "login" | "signup", body: { email: string; pa
   await syncNow();
 }
 
+export async function googleSignIn(credential: string) {
+  const d = await call<{ user: AccountUser }>("/api/auth/google", { method: "POST", body: JSON.stringify({ credential }) });
+  set({ user: d.user });
+  await syncNow();
+}
+
+export async function requestReset(email: string) {
+  await call("/api/auth/forgot", { method: "POST", body: JSON.stringify({ email }) });
+}
+
+export async function resetPassword(token: string, password: string) {
+  const d = await call<{ user: AccountUser }>("/api/auth/reset", { method: "POST", body: JSON.stringify({ token, password }) });
+  set({ user: d.user });
+  await syncNow();
+}
+
 export async function signOut() {
   await call("/api/auth/logout", { method: "POST" }).catch(() => {});
   lastPushed = "";

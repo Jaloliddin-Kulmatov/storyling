@@ -1,5 +1,7 @@
 "use client";
 
+import { AuthForm } from "@/components/AuthForm";
+
 import { language, languages, storiesFor } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
@@ -9,7 +11,7 @@ import { placementResult, placementWords, type PlacementWord } from "@storyling/
 import { useHydrated, useLearner, type Level } from "@/lib/learner";
 import { Logo } from "@/components/ui";
 import { FEATURED } from "@/views/Landing";
-import { signIn, useAccount } from "@/lib/account";
+import { useAccount } from "@/lib/account";
 
 const LEVELS: { level: Level; title: string; detail: (first: string) => string }[] = [
   { level: 0, title: "Just starting", detail: () => "I know a few words and can read the script." },
@@ -186,42 +188,13 @@ function WordTest({ lang, onBack, onDone }: { lang: LangCode; onBack: () => void
 
 /** First step: create an account or sign in, so progress is saved and follows the learner to any device. */
 function AuthStep({ onSkip }: { onSkip: () => void }) {
-  const [mode, setMode] = useState<"signup" | "login">("signup");
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setErr(null);
-    try {
-      await signIn(mode, form);
-    } catch (x) {
-      setErr(x instanceof Error ? x.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
   return (
-    <form className="stack" onSubmit={submit}>
+    <div className="stack">
       <div>
-        <h1 style={{ fontSize: "clamp(28px, 4.5vw, 40px)", fontWeight: 800 }}>{mode === "signup" ? "Create your account" : "Welcome back"}</h1>
-        <p className="muted" style={{ fontSize: 17, marginTop: 8 }}>
-          {mode === "signup" ? "Free. Your words, stories and streak are saved and follow you to any device." : "Sign in to continue where you left off."}
-        </p>
+        <h1 style={{ fontSize: "clamp(28px, 4.5vw, 40px)", fontWeight: 800 }}>Welcome to Storyling</h1>
+        <p className="muted" style={{ fontSize: 17, marginTop: 8 }}>Free. Your words, stories and streak are saved and follow you to any device.</p>
       </div>
-      <div className="seg auth-tabs" role="tablist" aria-label="Account">
-        <button type="button" role="tab" aria-selected={mode === "signup"} aria-pressed={mode === "signup"} onClick={() => { setMode("signup"); setErr(null); }}>Register</button>
-        <button type="button" role="tab" aria-selected={mode === "login"} aria-pressed={mode === "login"} onClick={() => { setMode("login"); setErr(null); }}>Sign in</button>
-      </div>
-      {mode === "signup" && (
-        <label className="field">Name<input className="input" autoComplete="nickname" maxLength={40} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Shown on the leaderboard" /></label>
-      )}
-      <label className="field">Email<input className="input" type="email" autoComplete="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
-      <label className="field">Password<input className="input" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="At least 8 characters" /></label>
-      {err && <p role="alert" className="small" style={{ margin: 0, color: "var(--danger, #c0392b)" }}>{err}</p>}
-      <button className="btn primary block" disabled={busy} style={{ minHeight: 50 }}>{busy ? "…" : mode === "signup" ? "Create account" : "Sign in"}</button>
-      <button type="button" className="btn ghost sm" onClick={onSkip} style={{ justifySelf: "center" }}>Continue without an account</button>
-    </form>
+      <AuthForm onSkip={onSkip} />
+    </div>
   );
 }
