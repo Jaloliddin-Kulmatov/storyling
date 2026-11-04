@@ -65,8 +65,11 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
     // No subtitles saved yet: load the video's own captions from YouTube.
     let dead = false;
     setFetching(true);
-    fetch(`/api/captions?v=${videoId}&lang=${lang}`)
-      .then((r) => r.json() as Promise<{ cues?: Cue[]; auto?: boolean }>)
+    // Saved caption files first (YouTube blocks caption requests from cloud servers), then the live route.
+    const get = (u: string) => fetch(u).then((r) => (r.ok ? (r.json() as Promise<{ cues?: Cue[]; auto?: boolean }>) : { cues: [] }));
+    get(`/captions/${videoId}.json`)
+      .catch(() => ({ cues: [] as Cue[], auto: false }))
+      .then((d) => (d.cues?.length ? d : get(`/api/captions?v=${videoId}&lang=${lang}`)))
       .then((d) => {
         if (dead || !d.cues?.length) return;
         setSaved({ cues: d.cues, tr: {} });
