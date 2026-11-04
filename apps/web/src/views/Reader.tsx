@@ -2,7 +2,7 @@
 
 import { countView } from "@/lib/views";
 import { AskPanel, SpeakRun, WritePanel } from "@/components/StoryTools";
-import { koreanLabels, romanize, splitKorean } from "@storyling/learner";
+import { FUNCTION_POS, koreanLabels, romanize, shuffle, splitKorean } from "@storyling/learner";
 import { ARTICLE, DE_GENDER, reviewOf } from "@storyling/content";
 import { language } from "@storyling/content";
 import type { LangCode, Token } from "@storyling/core";
@@ -18,7 +18,7 @@ import { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnySt
 import { Cover, Icon, Toast } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
-import { useTranslated } from "@/lib/translate";
+import { Tr, useTranslated } from "@/lib/translate";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -58,7 +58,7 @@ function StoryReader({ story }: { story: AnyStory }) {
   const [toast, setToast] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [shown, setShown] = useState<Set<number>>(() => new Set());
-  const [mode, setMode] = useState<null | "dictation" | "grammar" | "speak" | "write" | "ask">(null);
+  const [mode, setMode] = useState<null | "dictation" | "grammar" | "speak" | "write" | "ask" | "settings" | "tools">(null);
   const run = useRef(0);
   const { markOpened } = learner;
   useEffect(() => { markOpened(story.id); if (!isUserStory(story)) countView(story.id); }, [story.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -119,19 +119,11 @@ function StoryReader({ story }: { story: AnyStory }) {
     <>
       <div className="reader-bar">
         <Link href={`/${lang}`} className="btn ghost sm">{Icon.back} Home</Link>
-        <div className="row">
-          <button className={`chip save-chip${learner.favorites.includes(story.id) ? " on" : ""}`} aria-pressed={learner.favorites.includes(story.id)} onClick={() => learner.toggleFavorite(story.id)}>
-            {Icon.bookmark} {learner.favorites.includes(story.id) ? "Saved" : "Save"}
+        <div className="row" style={{ gap: 6 }}>
+          <button className={`icon-btn save-btn${learner.favorites.includes(story.id) ? " on" : ""}`} aria-pressed={learner.favorites.includes(story.id)} aria-label={learner.favorites.includes(story.id) ? "Saved" : "Save story"} onClick={() => learner.toggleFavorite(story.id)}>
+            {Icon.bookmark}
           </button>
-          <div className="seg" role="group" aria-label="Text size">
-            <button aria-label="Smaller text" onClick={() => setSettings({ fontScale: Math.max(0.85, +(settings.fontScale - 0.1).toFixed(2)) })}>A−</button>
-            <button aria-label="Larger text" onClick={() => setSettings({ fontScale: Math.min(1.4, +(settings.fontScale + 0.1).toFixed(2)) })}>A+</button>
-          </div>
-          <button className="chip" aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>Translation</button>
-          {lang === "de" && <button className="chip" aria-pressed={settings.genderColors} onClick={() => setSettings({ genderColors: !settings.genderColors })} title="Colour nouns: der blue, die red, das green">der/die/das</button>}
-          {lang === "ko" && <button className="chip" aria-pressed={settings.romanize} onClick={() => setSettings({ romanize: !settings.romanize })}>Romanization</button>}
-          <button className="chip" aria-pressed={settings.highlightNew} onClick={() => setSettings({ highlightNew: !settings.highlightNew })}>Highlights</button>
-          <button className="chip" aria-pressed={settings.levelUnderline} onClick={() => setSettings({ levelUnderline: !settings.levelUnderline })}>Levels</button>
+          <button className="icon-btn aa-btn" aria-label="Reading settings" onClick={() => setMode("settings")}>Aa</button>
         </div>
       </div>
 
@@ -187,19 +179,8 @@ function StoryReader({ story }: { story: AnyStory }) {
             ))}
           </div>
 
-          {settings.levelUnderline && !isUserStory(story) && (
-            <div className="lvl-legend" aria-label="Word level colors">
-              <span>Word underline = level it first appears at:</span>
-              {meta.levels.slice(0, 5).map((l, k) => <span key={l}><i style={{ background: `var(--lv${k})` }} />{l}</span>)}
-            </div>
-          )}
-          <div className="legend">
-            <span><span className="sw hl"><span className="w new">new</span></span>new word</span>
-            <span><span className="sw hl"><span className="w learning">word</span></span>saved for review</span>
-            <span>Tap any word for its meaning.</span>
-          </div>
 
-          <Finish story={story} tapped={tapped} done={done} onDone={(msg) => { setDone(true); setToast(msg); }} />
+          <StoryPractice story={story} tapped={tapped} done={done} onDone={(msg) => { setDone(true); setToast(msg); }} />
           <WatchMore story={story} />
           {isUserStory(story) && (
             <DeleteStory onDelete={() => { learner.removeStory(story.id); router.push(`/${lang}`); }} />
@@ -210,14 +191,7 @@ function StoryReader({ story }: { story: AnyStory }) {
       </div>
 
       {!picked && (
-        <div className="fab-bar" role="toolbar" aria-label="Reading tools">
-          <button aria-pressed={settings.showTranslations} onClick={() => setSettings({ showTranslations: !settings.showTranslations })}>{Icon.translate} Translation</button>
-          {voice && <button onClick={() => { stop(); setMode("dictation"); }}>{Icon.speaker} Dictation</button>}
-          <button onClick={() => setMode("grammar")}>{Icon.spark} Grammar</button>
-          <button onClick={() => { stop(); setMode("speak"); }}>🎙 Speak</button>
-          <button onClick={() => setMode("write")}>✍️ Write</button>
-          <button onClick={() => setMode("ask")}>💬 Ask</button>
-        </div>
+        <button className="tools-fab" aria-label="Reading tools" onClick={() => { stop(); setMode("tools"); }}>{Icon.spark}<span>Tools</span></button>
       )}
       {mode === "dictation" && (
         <div className="overlay" role="dialog" aria-label="Dictation" onClick={(e) => e.target === e.currentTarget && setMode(null)}>
@@ -228,6 +202,46 @@ function StoryReader({ story }: { story: AnyStory }) {
               rate={settings.rate}
               onFinish={(score) => { learner.recordGame("dictation", score); setMode(null); setToast(`Dictation finished · ${score}%`); }}
             />
+          </div>
+        </div>
+      )}
+      {mode === "settings" && (
+        <div className="overlay" role="dialog" aria-label="Reading settings" onClick={(e) => e.target === e.currentTarget && setMode(null)}>
+          <div className="sheet-in menu-sheet">
+            <div className="spread"><b style={{ fontSize: 18 }}>Reading settings</b><button className="icon-btn" aria-label="Close" onClick={() => setMode(null)}>{Icon.close}</button></div>
+            <div className="menu-row">
+              <span>Text size</span>
+              <div className="seg" role="group" aria-label="Text size">
+                <button aria-label="Smaller text" onClick={() => setSettings({ fontScale: Math.max(0.85, +(settings.fontScale - 0.1).toFixed(2)) })}>A−</button>
+                <button aria-label="Larger text" onClick={() => setSettings({ fontScale: Math.min(1.4, +(settings.fontScale + 0.1).toFixed(2)) })}>A+</button>
+              </div>
+            </div>
+            <div className="menu-row">
+              <span>Audio speed</span>
+              <div className="seg" role="group" aria-label="Audio speed">
+                {[0.75, 1, 1.25].map((r) => <button key={r} aria-pressed={settings.rate === r} onClick={() => setSettings({ rate: r })}>{r}×</button>)}
+              </div>
+            </div>
+            <Toggle label="Show all translations" hint="A line in your language under every sentence" on={settings.showTranslations} set={(v) => setSettings({ showTranslations: v })} />
+            {lang === "de" && <Toggle label="der / die / das colours" hint={<><b className="g-m">der</b> · <b className="g-f">die</b> · <b className="g-n">das</b></>} on={settings.genderColors} set={(v) => setSettings({ genderColors: v })} />}
+            {lang === "ko" && <Toggle label="Romanization" hint="Latin letters under each sentence" on={settings.romanize} set={(v) => setSettings({ romanize: v })} />}
+            <Toggle label="Highlight new words" hint={<><span className="hl"><span className="w new">new</span></span> not known yet · <span className="hl"><span className="w learning">word</span></span> saved for review</>} on={settings.highlightNew} set={(v) => setSettings({ highlightNew: v })} />
+            <Toggle label="Underline words by level" hint={<span className="lvl-dots">{meta.levels.slice(0, 5).map((l, k) => <span key={l}><i style={{ background: `var(--lv${k})` }} />{l}</span>)}</span>} on={settings.levelUnderline} set={(v) => setSettings({ levelUnderline: v })} />
+          </div>
+        </div>
+      )}
+      {mode === "tools" && (
+        <div className="overlay" role="dialog" aria-label="Reading tools" onClick={(e) => e.target === e.currentTarget && setMode(null)}>
+          <div className="sheet-in menu-sheet">
+            <div className="spread"><b style={{ fontSize: 18 }}>Practise with this story</b><button className="icon-btn" aria-label="Close" onClick={() => setMode(null)}>{Icon.close}</button></div>
+            <div className="tool-grid">
+              {voice && <button onClick={() => setMode("dictation")}><span className="ti">🎧</span><b>Dictation</b><span>Hear and type each sentence</span></button>}
+              <button onClick={() => setMode("speak")}><span className="ti">🎙</span><b>Speak</b><span>Read aloud and get feedback</span></button>
+              <button onClick={() => setMode("write")}><span className="ti">✍️</span><b>Write</b><span>Write about the story, get corrections</span></button>
+              <button onClick={() => setMode("ask")}><span className="ti">💬</span><b>Ask</b><span>Questions about the text</span></button>
+              <button onClick={() => setMode("grammar")}><span className="ti">📘</span><b>Grammar</b><span>Explain a sentence</span></button>
+              <button onClick={() => { setMode(null); document.getElementById("practice")?.scrollIntoView({ behavior: "smooth" }); }}><span className="ti">✅</span><b>Words &amp; quiz</b><span>Meanings and practice below</span></button>
+            </div>
           </div>
         </div>
       )}
@@ -383,125 +397,171 @@ function WordPanel({ story, picked, ai, onClose }: { story: AnyStory; picked: Pi
   );
 }
 
-interface Question {
-  lemma: string;
-  word: string;
-  sentence: number;
-  context: string;
-  options: string[];
-  answer: string;
+function Toggle({ label, hint, on, set }: { label: string; hint?: React.ReactNode; on: boolean; set: (v: boolean) => void }) {
+  return (
+    <label className="menu-row toggle-row">
+      <span><span style={{ display: "block", fontWeight: 600 }}>{label}</span>{hint && <span className="small muted">{hint}</span>}</span>
+      <input type="checkbox" className="switch" checked={on} onChange={(e) => set(e.target.checked)} />
+    </label>
+  );
 }
 
-function makeQuiz(story: AnyStory, tapped: Set<string>, isNew: (l: string) => boolean): Question[] {
+interface StoryWord { lemma: string; display: string; meaning: string; pos: string; sentence: number; surface: string }
+
+/** Content words of a story with meanings, new and saved words first. */
+function storyWords(story: AnyStory): StoryWord[] {
   const seen = new Set<string>();
-  const items: { lemma: string; surface: string; sentence: number; meaning: string }[] = [];
+  const out: StoryWord[] = [];
   story.sentences.forEach((s, i) =>
     s.tokens.forEach((t) => {
       if (!t.lemma || t.isName || seen.has(t.lemma)) return;
-      const m = lookupIn(story, t.lemma)?.meaning;
-      if (!m) return;
+      const e = lookupIn(story, t.lemma);
+      if (!e || FUNCTION_POS.has(e.pos)) return;
       seen.add(t.lemma);
-      items.push({ lemma: t.lemma, surface: t.surface, sentence: i, meaning: m });
+      out.push({ lemma: t.lemma, display: e.display, meaning: e.meaning, pos: e.pos, sentence: i, surface: t.surface });
     }),
   );
-  const meanings = [...new Set(items.map((i) => i.meaning))];
-  if (meanings.length < 4) return [];
-  const rank = (l: string) => (tapped.has(l) ? 0 : isNew(l) ? 1 : 2);
-  const pool = [...items].sort((a, b) => rank(a.lemma) - rank(b.lemma) || Math.random() - 0.5).slice(0, 3);
-  return pool.map((it) => {
-    const wrong = meanings.filter((m) => m !== it.meaning).sort(() => Math.random() - 0.5).slice(0, 3);
-    return {
-      lemma: it.lemma,
-      word: it.surface,
-      sentence: it.sentence,
-      context: textOf(story, story.sentences[it.sentence]!),
-      options: [...wrong, it.meaning].sort(() => Math.random() - 0.5),
-      answer: it.meaning,
-    };
-  });
+  return out;
 }
 
-function Finish({ story, tapped, done, onDone }: { story: AnyStory; tapped: Set<string>; done: boolean; onDone: (msg: string) => void }) {
+type PQ =
+  | { kind: "meaning"; lemma: string; sentence: number; prompt: string; context: string; options: string[]; answer: string }
+  | { kind: "gap"; lemma: string; sentence: number; prompt: string; options: string[]; answer: string; translation?: string };
+
+/** Practice for one story: what words mean, then fill the gap in a sentence from the story. */
+function makePractice(story: AnyStory, words: StoryWord[], rank: (l: string) => number): PQ[] {
+  const meanings = [...new Set(words.map((w) => w.meaning))];
+  if (words.length < 4) return [];
+  const pick = [...words].sort((a, b) => rank(a.lemma) - rank(b.lemma) || Math.random() - 0.5);
+  const qs: PQ[] = pick.slice(0, 4).map((w) => ({
+    kind: "meaning",
+    lemma: w.lemma,
+    sentence: w.sentence,
+    prompt: w.display,
+    context: textOf(story, story.sentences[w.sentence]!),
+    options: shuffle([w.meaning, ...shuffle(meanings.filter((m) => m !== w.meaning)).slice(0, 3)]),
+    answer: w.meaning,
+  }));
+  for (const w of pick.slice(4, 6)) {
+    const text = textOf(story, story.sentences[w.sentence]!);
+    if (!text.includes(w.surface)) continue;
+    const others = shuffle(words.filter((x) => x.pos === w.pos && x.surface !== w.surface)).slice(0, 3).map((x) => x.surface);
+    if (others.length < 2) continue;
+    qs.push({ kind: "gap", lemma: w.lemma, sentence: w.sentence, prompt: text.replace(w.surface, "_____"), options: shuffle([w.surface, ...others]), answer: w.surface, translation: story.sentences[w.sentence]!.translation });
+  }
+  return qs;
+}
+
+/**
+ * Below every story, like a lesson page: the story's words with meanings, then practice.
+ * Finishing the practice marks the story as read; words answered right count as learned, missed ones go to review.
+ */
+function StoryPractice({ story, tapped, done, onDone }: { story: AnyStory; tapped: Set<string>; done: boolean; onDone: (msg: string) => void }) {
   const lang = story.lang;
   const learner = useLearner(lang);
   const ranked = useRankedStories(lang);
-  const [quiz, setQuiz] = useState<Question[] | null>(null);
-  const [step, setStep] = useState(0);
+  const words = useMemo(() => storyWords(story), [story]);
+  const [all, setAll] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [round, setRound] = useState(0);
+  const qs = useMemo(
+    () => makePractice(story, words, (l) => (tapped.has(l) ? 0 : learner.wordState(l) === "new" ? 1 : learner.wordState(l) === "learning" ? 1 : 2)),
+    [story, words, round], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const [n, setN] = useState(0);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [right, setRight] = useState(0);
+  const [results, setResults] = useState<{ lemma: string; ok: boolean }[]>([]);
   const next = useMemo(() => ranked.find((r) => !r.read && r.story.id !== story.id), [ranked, story.id]);
+  const meanings = useTranslated(words.map((w) => w.meaning));
+  const shown = all ? words : words.slice(0, 8);
 
-  function finish(score?: { right: number; total: number }) {
+  const finish = (res: { lemma: string; ok: boolean }[]) => {
     const r = learner.finishStory(story, tapped);
-    if (score) learner.recordQuiz(score.right, score.total);
-    const parts = ["Story finished"];
-    if (r.newlyKnown) parts.push(`${r.newlyKnown} new ${r.newlyKnown === 1 ? "word" : "words"} known`);
-    if (r.reviewedInStory) parts.push(`${r.reviewedInStory} reviewed`);
-    onDone(parts.join(" · "));
-  }
+    for (const x of res) learner.setWord(x.lemma, x.ok ? "known" : "learning", { storyId: story.id, sentence: words.find((w) => w.lemma === x.lemma)?.sentence ?? 0 });
+    const right = res.filter((x) => x.ok).length;
+    if (res.length) learner.recordQuiz(right, res.length);
+    onDone(`Story added to Read · ${right + r.newlyKnown} words learned${res.length - right ? ` · ${res.length - right} to review` : ""}`);
+  };
 
-  if (done) {
-    return (
-      <div className="finish">
-        <h2 style={{ fontSize: 22, margin: 0 }}>Well done!</h2>
-        <div className="row">
-          {next && <Link className="btn primary" href={`/${lang}/read/${next.story.id}`}>Next story: <span lang={lang}>{next.story.title}</span></Link>}
-          <Link className="btn" href={`/${lang}/practice`}>Practice words</Link>
-          <Link className="btn ghost" href={`/${lang}`}>Today</Link>
-        </div>
-      </div>
-    );
-  }
+  const q = qs[n];
+  const right = results.filter((x) => x.ok).length;
 
-  if (!quiz) {
-    return (
-      <div className="finish">
-        <div className="spread">
-          <span><b>Finished reading?</b> <span className="muted">A quick check helps the words stick.</span></span>
-          <div className="row">
-            <button className="btn" onClick={() => finish()}>Mark as read</button>
-            <button className="btn primary" onClick={() => {
-              const q = makeQuiz(story, tapped, (l) => learner.wordState(l) === "new");
-              if (q.length) setQuiz(q);
-              else finish();
-            }}>Quick check</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const q = quiz[step]!;
-  const answered = chosen !== null;
   return (
-    <div className="finish">
-      <div className="quiz">
-        <div className="spread small muted"><span>Question {step + 1} of {quiz.length}</span><span>What does it mean?</span></div>
-        <div className="q" lang={lang}>{q.word}</div>
-        <div className="muted" lang={lang} style={{ fontFamily: "var(--f-read)" }}>
-          {q.context.split(q.word).map((part, i, arr) => <span key={i}>{part}{i < arr.length - 1 && <mark>{q.word}</mark>}</span>)}
-        </div>
-        <div className="choices">
-          {q.options.map((o) => (
-            <button key={o} className={`choice${answered && o === q.answer ? " ok" : ""}${answered && o === chosen && o !== q.answer ? " no" : ""}`} disabled={answered}
-              onClick={() => {
-                setChosen(o);
-                if (o === q.answer) setRight((n) => n + 1);
-                else learner.setWord(q.lemma, "learning", { storyId: story.id, sentence: q.sentence });
-              }}>{o}</button>
-          ))}
-        </div>
-        {answered && (
-          <div className="spread">
-            <span className="small">{chosen === q.answer ? "Correct!" : "Not quite. Saved for review."}</span>
-            <button className="btn primary sm" onClick={() => {
-              if (step + 1 < quiz.length) { setStep(step + 1); setChosen(null); }
-              else finish({ right, total: quiz.length });
-            }}>{step + 1 < quiz.length ? "Next" : "Finish"}</button>
+    <section id="practice" className="story-practice" aria-label="Words and practice">
+      <div className="sp-head"><h2>Words in this story</h2><span className="muted small">{words.length} words</span></div>
+      <ul className="vocab">
+        {shown.map((w) => {
+          const st = learner.wordState(w.lemma);
+          const saved = learner.word(w.lemma)?.saved === "learning";
+          const g = lang === "de" && w.pos === "noun" ? DE_GENDER[w.display] : undefined;
+          return (
+            <li key={w.lemma} className={st === "known" ? "known" : ""}>
+              <button className="icon-btn" aria-label={`Hear ${w.display}`} onClick={() => playWord(lang, w.lemma, w.display)}>{Icon.speaker}</button>
+              <span className="v-word" lang={lang}>{g && <span className={`art g-${g}`}>{ARTICLE[g]} </span>}{w.display}</span>
+              <span className="v-mean">{meanings.texts[words.indexOf(w)]}</span>
+              <span className={`v-state ${st === "known" ? "ok" : saved ? "rev" : ""}`}>{st === "known" ? "Learned" : saved ? "Review" : "New"}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {words.length > 8 && <button className="btn ghost sm" onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show all ${words.length} words`}</button>}
+
+      <div className="sp-head" style={{ marginTop: 22 }}><h2>Practice</h2>{started && q && <span className="muted small">{n + 1} / {qs.length}</span>}</div>
+      {done ? (
+        <div className="finish done-card">
+          <h3 style={{ margin: 0 }}>✓ Story added to your read stories</h3>
+          <p className="muted small" style={{ margin: 0 }}>Learned words are in your Notebook under Known; missed ones come back in flashcards.</p>
+          <div className="row" style={{ flexWrap: "wrap" }}>
+            {next && <Link className="btn primary" href={`/${lang}/read/${next.story.id}`}>Next story: <span lang={lang}>{next.story.title}</span></Link>}
+            <Link className="btn" href={`/${lang}/words`}>Notebook</Link>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      ) : !qs.length ? (
+        <div className="finish"><button className="btn primary" onClick={() => finish([])}>Mark as read</button></div>
+      ) : !started ? (
+        <div className="finish sp-start">
+          <span><b>{qs.length} quick questions</b> <span className="muted">· finish them to add this story and its words to what you've learned.</span></span>
+          <div className="row">
+            <button className="btn primary" onClick={() => setStarted(true)}>Start practice</button>
+            <button className="btn ghost sm" onClick={() => finish([])}>Just mark as read</button>
+          </div>
+        </div>
+      ) : q ? (
+        <div className="flash sp-q" key={n} style={{ textAlign: "left" }}>
+          <div className="g-progress"><span style={{ width: `${(n / qs.length) * 100}%` }} /></div>
+          {q.kind === "meaning" ? (
+            <>
+              <span className="small muted">What does it mean?</span>
+              <div className="lemma" lang={lang}>{q.prompt}</div>
+              <div className="ctx muted" lang={lang}>{q.context}</div>
+            </>
+          ) : (
+            <>
+              <span className="small muted">Fill the gap</span>
+              <div className="ctx" lang={lang} style={{ fontSize: 22 }}>{q.prompt}</div>
+              {q.translation && <span className="small muted">{q.translation}</span>}
+            </>
+          )}
+          <div className="choices">
+            {q.options.map((o) => (
+              <button key={o} lang={q.kind === "gap" ? lang : undefined} disabled={chosen !== null}
+                className={`choice${chosen !== null && o === q.answer ? " ok" : ""}${chosen === o && o !== q.answer ? " no" : ""}`}
+                onClick={() => { setChosen(o); setResults((r) => [...r, { lemma: q.lemma, ok: o === q.answer }]); }}>
+                {q.kind === "meaning" ? <Tr>{o}</Tr> : o}
+              </button>
+            ))}
+          </div>
+          {chosen !== null && (
+            <button className="btn primary block" onClick={() => {
+              setChosen(null);
+              if (n + 1 < qs.length) setN(n + 1);
+              else finish(results);
+            }}>{n + 1 < qs.length ? "Next" : `Finish · ${right}/${qs.length}`}</button>
+          )}
+        </div>
+      ) : null}
+      {started && !done && !q && <button className="btn" onClick={() => { setRound((r) => r + 1); setN(0); setResults([]); }}>Try again</button>}
+    </section>
   );
 }
 

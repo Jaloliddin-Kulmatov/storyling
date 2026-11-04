@@ -531,3 +531,44 @@ kbd { font: 600 11px/1 var(--f-ui, inherit); padding: 2px 5px; border-radius: 5p
   .reader-bar > .row::-webkit-scrollbar { display: none; }
   .reader-bar > .row > * { flex: none; }
 }
+
+/* ── reader, Todaii-style: one settings button, one tools button, words + practice under the story ── */
+.aa-btn { font-family: var(--f-read); font-weight: 700; font-size: 17px; }
+.save-btn.on { color: var(--primary); border-color: var(--primary); background: var(--primary-soft); }
+.tools-fab { position: fixed; right: 18px; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); z-index: 29; display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border: 0; border-radius: 99px; background: var(--primary); color: #fff; font-weight: 800; font-size: 15px; box-shadow: 0 12px 28px -12px rgba(0,0,0,.5); transition: transform .15s; }
+.tools-fab:active { transform: scale(.95); }
+.tools-fab svg { width: 18px; height: 18px; }
+@media (min-width: 900px) { .tools-fab { bottom: 96px; } }
+.menu-sheet { display: grid; gap: 4px; }
+.menu-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.menu-row:last-child { border-bottom: 0; }
+.toggle-row { cursor: pointer; }
+.switch { appearance: none; width: 46px; height: 28px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); position: relative; flex: none; transition: background .2s; cursor: pointer; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+.switch:checked { background: var(--primary); border-color: var(--primary); }
+.switch:checked::after { transform: translateX(18px); }
+.lvl-dots { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.lvl-dots i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+.tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; }
+.tool-grid button { display: grid; gap: 2px; text-align: left; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: transform .12s, border-color .2s; }
+.tool-grid button:hover { border-color: var(--primary); }
+.tool-grid button:active { transform: scale(.97); }
+.tool-grid .ti { font-size: 22px; }
+.tool-grid button span:last-child { font-size: 12.5px; color: var(--muted); }
+.story-practice { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.sp-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.sp-head h2 { font-size: 20px; margin: 0; }
+.vocab { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.vocab li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "a w s" "a m s"; column-gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); animation: rise .3s ease both; }
+.vocab li .icon-btn { grid-area: a; width: 34px; height: 34px; }
+.vocab .v-word { grid-area: w; font-family: var(--f-read); font-size: 19px; }
+.vocab .v-mean { grid-area: m; color: var(--ink-soft); font-size: 14px; }
+.vocab .v-state { grid-area: s; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--new-word-soft); color: var(--ink); }
+.vocab .v-state.ok { background: var(--primary-soft); color: var(--primary); }
+.vocab .v-state.rev { background: var(--learning-soft); }
+.vocab li.known { opacity: .75; }
+.sp-start { display: grid; gap: 10px; }
+.sp-q { max-width: none; }
+@media (max-width: 899px) { .shell.is-reading .main { padding-bottom: 230px; } }
+/* speed lives in the Aa menu on phones, so the player stays one row */
+@media (max-width: 899px) { .player .seg[aria-label="Speed"] { display: none; } .tools-fab { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); } .shell.is-reading .main { padding-bottom: 170px; } }
