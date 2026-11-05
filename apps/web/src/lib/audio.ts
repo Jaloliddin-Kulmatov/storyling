@@ -19,7 +19,8 @@ function element(file: string): HTMLAudioElement {
   let el = elements.get(file);
   if (!el) {
     el = new Audio(file);
-    el.preload = "auto";
+    // The word file is large and only small parts of it play, so don't download it all up front.
+    el.preload = file.includes("/w-") ? "metadata" : "auto";
     elements.set(file, el);
   }
   return el;
