@@ -757,3 +757,20 @@ span.gv, b.gv { color: var(--gc-verb); }
 .link-btn { border: 0; background: none; padding: 0; color: var(--primary); font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: underline; }
 .auth-err { margin: 0; color: var(--danger); }
 .auth-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-soft); }
+
+/* Admin: daily story review */
+.adm-bar { flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.adm-sel { width: auto; max-width: 180px; padding-block: 6px; }
+.adm-story { margin-bottom: 16px; }
+.adm-story h2 { margin: 8px 0 2px; }
+.adm-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.adm-warn { margin: 12px 0; padding: 8px 12px 8px 28px; border-radius: 8px; color: #92400e; background: #fef3c7; font-size: 14px; }
+p.adm-warn { padding-left: 12px; }
+.adm-lines { margin: 14px 0; padding-left: 24px; display: grid; gap: 10px; }
+.adm-lines li > span, .adm-lines li > small { display: block; }
+.adm-lines .textarea { width: 100%; margin-bottom: 4px; }
+.adm-words summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.adm-words dl { margin: 10px 0 0; display: grid; gap: 6px; }
+.adm-words dl > div { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr; gap: 10px; align-items: center; font-size: 14px; }
+.adm-words dd { margin: 0; }
+.adm-actions { flex-wrap: wrap; margin-top: 14px; }

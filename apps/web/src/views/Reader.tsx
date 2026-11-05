@@ -14,7 +14,7 @@ import { canSpeak, hasRecording, playSentence, playWord, preload, stopAudio } fr
 import { examplesFor, wordLevelOf } from "@storyling/learner";
 import { useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories } from "@/lib/rank";
-import { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnyStory } from "@/lib/stories";
+import { isPublished, isUserStory, loadPublishedStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnyStory } from "@/lib/stories";
 import { Cover, Icon, Toast } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
@@ -33,6 +33,11 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
   const story = useStory(lang, id);
   const learner = useLearner(lang);
   const plan = usePlan();
+  // Daily stories live on the server: wait for one before saying it's missing.
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    if (!story) void loadPublishedStory(lang, id).finally(() => setChecked(true));
+  }, [lang, id, !story]); // eslint-disable-line react-hooks/exhaustive-deps
   if (story && plan.enabled && !plan.pro && !isUserStory(story)) {
     // Free plan: a few new stories a day; stories already opened today stay open.
     const since = new Date().setHours(0, 0, 0, 0);
@@ -40,6 +45,7 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
     if (others >= plan.limits.storiesPerDay) return <Paywall lang={lang} limit={plan.limits.storiesPerDay} />;
   }
   if (!story) {
+    if (!checked) return <p className="muted" style={{ marginTop: 40, textAlign: "center" }}>Loading…</p>;
     return (
       <div className="empty" style={{ marginTop: 40 }}>
         <h2 style={{ fontSize: 22 }}>Story not found</h2>
@@ -170,7 +176,8 @@ function StoryReader({ story }: { story: AnyStory }) {
           </div>
           <h1 lang={lang} style={{ marginTop: 6 }}>{story.title}</h1>
           {story.titleEnglish && <p className="muted" style={{ margin: "4px 0 0" }}>{story.titleEnglish}</p>}
-          {!isUserStory(story) && (reviewOf(story.id)
+          {isPublished(story) && <p className="small muted" style={{ margin: "6px 0 0" }}>Written with AI and checked by the Storyling team.</p>}
+          {!isUserStory(story) && !isPublished(story) && (reviewOf(story.id)
             ? <p className="small review-ok" style={{ margin: "6px 0 0" }}>✓ Checked by a native speaker</p>
             : <p className="small muted" style={{ margin: "6px 0 0" }}>Written by Storyling. Not yet checked by a native speaker.</p>)}
 

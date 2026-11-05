@@ -1,4 +1,4 @@
-import { configureStorage, configureTranslation, type KeyValueStorage } from "@storyling/learner";
+import { configurePublished, configureStorage, configureTranslation, type KeyValueStorage } from "@storyling/learner";
 
 // In a browser (Expo web preview), learner state lives in localStorage.
 const kv: KeyValueStorage = {
@@ -21,3 +21,4 @@ configureStorage(kv);
 
 const api = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "");
 configureTranslation({ storage: kv, ...(api ? { endpoint: `${api}/api/translate` } : {}) });
+configurePublished(api);

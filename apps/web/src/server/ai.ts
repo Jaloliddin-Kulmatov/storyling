@@ -225,6 +225,28 @@ export function writeStory(lang: string, level: string, topic: string, words: st
 }
 
 // ── 4. Translate subtitle lines ──
+const LEVEL_GUIDE: Record<string, string> = {
+  A1: "8–10 very short sentences in the present tense, using only the most common everyday words.",
+  A2: "8–12 short sentences; the present and simple past or Perfekt, with common words and simple linking words.",
+  B1: "10–14 sentences; clear connected text with subordinate clauses and everyday vocabulary.",
+  B2: "10–14 sentences; varied sentence structure, some abstract vocabulary and opinions.",
+  C1: "10–14 sentences; rich, precise language with complex sentences and idiomatic expressions.",
+};
+
+/** One story for the daily queue. An admin reads it before any learner sees it. */
+export function writeDailyStory(lang: string, level: string, topic: string, avoid: string[]) {
+  return parsePrepared(
+    `You write short, engaging graded-reader stories for language learners, then prepare them for a reader app. ${TOKEN_RULES(lang)}`,
+    `Write an original story in ${languageName(lang)} for a learner at CEFR level ${level}.\n` +
+      `Topic: ${topic}.\n` +
+      `Length and language: ${LEVEL_GUIDE[level] ?? LEVEL_GUIDE.B1}\n` +
+      `Give it a clear beginning and a small surprise or warm ending. The grammar and spelling must be flawless standard ${languageName(lang)}. ` +
+      `Do not use quotation marks or dashes. Characters are fictional. Keep it suitable for all ages.\n` +
+      (avoid.length ? `Tell a different story from these recent titles: ${avoid.join("; ")}.` : ""),
+    32000,
+  );
+}
+
 export const TARGET_LANGUAGES: Record<string, string> = {
   en: "English", vi: "Vietnamese", pl: "Polish", fr: "French", ru: "Russian", es: "Spanish", de: "German", ko: "Korean",
   zh: "Chinese (Simplified)", "zh-TW": "Chinese (Traditional)", th: "Thai", tr: "Turkish", id: "Indonesian", fil: "Filipino", uk: "Ukrainian",

@@ -7,6 +7,8 @@ export interface AccountUser {
   id: string;
   email: string;
   name: string;
+  /** Can review daily stories. */
+  admin?: boolean;
 }
 interface State {
   loaded: boolean;

@@ -5,7 +5,7 @@ import type { LangCode, Sentence } from "@storyling/core";
 import type { UserStory } from "@storyling/learner";
 import type { PreparedText } from "@/server/ai";
 
-export { isUserStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, topicOf, useStories, useStory, type AnyStory } from "@storyling/learner";
+export { isPublished, isUserStory, loadPublishedStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, topicOf, useStories, useStory, type AnyStory } from "@storyling/learner";
 import { PUNCT } from "@storyling/learner";
 
 const minutesFor = (words: number) => Math.max(1, Math.round(words / 80));

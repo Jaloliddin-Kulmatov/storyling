@@ -1,6 +1,7 @@
 import { startSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { accountRoute, HttpError } from "@/server/account-route";
+import { isAdminEmail } from "@/server/stories";
 
 interface TokenInfo { aud?: string; email?: string; email_verified?: string; name?: string; exp?: string }
 
@@ -22,5 +23,5 @@ export const POST = accountRoute(async (_u, req) => {
     ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
     RETURNING id, email, name`) as { id: string; email: string; name: string }[];
   await startSession(u!.id);
-  return { user: u };
+  return { user: { ...u!, admin: isAdminEmail(u!.email) } };
 }, { auth: false });

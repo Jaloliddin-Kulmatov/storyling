@@ -1,6 +1,7 @@
 import { hashPassword, startSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { accountRoute, HttpError } from "@/server/account-route";
+import { isAdminEmail } from "@/server/stories";
 
 export const POST = accountRoute(async (_u, req) => {
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
@@ -9,6 +10,8 @@ export const POST = accountRoute(async (_u, req) => {
   const password = String(b.password ?? "");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200) throw new HttpError("Enter a valid email address.");
   if (password.length < 8 || password.length > 200) throw new HttpError("Use a password of at least 8 characters.");
+  // Signing up doesn't prove who owns an address, so an admin address can only come in through Google.
+  if (isAdminEmail(email)) throw new HttpError("This account signs in with Google. Use “Continue with Google”.", 403);
   const sql = await db();
   const rows = (await sql`INSERT INTO users (email, name, pass_hash) VALUES (${email}, ${name}, ${await hashPassword(password)})
     ON CONFLICT (email) DO NOTHING RETURNING id`) as { id: string }[];

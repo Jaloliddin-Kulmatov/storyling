@@ -41,6 +41,17 @@ export async function db(): Promise<NeonQueryFunction<false, false>> {
       story_id text PRIMARY KEY,
       views integer NOT NULL DEFAULT 0
     )`;
+    await q`CREATE TABLE IF NOT EXISTS daily_stories (
+      id text PRIMARY KEY,
+      lang text NOT NULL,
+      status text NOT NULL DEFAULT 'pending',
+      story jsonb NOT NULL,
+      warnings jsonb NOT NULL DEFAULT '[]',
+      created_at timestamptz NOT NULL DEFAULT now(),
+      published_at timestamptz,
+      reviewed_by text
+    )`;
+    await q`CREATE INDEX IF NOT EXISTS daily_stories_status ON daily_stories (lang, status, published_at DESC)`;
   })().catch((e) => {
     ready = null;
     throw e;

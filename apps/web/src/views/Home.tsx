@@ -4,12 +4,13 @@ import { compact, useViews } from "@/lib/views";
 import { useT } from "@/lib/i18n";
 import { language } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
+import type { PublishedStory } from "@storyling/learner";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
-import { isUserStory, TOPIC_LABEL } from "@/lib/stories";
+import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
 import { Cover, FitBadge, Icon } from "@/components/ui";
 
 /**
@@ -39,7 +40,9 @@ export function Home({ lang }: { lang: LangCode }) {
 
   const levelItems = useMemo(
     () =>
-      level === "daily"
+      level === "new"
+        ? ranked.filter((r) => isPublished(r.story)).sort((a, b) => (b.story as PublishedStory).publishedAt - (a.story as PublishedStory).publishedAt)
+        : level === "daily"
         ? dailyPicks(ranked.filter((r) => !isUserStory(r.story)), dayKey(day), learner.level ?? 0, meta.levels)
         : level === "for-you"
         ? ranked.filter((r) => !isUserStory(r.story))
@@ -89,6 +92,9 @@ export function Home({ lang }: { lang: LangCode }) {
 
       <div className="level-tabs" role="tablist" aria-label="Level">
         <button role="tab" aria-selected={level === "for-you"} onClick={() => { setLevel("for-you"); setTopic("all"); }}>{t("home.forYou")}</button>
+        {ranked.some((r) => isPublished(r.story)) && (
+          <button role="tab" aria-selected={level === "new"} onClick={() => { setLevel("new"); setTopic("all"); }}>New</button>
+        )}
         <button role="tab" aria-selected={level === "daily"} onClick={() => { setLevel("daily"); setTopic("all"); }}>{t("home.daily")}</button>
         {meta.levels.map((l) => (
           <button key={l} role="tab" aria-selected={level === l} onClick={() => { setLevel(l); setTopic("all"); }}>

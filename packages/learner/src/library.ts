@@ -3,14 +3,16 @@ import { coverage, recommend, type Coverage, type LangCode, type Sentence } from
 import { useCallback, useMemo } from "react";
 import { useLearner, type StoredWord, type UserStory } from "./index";
 import { FUNCTION_POS, wordLevels } from "./placement";
+import { usePublished, type PublishedStory } from "./published";
 
 /**
  * Library helpers shared by the web and phone apps: the learner's stories next to the catalog,
  * ranking by fit, meanings in context, and small utilities for games.
  */
-export type AnyStory = CatalogStory | UserStory;
+export type AnyStory = CatalogStory | UserStory | PublishedStory;
 
 export const isUserStory = (s: AnyStory): s is UserStory => "origin" in s;
+export const isPublished = (s: AnyStory): s is PublishedStory => "publishedAt" in s;
 export const PUNCT = /^[\p{P}\p{S}]+$/u;
 
 export const TOPIC_LABEL: Record<string, string> = {
@@ -21,11 +23,12 @@ export const TOPIC_LABEL: Record<string, string> = {
 
 export const topicOf = (s: AnyStory) => (isUserStory(s) ? "mine" : s.topic);
 
-/** Catalog stories plus the learner's own texts, newest own texts first. */
+/** The learner's own texts, then approved daily stories, then the catalog. */
 export function useStories(lang: LangCode): AnyStory[] {
   const { stories } = useLearner(lang);
+  const published = usePublished(lang);
   // Synced stories can come from older versions: keep only ones with a readable shape.
-  return useMemo(() => [...stories.filter(isValidStory), ...storiesFor(lang)], [stories, lang]);
+  return useMemo(() => [...stories.filter(isValidStory), ...published, ...storiesFor(lang)], [stories, published, lang]);
 }
 
 export function useStory(lang: LangCode, id: string): AnyStory | undefined {
@@ -38,7 +41,7 @@ function isValidStory(s: AnyStory | null | undefined): s is AnyStory {
 
 /** Meaning of a lemma: the story's own glossary first, then the shared dictionary. */
 export function lookupIn(story: AnyStory, lemma: string): DictEntry | undefined {
-  if (isUserStory(story)) {
+  if ("dict" in story) {
     const e = story.dict?.[lemma];
     if (Array.isArray(e) && typeof e[1] === "string") return { lemma, display: lemma, pos: e[0], meaning: e[1], ...(e[2] ? { reading: e[2] } : {}) };
   }

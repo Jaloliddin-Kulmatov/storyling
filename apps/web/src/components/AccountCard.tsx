@@ -24,6 +24,7 @@ export function AccountCard({ lang }: { lang: LangCode }) {
         <div className="row">
           <button className="btn sm" disabled={a.syncing} onClick={() => void syncNow()}>Sync now</button>
           <Link className="btn sm" href={`/${lang}/leaderboard`}>Leaderboard</Link>
+          {a.user.admin && <Link className="btn sm" href={`/${lang}/admin`}>Review stories</Link>}
         </div>
       </div>
     );
