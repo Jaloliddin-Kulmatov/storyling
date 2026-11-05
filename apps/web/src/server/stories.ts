@@ -85,8 +85,6 @@ async function pickCover(s: PublishedStory) {
  */
 export async function fillCovers(until: number) {
   const sql = await db();
-  // One-off: take down a wrongly matched photo.
-  await sql`UPDATE daily_stories SET story = story - 'cover' WHERE story->'cover'->>'url' LIKE '%WTC-Fireman%'`;
   const rows = (await sql`SELECT id, story FROM daily_stories WHERE status = 'pending' AND story->'cover' IS NULL ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
   let filled = 0;
   for (const r of rows) {
