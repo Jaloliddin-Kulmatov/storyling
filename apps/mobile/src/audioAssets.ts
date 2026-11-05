@@ -1,5 +1,17 @@
 // Generated from assets/audio. Metro needs static require() calls for bundled files.
 export const audioAssets: Record<string, number> = {
+  "de-firstday": require("../assets/audio/de-firstday.mp4"),
+  "de-rainybus": require("../assets/audio/de-rainybus.mp4"),
+  "de-birthdaycat": require("../assets/audio/de-birthdaycat.mp4"),
+  "de-marktag": require("../assets/audio/de-marktag.mp4"),
+  "de-snowday": require("../assets/audio/de-snowday.mp4"),
+  "de-newphone": require("../assets/audio/de-newphone.mp4"),
+  "de-lostdog": require("../assets/audio/de-lostdog.mp4"),
+  "de-flatmate": require("../assets/audio/de-flatmate.mp4"),
+  "de-gespraech": require("../assets/audio/de-gespraech.mp4"),
+  "de-hiking": require("../assets/audio/de-hiking.mp4"),
+  "de-doctorcall": require("../assets/audio/de-doctorcall.mp4"),
+  "de-flea": require("../assets/audio/de-flea.mp4"),
   "de-apollo13": require("../assets/audio/de-apollo13.mp4"),
   "de-assembly": require("../assets/audio/de-assembly.mp4"),
   "de-astrology": require("../assets/audio/de-astrology.mp4"),

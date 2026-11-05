@@ -1,0 +1,46 @@
+name: Record daily story audio
+
+# Records published daily stories with the same voice as the catalog and commits the audio, which redeploys the site.
+on:
+  schedule:
+    - cron: "15 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/record-stories.yml
+      - scripts/record_stories.py
+
+permissions:
+  contents: write
+
+concurrency: record-stories
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install piper-tts==1.3.0 || pip install piper-tts
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Download the voice
+        run: |
+          base=https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high
+          curl -fsSL -o /tmp/voice.onnx $base/de_DE-thorsten-high.onnx
+          curl -fsSL -o /tmp/voice.onnx.json $base/de_DE-thorsten-high.onnx.json
+      - name: Record
+        env:
+          VOICE: /tmp/voice.onnx
+        run: python scripts/record_stories.py --site https://storyling.vercel.app
+      - name: Commit
+        run: |
+          git add apps/web/public/audio packages/content/src/audio.json
+          git diff --cached --quiet && exit 0
+          git config user.name "storyling-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record audio for daily stories"
+          git pull --rebase origin main
+          git push
