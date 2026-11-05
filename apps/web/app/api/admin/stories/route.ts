@@ -5,7 +5,8 @@ import { accountRoute, HttpError } from "@/server/account-route";
 import { AiError, aiEnabled } from "@/server/ai";
 import type { Account } from "@/server/auth";
 import { db } from "@/server/db";
-import { applySentenceEdits, DAILY_LANGS, isAdminEmail, queueStory, recentTitles, storyWarnings, TOPICS } from "@/server/stories";
+import { searchPhotos } from "@/server/photos";
+import { applySentenceEdits, DAILY_LANGS, isAdminEmail, photoQuery, queueStory, recentTitles, storyWarnings, TOPICS } from "@/server/stories";
 
 export const maxDuration = 60;
 
@@ -25,6 +26,18 @@ export const GET = accountRoute(async (user, req) => {
   const rows = await sql`SELECT id, status, story, warnings, created_at FROM daily_stories WHERE status = ${status} ORDER BY created_at DESC LIMIT 60`;
   const [count] = (await sql`SELECT COUNT(*)::int AS n FROM daily_stories WHERE status = 'pending'`) as { n: number }[];
   return { stories: rows, waiting: count!.n, levels: LEVELS, topics: TOPICS };
+});
+
+/** PUT { id, query? }: photo choices for a story, from the reviewer's words or the story itself. */
+export const PUT = accountRoute(async (user, req) => {
+  admin(user);
+  const b = z.object({ id: z.string().max(80), query: z.string().trim().max(80).optional() }).safeParse(await req.json().catch(() => null));
+  if (!b.success) throw new HttpError("Unknown story.");
+  const sql = await db();
+  const [row] = (await sql`SELECT story FROM daily_stories WHERE id = ${b.data.id}`) as { story: PublishedStory }[];
+  if (!row) throw new HttpError("That story is gone.", 404);
+  const query = b.data.query || (await photoQuery(row.story));
+  return { query, photos: await searchPhotos(query).catch(() => []) };
 });
 
 const Write = z.object({ lang: z.string(), level: z.enum(LEVELS as [string, ...string[]]), topic: z.string().refine((t) => t in TOPICS) });
@@ -49,6 +62,7 @@ export const POST = accountRoute(async (user, req) => {
 const Review = z.object({
   id: z.string().max(80),
   status: z.enum(["pending", "published", "rejected"]).optional(),
+  cover: z.object({ url: z.string().url().startsWith("https://").max(600), author: z.string().max(120), license: z.string().max(60), page: z.string().url().startsWith("https://").max(600) }).optional(),
   edit: z.object({
     title: z.string().trim().min(1).max(120),
     titleEnglish: z.string().trim().max(120),
@@ -64,7 +78,7 @@ export const PATCH = accountRoute(async (user, req) => {
   const reviewer = admin(user);
   const b = Review.safeParse(await req.json().catch(() => null));
   if (!b.success) throw new HttpError("Check the story: a title and at least one sentence are needed.");
-  const { id, edit, status } = b.data;
+  const { id, edit, status, cover } = b.data;
   const sql = await db();
   const [row] = (await sql`SELECT story FROM daily_stories WHERE id = ${id}`) as { story: PublishedStory }[];
   if (!row) throw new HttpError("That story is gone.", 404);
@@ -76,6 +90,10 @@ export const PATCH = accountRoute(async (user, req) => {
       if (e) dict[lemma] = e[2] ? [e[0], meaning, e[2]] : [e[0], meaning];
     }
     story = { ...story, title: edit.title, titleEnglish: edit.titleEnglish, level: edit.level, topic: edit.topic, sentences, dict, minutes };
+    await sql`UPDATE daily_stories SET story = ${JSON.stringify(story)}::jsonb, warnings = ${JSON.stringify(storyWarnings(story))}::jsonb WHERE id = ${id}`;
+  }
+  if (cover) {
+    story = { ...story, cover };
     await sql`UPDATE daily_stories SET story = ${JSON.stringify(story)}::jsonb, warnings = ${JSON.stringify(storyWarnings(story))}::jsonb WHERE id = ${id}`;
   }
   if (status) {

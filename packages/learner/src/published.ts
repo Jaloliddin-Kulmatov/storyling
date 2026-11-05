@@ -2,11 +2,21 @@ import type { CatalogStory } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import { useEffect, useSyncExternalStore } from "react";
 
+/** A free-to-use photo and who to credit. */
+export interface StoryPhoto {
+  url: string;
+  author: string;
+  license: string;
+  /** The photo's page at its source. */
+  page: string;
+}
+
 /** A story an admin approved. Reads like a catalog story and carries its own glossary. */
 export interface PublishedStory extends CatalogStory {
   /** lemma → [part of speech, English meaning, reading?] */
   dict: Record<string, [string, string] | [string, string, string]>;
   publishedAt: number;
+  cover?: StoryPhoto;
 }
 
 const NONE: PublishedStory[] = [];

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { aiEnabled } from "@/server/ai";
 import { db, dbEnabled } from "@/server/db";
 import { mailEnabled, sendMail } from "@/server/mail";
-import { adminEmails, DAILY_LANGS, dailyPlan, MAX_WAITING, queueStory, recentTitles } from "@/server/stories";
+import { adminEmails, DAILY_LANGS, dailyPlan, fillCovers, MAX_WAITING, queueStory, recentTitles } from "@/server/stories";
 
 export const maxDuration = 60;
 
@@ -14,6 +14,7 @@ export async function GET(req: Request) {
   if (process.env.CRON_SECRET && req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!dbEnabled() || !aiEnabled()) return NextResponse.json({ written: 0, reason: "Database or AI is not configured." });
+  const started = Date.now();
   const day = new Date().toISOString().slice(0, 10);
   const sql = await db();
   const written: string[] = [];
@@ -42,5 +43,6 @@ export async function GET(req: Request) {
     const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://storyling.vercel.app";
     for (const to of adminEmails()) await sendMail(to, `${written.length} new stories to review`, `Read and publish them here:\n${site}/de/admin`);
   }
-  return NextResponse.json({ written, errors }, { status: errors.length && !written.length ? 502 : 200 });
+  const covers = await fillCovers(started + 45_000);
+  return NextResponse.json({ written, errors, covers }, { status: errors.length && !written.length ? 502 : 200 });
 }

@@ -15,7 +15,7 @@ import { examplesFor, wordLevelOf } from "@storyling/learner";
 import { useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories } from "@/lib/rank";
 import { isPublished, isUserStory, loadPublishedStory, lookupIn, PUNCT, textOf, TOPIC_LABEL, useStory, type AnyStory } from "@/lib/stories";
-import { Cover, Icon, Toast } from "@/components/ui";
+import { Cover, Icon, levelTone, Toast } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
 import { Tr, useTranslated } from "@/lib/translate";
@@ -167,8 +167,9 @@ function StoryReader({ story }: { story: AnyStory }) {
       <div className="reader">
         <article className="article">
           <Cover story={story} className="article-art" />
+          {isPublished(story) && story.cover && <p className="small muted" style={{ margin: "6px 0 0" }}><a href={story.cover.page} target="_blank" rel="noreferrer">Photo: {story.cover.author}</a> · {story.cover.license}</p>}
           <div className="row small muted" style={{ marginTop: 16 }}>
-            <span className="lvl">{story.level}</span>
+            <span className={`lvl ${levelTone(story.level)}`}>{story.level}</span>
             <span>{TOPIC_LABEL[isUserStory(story) ? "mine" : story.topic] ?? story.topic}</span>
             <span>· {story.date}</span>
             <span>· {story.sentences.reduce((n, x) => n + x.tokens.filter((t) => t.lemma).length, 0)} words</span>

@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
 import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
-import { Cover, FitBadge, Icon } from "@/components/ui";
+import { Cover, FitBadge, Icon, levelTone } from "@/components/ui";
 
 /**
  * Home: a reading feed sorted like a news app. Level tabs across the top ("For you" first),
@@ -97,7 +97,7 @@ export function Home({ lang }: { lang: LangCode }) {
         )}
         <button role="tab" aria-selected={level === "daily"} onClick={() => { setLevel("daily"); setTopic("all"); }}>{t("home.daily")}</button>
         {meta.levels.map((l) => (
-          <button key={l} role="tab" aria-selected={level === l} onClick={() => { setLevel(l); setTopic("all"); }}>
+          <button key={l} role="tab" className={levelTone(l)} aria-selected={level === l} onClick={() => { setLevel(l); setTopic("all"); }}>
             {l} <small>{countAt(l)}</small>
           </button>
         ))}
@@ -112,24 +112,39 @@ export function Home({ lang }: { lang: LangCode }) {
           ))}
         </div>
       )}
-      <div className="filters" role="group" aria-label="Topic" style={{ margin: "12px 0 16px" }}>
+      <div className="filters topic-chips" role="group" aria-label="Topic" style={{ margin: "12px 0 16px" }}>
         {topics.map((t) => (
           <button key={t} className="chip" aria-pressed={topic === t} onClick={() => setTopic(t)}>{t === "all" ? "All topics" : TOPIC_LABEL[t] ?? t}</button>
         ))}
       </div>
 
-      {featured ? (
-        <>
-          <Featured r={featured} lang={lang} views={views[featured.story.id]} saved={learner.favorites.includes(featured.story.id)} onSave={() => learner.toggleFavorite(featured.story.id)} />
-          <div className="feed">
-            {rest.map((r) => (
-              <FeedRow key={r.story.id} r={r} lang={lang} views={views[r.story.id]} saved={learner.favorites.includes(r.story.id)} onSave={() => learner.toggleFavorite(r.story.id)} />
+      <div className="home-grid">
+        <div>
+          {featured ? (
+            <>
+              <Featured r={featured} lang={lang} views={views[featured.story.id]} saved={learner.favorites.includes(featured.story.id)} onSave={() => learner.toggleFavorite(featured.story.id)} />
+              <div className="story-grid">
+                {rest.map((r) => (
+                  <StoryTile key={r.story.id} r={r} lang={lang} views={views[r.story.id]} saved={learner.favorites.includes(r.story.id)} onSave={() => learner.toggleFavorite(r.story.id)} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="empty"><p className="muted" style={{ margin: 0 }}>No stories here yet.</p></div>
+          )}
+        </div>
+        <aside className="home-rail" aria-label="Browse">
+          <h2>Read by topic</h2>
+          <div className="rail-topics">
+            {topics.map((x) => (
+              <button key={x} className="chip" aria-pressed={topic === x} onClick={() => setTopic(x)}>{x === "all" ? "All topics" : TOPIC_LABEL[x] ?? x}</button>
             ))}
           </div>
-        </>
-      ) : (
-        <div className="empty"><p className="muted" style={{ margin: 0 }}>No stories here yet.</p></div>
-      )}
+          <Link className="promo promo-a" href={`/${lang}/watch`}><b>🎬 Watch and learn</b><span>German videos with subtitles you can tap.</span></Link>
+          <Link className="promo promo-b" href={`/${lang}/practice`}><b>🎮 Practice games</b><span>Bingo, picture match, fill the gaps and more.</span></Link>
+          <Link className="promo promo-c" href={`/${lang}/exams`}><b>🎓 Mock exams</b><span>Get ready for Goethe and telc, A1 to C1.</span></Link>
+        </aside>
+      </div>
     </>
   );
 }
@@ -156,7 +171,7 @@ function Featured({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode
         <span className="hero-shade" />
         <span className="hero-over">
           <span className="row small">
-            <span className="lvl">{s.level}</span>
+            <span className={`lvl ${levelTone(s.level)}`}>{s.level}</span>
             <span className="tag">{TOPIC_LABEL[topic] ?? topic}</span>
             <span className="tag">{s.minutes} min</span>
             {!!views && <span className="tag">{compact(views)} reads</span>}
@@ -177,25 +192,25 @@ function Featured({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode
   );
 }
 
-function FeedRow({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void; views?: number }) {
+function StoryTile({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode; saved: boolean; onSave: () => void; views?: number }) {
   const s = r.story;
   const topic = isUserStory(s) ? "mine" : s.topic;
   return (
-    <Link href={`/${lang}/read/${s.id}`} className={`feed-row${r.read ? " read" : ""}`}>
-      <Cover story={s} className="thumb">{r.read && <span className="read-dot" aria-label="Read">✓</span>}</Cover>
-      <span className="fr-body">
-        <span className="row small"><span className="lvl">{s.level}</span><span className="muted">{TOPIC_LABEL[topic] ?? topic}</span></span>
+    <Link href={`/${lang}/read/${s.id}`} className={`sc ${levelTone(s.level)}${r.read ? " read" : ""}`}>
+      <Cover story={s} className="sc-img">
+        {r.read && <span className="read-dot" aria-label="Read">✓</span>}
+        <span className="sc-min">{s.minutes} min</span>
+        <span className="sc-topic">{TOPIC_LABEL[topic] ?? topic}{views ? ` · ${compact(views)} reads` : ""}</span>
+      </Cover>
+      <span className="sc-body">
         <span className="t" lang={lang}>{s.title}</span>
         {s.titleEnglish && <span className="muted small">{s.titleEnglish}</span>}
-        <span className="row small muted">
-          <span>{s.minutes} min read</span>
-          <span>· {s.date}</span>
-          {!!views && <span>· {compact(views)} reads</span>}
+        <span className="sc-foot">
+          <span className={`lvl ${levelTone(s.level)}`}>{s.level}</span>
+          <span className="muted small">{s.date}</span>
+          <SaveButton saved={saved} onSave={onSave} />
         </span>
-      </span>
-      <span className="fr-side">
-        <FitBadge coverage={r.coverage} />
-        <SaveButton saved={saved} onSave={onSave} />
+        <FitBadge coverage={r.coverage} short />
       </span>
     </Link>
   );

@@ -2,8 +2,9 @@ import "server-only";
 import { lookup, sentenceText } from "@storyling/content";
 import type { LangCode, Sentence, Token } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
-import { prepareText, writeDailyStory, type PreparedText } from "./ai";
+import { photoKeywords, prepareText, writeDailyStory, type PreparedText } from "./ai";
 import { db } from "./db";
+import { searchPhotos } from "./photos";
 
 /** Languages learners can see, so the only ones worth writing for. */
 export const DAILY_LANGS: LangCode[] = ["de"];
@@ -61,7 +62,36 @@ export function storyWarnings(s: PublishedStory): string[] {
   for (const x of s.sentences) for (const t of x.tokens) if (t.lemma && !s.dict[t.lemma] && !lookup(s.lang, t.lemma)) missing.add(t.lemma);
   if (missing.size) out.push(`No meaning for: ${[...missing].slice(0, 12).join(", ")}${missing.size > 12 ? "…" : ""}`);
   if (!s.titleEnglish.trim()) out.push("No English title.");
+  if (!s.cover) out.push("No picture yet.");
   return out;
+}
+
+/** Search words for a story's photo, falling back to its topic if the AI is unavailable. */
+export async function photoQuery(s: PublishedStory) {
+  const words = await photoKeywords(s.titleEnglish || s.title, s.sentences.slice(0, 2).map((x) => x.translation).join(" ")).catch(() => "");
+  return words || (TOPICS[s.topic] ?? s.topic);
+}
+
+/** A photo for a story: varied among the best few, so stories on the same subject don't all look alike. */
+async function pickCover(s: PublishedStory) {
+  const query = await photoQuery(s);
+  const photos = await searchPhotos(query).catch(() => []);
+  return photos[Math.floor(Math.random() * Math.min(photos.length, 5))];
+}
+
+/** Give photos to stories that have none. Stops at `until` (a timestamp) to stay inside the cron's time limit. */
+export async function fillCovers(until: number) {
+  const sql = await db();
+  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status <> 'rejected' AND story->'cover' IS NULL ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
+  let filled = 0;
+  for (const r of rows) {
+    if (Date.now() > until) break;
+    const cover = await pickCover(r.story);
+    if (!cover) continue;
+    await sql`UPDATE daily_stories SET story = story || ${JSON.stringify({ cover })}::jsonb WHERE id = ${r.id}`;
+    filled++;
+  }
+  return filled;
 }
 
 /** Write one story and put it in the review queue. Returns false when that id already exists. */
@@ -75,6 +105,8 @@ export async function queueStory(id: string, lang: LangCode, level: string, topi
     date: new Date().toLocaleDateString("en", { month: "short", day: "numeric" }),
     sentences, dict, publishedAt: 0,
   };
+  const cover = await pickCover(story);
+  if (cover) story.cover = cover;
   const sql = await db();
   const rows = await sql`INSERT INTO daily_stories (id, lang, story, warnings)
     VALUES (${id}, ${lang}, ${JSON.stringify(story)}::jsonb, ${JSON.stringify(storyWarnings(story))}::jsonb)

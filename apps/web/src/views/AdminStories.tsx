@@ -2,7 +2,7 @@
 
 import { sentenceText } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
-import type { PublishedStory } from "@storyling/learner";
+import type { PublishedStory, StoryPhoto } from "@storyling/learner";
 import { useCallback, useEffect, useState } from "react";
 import { AuthForm } from "@/components/AuthForm";
 import { useAccount } from "@/lib/account";
@@ -95,6 +95,53 @@ export function AdminStories({ lang }: { lang: LangCode }) {
   );
 }
 
+function PhotoPicker({ id, current, onChoose }: { id: string; current?: StoryPhoto; onChoose: (p: StoryPhoto) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [photos, setPhotos] = useState<StoryPhoto[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function search(q: string) {
+    setOpen(true);
+    setPhotos(null);
+    setError(null);
+    try {
+      const out = await api<{ query: string; photos: StoryPhoto[] }>("PUT", { id, ...(q ? { query: q } : {}) });
+      setQuery(out.query);
+      setPhotos(out.photos);
+    } catch (e) {
+      setError((e as Error).message);
+      setPhotos([]);
+    }
+  }
+
+  return (
+    <div className="adm-photo">
+      {current ? <img src={current.url} alt="" referrerPolicy="no-referrer" /> : <div className="adm-nophoto muted">No picture yet</div>}
+      <button className="btn sm" onClick={() => (open ? setOpen(false) : void search(query))}>{open ? "Close pictures" : "Change picture"}</button>
+      {current && <p className="muted small" style={{ margin: "6px 0 0" }}>{current.author} · {current.license}</p>}
+      {open && (
+        <div className="adm-picker">
+          <form className="row" onSubmit={(e) => { e.preventDefault(); void search(query); }}>
+            <input className="input" aria-label="Search pictures" placeholder="Search in English, e.g. rain village" value={query} maxLength={80} onChange={(e) => setQuery(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
+            <button className="btn sm">Search</button>
+          </form>
+          {error && <p className="adm-warn" role="alert">{error}</p>}
+          {!photos ? <p className="muted small">Searching…</p> : photos.length === 0 ? <p className="muted small">No pictures found. Try simpler words.</p> : (
+            <div className="adm-photos">
+              {photos.map((p) => (
+                <button key={p.url} aria-label={`Use photo by ${p.author}`} onClick={() => void onChoose(p).then(() => setOpen(false), (e: Error) => setError(e.message))}>
+                  <img src={p.url} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StoryReview({ row, levels, topics, onDone }: { row: Row; levels: string[]; topics: Record<string, string>; onDone: () => void }) {
   const [story, setStory] = useState(row.story);
   const [warnings, setWarnings] = useState(row.warnings);
@@ -126,8 +173,15 @@ function StoryReview({ row, levels, topics, onDone }: { row: Row; levels: string
     setBusy(false);
   }
 
+  async function choose(cover: StoryPhoto) {
+    const out = await api<{ story: PublishedStory; warnings: string[] }>("PATCH", { id: row.id, cover });
+    setStory(out.story);
+    setWarnings(out.warnings);
+  }
+
   return (
     <article className="card adm-story">
+      <PhotoPicker id={row.id} current={story.cover} onChoose={choose} />
       {editing ? (
         <div className="adm-grid">
           <label className="field"><span>Title</span><input className="input" lang={story.lang} value={draft.title} maxLength={120} onChange={(e) => patch({ title: e.target.value })} /></label>

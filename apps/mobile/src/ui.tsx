@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { coverOf } from "@storyling/content";
 import { FIT_LABEL, type Coverage } from "@storyling/core";
-import { isUserStory, TOPIC_LABEL, topicOf, useTranslated, type AnyStory } from "@storyling/learner";
+import { isPublished, isUserStory, TOPIC_LABEL, topicOf, useTranslated, type AnyStory } from "@storyling/learner";
 import type { ReactNode } from "react";
 import { Image, Pressable, StyleSheet, Text, View, type StyleProp, type TextProps, type ViewStyle } from "react-native";
 import { coverAssets } from "./coverAssets";
@@ -37,7 +37,7 @@ const TOPIC_ICON: Record<string, IconName> = {
 export function Cover({ story, style, children }: { story: AnyStory; style?: StyleProp<ViewStyle>; children?: ReactNode }) {
   const topic = topicOf(story);
   const slug = isUserStory(story) ? undefined : coverOf(story.id)?.replace(/^\/covers\/|\.jpg$/g, "");
-  const asset = slug ? coverAssets[slug] : undefined;
+  const asset = slug ? coverAssets[slug] : isPublished(story) && story.cover ? { uri: story.cover.url } : undefined;
   return (
     <View style={[{ overflow: "hidden", backgroundColor: TOPIC_TINT[topic] ?? "#eee", alignItems: "center", justifyContent: "center" }, style]}>
       {asset !== undefined ? (

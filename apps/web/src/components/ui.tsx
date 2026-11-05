@@ -2,10 +2,10 @@
 
 import { FIT_LABEL, type Coverage } from "@storyling/core";
 import Link from "next/link";
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { coverOf } from "@storyling/content";
 import type { AnyStory } from "@/lib/stories";
-import { isUserStory, TOPIC_LABEL } from "@/lib/stories";
+import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
 
 /** Small stroke icons (no emoji as UI glyphs). */
 export const Icon = {
@@ -59,13 +59,17 @@ export function Art({ topic, className = "" }: { topic: string; className?: stri
   );
 }
 
+/** Each level has its own colour, so a story's difficulty shows at a glance. */
+export const levelTone = (level: string) => `lv-${level.replace(/\s/g, "")}`;
+
 /** Story cover: the story's photo, or a drawn topic picture for the learner's own texts. */
 export function Cover({ story, className = "", children }: { story: AnyStory; className?: string; children?: ReactNode }) {
-  const src = isUserStory(story) ? undefined : coverOf(story.id);
+  const [broken, setBroken] = useState(false);
+  const src = isUserStory(story) ? undefined : isPublished(story) ? story.cover?.url : coverOf(story.id);
   const topic = isUserStory(story) ? "mine" : story.topic;
   return (
     <span className={`cover ${className}`}>
-      {src ? <img src={src} alt="" loading="lazy" decoding="async" /> : <Art topic={topic} />}
+      {src && !broken ? <img src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setBroken(true)} /> : <Art topic={topic} />}
       {children}
     </span>
   );
@@ -92,8 +96,8 @@ export function Logo({ size = 34 }: { size?: number }) {
   );
 }
 
-export function FitBadge({ coverage }: { coverage: Coverage }) {
-  return <span className={`pill fit-${coverage.fit}`}>{FIT_LABEL[coverage.fit]} · {coverage.percent}%</span>;
+export function FitBadge({ coverage, short }: { coverage: Coverage; short?: boolean }) {
+  return <span className={`pill fit-${coverage.fit}`}>{short ? "You know" : `${FIT_LABEL[coverage.fit]} · you know`} {coverage.percent}%</span>;
 }
 
 export function CoverageBar({ coverage }: { coverage: Coverage }) {
@@ -108,7 +112,7 @@ export function StoryCard({ story, coverage, read }: { story: AnyStory; coverage
   const topic = isUserStory(story) ? "mine" : story.topic;
   return (
     <Link href={`/${story.lang}/read/${story.id}`} className="story-card">
-      <Cover story={story}><span className="lvl on-img">{story.level}</span></Cover>
+      <Cover story={story}><span className={`lvl on-img ${levelTone(story.level)}`}>{story.level}</span></Cover>
       <span className="body">
         <span className="t" lang={story.lang}>{story.title}</span>
         <span className="muted small">{story.titleEnglish || TOPIC_LABEL[topic]}</span>

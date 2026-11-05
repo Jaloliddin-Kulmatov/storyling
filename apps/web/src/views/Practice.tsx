@@ -27,6 +27,10 @@ interface PoolWord {
 
 interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string }
 
+const GAME_EMOJI: Record<string, string> = {
+  "Picture match": "🖼️", Bingo: "🎯", "Match words": "🧩", "Fill the gaps": "✏️", "Build the sentence": "🧱", Listening: "🎧", Dictation: "✍️", "Level test": "📊", "Mock exams": "🎓", Grammar: "📘",
+};
+
 const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
   { title: "Word games", key: "prac.words", cards: [
     { mode: "picture", title: "Picture match", text: "See a picture, pick the word. Hear a word, find the picture.", icon: "spark", tone: "t1", mins: "2 min" },
@@ -103,7 +107,7 @@ export function Practice({ lang }: { lang: LangCode }) {
               const best = g.mode ? learner.games[g.mode] : undefined;
               return (
                 <Link key={g.title} href={g.mode ? `/${lang}/practice?mode=${g.mode}` : `/${lang}${g.href}`} className={`game-card ${g.tone}`}>
-                  <span className="spread"><span className="gi" aria-hidden="true">{Icon[g.icon]}</span><span className="small muted">{g.mins}</span></span>
+                  <span className="spread"><span className="gi" aria-hidden="true">{GAME_EMOJI[g.title] ?? Icon[g.icon]}</span><span className="small muted">{g.mins}</span></span>
                   <span className="t">{g.title}</span>
                   <span className="muted small">{g.text}</span>
                   {g.mode && <span className="small gm">{best ? `Best ${best.best}% · played ${best.played}×` : "Not played yet"}</span>}

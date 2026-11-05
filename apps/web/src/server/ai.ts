@@ -247,6 +247,17 @@ export function writeDailyStory(lang: string, level: string, topic: string, avoi
   );
 }
 
+/** Two or three English words to find a photo for a story. */
+export async function photoKeywords(title: string, opening: string): Promise<string> {
+  const out = await complete(
+    "You pick search words for a stock photo library. Reply with two or three plain English nouns naming the main visible subject and nothing else. No punctuation.",
+    `Story title: ${title}\nOpening: ${opening}`,
+    30,
+    false,
+  );
+  return out.replace(/[^\p{L} ]/gu, " ").trim().split(/\s+/).slice(0, 3).join(" ");
+}
+
 export const TARGET_LANGUAGES: Record<string, string> = {
   en: "English", vi: "Vietnamese", pl: "Polish", fr: "French", ru: "Russian", es: "Spanish", de: "German", ko: "Korean",
   zh: "Chinese (Simplified)", "zh-TW": "Chinese (Traditional)", th: "Thai", tr: "Turkish", id: "Indonesian", fil: "Filipino", uk: "Ukrainian",
