@@ -697,8 +697,10 @@ span.gv, b.gv { color: var(--gc-verb); }
 .pub-foot { text-align: center; padding: 24px 16px; }
 
 /* ── Pricing ── */
-.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 8px; }
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; margin-top: 8px; }
 .plan { display: grid; gap: 10px; align-content: start; padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.plan .btn { white-space: normal; height: auto; min-width: 0; }
+.pub-main .seg { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .plan.pro { border: 2px solid var(--primary); box-shadow: var(--shadow); }
 .plan-name { font-size: 20px; display: flex; gap: 8px; align-items: center; }
 .plan-price { font-size: 36px; font-weight: 800; }
