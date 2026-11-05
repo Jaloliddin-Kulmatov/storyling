@@ -172,7 +172,7 @@ const JSON_SHAPE =
 async function groqPrepared(system: string, user: string): Promise<PreparedText> {
   let lastError = "";
   for (let attempt = 0; attempt < 2; attempt++) {
-    const text = await groqChat(system + JSON_SHAPE, attempt ? `${user}\n\nYour last reply was not valid (${lastError}). Reply with the JSON object only.` : user, 8000, true);
+    const text = await groqChat(system + JSON_SHAPE, attempt ? `${user}\n\nYour last reply was not valid (${lastError}). Reply with the JSON object only.` : user, 11000, true);
     try {
       const parsed = PreparedText.safeParse(JSON.parse(text));
       if (parsed.success && parsed.data.sentences.length) return parsed.data;
@@ -228,9 +228,9 @@ export function writeStory(lang: string, level: string, topic: string, words: st
 const LEVEL_GUIDE: Record<string, string> = {
   A1: "8–10 very short sentences in the present tense, using only the most common everyday words.",
   A2: "8–12 short sentences; the present and simple past or Perfekt, with common words and simple linking words.",
-  B1: "10–14 sentences; clear connected text with subordinate clauses and everyday vocabulary.",
-  B2: "10–14 sentences; varied sentence structure, some abstract vocabulary and opinions.",
-  C1: "10–14 sentences; rich, precise language with complex sentences and idiomatic expressions.",
+  B1: "8–10 sentences; clear connected text with subordinate clauses and everyday vocabulary.",
+  B2: "8–10 sentences; varied sentence structure, some abstract vocabulary and opinions.",
+  C1: "7–9 sentences; rich, precise language with complex sentences and idiomatic expressions.",
 };
 
 /** One story for the daily queue. An admin reads it before any learner sees it. */

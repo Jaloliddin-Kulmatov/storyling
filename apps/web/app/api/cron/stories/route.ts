@@ -8,7 +8,7 @@ export const maxDuration = 60;
 
 /**
  * Daily (vercel.json cron): write the day's stories into the review queue. Nothing here reaches learners;
- * an admin publishes from /de/admin. Ids include the date, so running it twice in a day writes nothing new.
+ * an admin publishes from /de/admin. Ids include the date, so the second run each morning only fills in what failed.
  */
 export async function GET(req: Request) {
   if (process.env.CRON_SECRET && req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`)

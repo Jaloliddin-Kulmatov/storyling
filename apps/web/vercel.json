@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/stories",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/stories?retry=1",
+      "schedule": "30 4 * * *"
     }
   ]
 }
