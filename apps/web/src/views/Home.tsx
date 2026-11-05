@@ -174,7 +174,7 @@ function Featured({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode
             <span className={`lvl ${levelTone(s.level)}`}>{s.level}</span>
             <span className="tag">{TOPIC_LABEL[topic] ?? topic}</span>
             <span className="tag">{s.minutes} min</span>
-            {!!views && <span className="tag">{compact(views)} reads</span>}
+            {!!views && <span className="tag">{compact(views)} {views === 1 ? "read" : "reads"}</span>}
             {r.read && <span className="tag">Read</span>}
           </span>
           <span className="t" lang={lang}>{s.title}</span>
@@ -200,7 +200,7 @@ function StoryTile({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCod
       <Cover story={s} className="sc-img">
         {r.read && <span className="read-dot" aria-label="Read">✓</span>}
         <span className="sc-min">{s.minutes} min</span>
-        <span className="sc-topic">{TOPIC_LABEL[topic] ?? topic}{views ? ` · ${compact(views)} reads` : ""}</span>
+        <span className="sc-topic">{TOPIC_LABEL[topic] ?? topic}{views ? ` · ${compact(views)} ${views === 1 ? "read" : "reads"}` : ""}</span>
       </Cover>
       <span className="sc-body">
         <span className="t" lang={lang}>{s.title}</span>

@@ -59,6 +59,11 @@ export function Art({ topic, className = "" }: { topic: string; className?: stri
   );
 }
 
+/** A cached photo can finish before React listens for its load event. */
+const shown = (img: HTMLImageElement | null) => {
+  if (img?.complete && img.naturalWidth) img.setAttribute("data-loaded", "");
+};
+
 /** Each level has its own colour, so a story's difficulty shows at a glance. */
 export const levelTone = (level: string) => `lv-${level.replace(/\s/g, "")}`;
 
@@ -69,7 +74,7 @@ export function Cover({ story, className = "", children }: { story: AnyStory; cl
   const topic = isUserStory(story) ? "mine" : story.topic;
   return (
     <span className={`cover ${className}`}>
-      {src && !broken ? <img src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setBroken(true)} /> : <Art topic={topic} />}
+      {src && !broken ? <img ref={shown} src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} onError={() => setBroken(true)} /> : <Art topic={topic} />}
       {children}
     </span>
   );

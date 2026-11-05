@@ -9,7 +9,7 @@ import { searchPhotos } from "./photos";
 /** Languages learners can see, so the only ones worth writing for. */
 export const DAILY_LANGS: LangCode[] = ["de"];
 /** Stop writing when this many stories wait for review, so a quiet week doesn't spend AI credits on a pile nobody reads. */
-export const MAX_WAITING = 14;
+export const MAX_WAITING = 21;
 
 const EASY = ["A1", "A2"];
 const HARD = ["B1", "B2", "C1"];
@@ -25,12 +25,13 @@ const admins = () => (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.tr
 export const adminEmails = admins;
 export const isAdminEmail = (email: string) => admins().includes(email.toLowerCase());
 
-/** Two stories a day, one easier and one harder, moving through the levels and topics. */
+/** Three stories a day, from easier to harder, moving through the levels and topics. */
 export function dailyPlan(day: string): { level: string; topic: string }[] {
   const n = Math.floor(Date.parse(day) / 864e5);
   const topics = Object.keys(TOPICS);
   return [
     { level: EASY[n % EASY.length]!, topic: topics[(n * 2) % topics.length]! },
+    { level: EASY[(n + 1) % EASY.length]!, topic: topics[(n * 3 + 5) % topics.length]! },
     { level: HARD[n % HARD.length]!, topic: topics[(n * 2 + 1) % topics.length]! },
   ];
 }

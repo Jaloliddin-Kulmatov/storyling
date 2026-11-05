@@ -55,13 +55,17 @@ export function AdminStories({ lang }: { lang: LangCode }) {
     );
   if (!allowed) return <div className="empty" style={{ marginTop: 40 }}><p className="muted" style={{ margin: 0 }}>This page is for admins.</p></div>;
 
-  async function write() {
+  async function write(times: number) {
     setWriting(true);
     setError(null);
     try {
-      await api("POST", { lang, level, topic });
-      if (tab === "pending") load();
-      else setTab("pending");
+      // Mixed topics when writing several, so a batch isn't five stories about the same thing.
+      const keys = Object.keys(list?.topics ?? {});
+      for (let i = 0; i < times; i++) {
+        await api("POST", { lang, level: times > 1 ? list!.levels[i % list!.levels.length]! : level, topic: times > 1 ? keys[Math.floor(Math.random() * keys.length)]! : topic });
+        if (tab === "pending") load();
+      }
+      if (tab !== "pending") setTab("pending");
     } catch (e) {
       setError((e as Error).message);
     }
@@ -82,7 +86,8 @@ export function AdminStories({ lang }: { lang: LangCode }) {
           <div className="row">
             <select className="input adm-sel" aria-label="Level" value={level} onChange={(e) => setLevel(e.target.value)}>{list.levels.map((l) => <option key={l}>{l}</option>)}</select>
             <select className="input adm-sel" aria-label="Topic" value={topic} onChange={(e) => setTopic(e.target.value)}>{Object.entries(list.topics).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-            <button className="btn sm" disabled={writing} onClick={() => void write()}>{writing ? "Writing…" : "Write one now"}</button>
+            <button className="btn sm" disabled={writing} onClick={() => void write(1)}>{writing ? "Writing…" : "Write one now"}</button>
+            <button className="btn sm" disabled={writing} onClick={() => void write(5)}>Write 5 (all levels)</button>
           </div>
         )}
       </div>

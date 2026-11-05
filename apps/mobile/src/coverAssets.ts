@@ -1,5 +1,17 @@
 // Generated from apps/web/public/covers. Metro needs static require() calls for bundled images.
 export const coverAssets: Record<string, number> = {
+  "gespraech": require("../../web/public/covers/gespraech.jpg"),
+  "flea": require("../../web/public/covers/flea.jpg"),
+  "doctorcall": require("../../web/public/covers/doctorcall.jpg"),
+  "hiking": require("../../web/public/covers/hiking.jpg"),
+  "flatmate": require("../../web/public/covers/flatmate.jpg"),
+  "lostdog": require("../../web/public/covers/lostdog.jpg"),
+  "newphone": require("../../web/public/covers/newphone.jpg"),
+  "snowday": require("../../web/public/covers/snowday.jpg"),
+  "marktag": require("../../web/public/covers/marktag.jpg"),
+  "birthdaycat": require("../../web/public/covers/birthdaycat.jpg"),
+  "rainybus": require("../../web/public/covers/rainybus.jpg"),
+  "firstday": require("../../web/public/covers/firstday.jpg"),
   "alone": require("../../web/public/covers/alone.jpg"),
   "apollo13": require("../../web/public/covers/apollo13.jpg"),
   "assembly": require("../../web/public/covers/assembly.jpg"),

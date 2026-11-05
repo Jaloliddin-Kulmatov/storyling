@@ -48,7 +48,7 @@ interface CommonsPage {
 const FREE_LICENSE = /^(CC0|CC BY|Public domain)/i;
 
 async function commons(query: string): Promise<StoryPhoto[]> {
-  const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=30&gsrsearch=${encodeURIComponent(`${query} filemime:image/jpeg`)}&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1000`;
+  const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=30&gsrsearch=${encodeURIComponent(`${query} filemime:image/jpeg -nude -nudity`)}&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1000`;
   const res = await fetch(url, { headers: { "User-Agent": "Storyling/1.0 (https://storyling.vercel.app)" }, signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`Commons ${res.status}`);
   const pages = ((await res.json()) as { query?: { pages: Record<string, CommonsPage> } }).query?.pages ?? {};

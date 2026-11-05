@@ -3,7 +3,14 @@
 import { useEffect } from "react";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  useEffect(() => console.error(error), [error]);
+  useEffect(() => {
+    console.error(error);
+    // A new version went live while this tab was open: its old code files are gone, so load the new ones.
+    if (/ChunkLoadError|Loading chunk/.test(`${error.name} ${error.message}`) && !sessionStorage.getItem("storyling.reloaded")) {
+      sessionStorage.setItem("storyling.reloaded", "1");
+      location.reload();
+    }
+  }, [error]);
   return (
     <div className="empty" style={{ padding: "64px 16px", textAlign: "center" }}>
       <h2>Something went wrong on this page</h2>

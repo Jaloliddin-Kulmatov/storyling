@@ -486,7 +486,7 @@ function FlashCard({ word, lang, meaning, ctx, flipped, onFlip, onGrade, left }:
         <button className="btn primary block" onClick={onFlip} autoFocus>Show meaning <kbd>Space</kbd></button>
       ) : (
         <>
-          <div className="reveal">
+          <div className="answer-reveal">
             {meaning?.reading && <div className="reading">{meaning.reading}</div>}
             <div style={{ fontSize: 22, fontWeight: 700 }}>{meaning?.meaning ? <Tr>{meaning.meaning}</Tr> : "—"}</div>
             {meaning?.pos && <div className="muted small">{meaning.pos}</div>}

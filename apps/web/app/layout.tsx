@@ -8,6 +8,9 @@ const THEME = `:root{${cssVars("light")}}@media (prefers-color-scheme: dark){:ro
 // Applies a saved light/dark choice before the first paint so the page does not flash.
 const THEME_SCRIPT = `try{var t=JSON.parse(localStorage.getItem("storyling.learner.v2")||"{}").settings.theme;if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
+// A tab left open across a release asks for code files that no longer exist: reload once to get the new ones.
+const RELOAD_SCRIPT = `addEventListener("error",function(e){if(/ChunkLoadError|Loading chunk/.test(e.message||"")&&!sessionStorage.getItem("storyling.reloaded")){sessionStorage.setItem("storyling.reloaded","1");location.reload()}});`;
+
 export const metadata: Metadata = {
   title: { default: "Storyling", template: "%s · Storyling" },
   description: "Read stories you can almost understand, in 10 languages.",
@@ -28,6 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="stylesheet" href={FONTS} />
         <style dangerouslySetInnerHTML={{ __html: THEME }} />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: RELOAD_SCRIPT }} />
       </head>
       <body>{children}</body>
     </html>
