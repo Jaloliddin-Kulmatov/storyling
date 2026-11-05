@@ -6,10 +6,11 @@ import type { StoryPhoto } from "@storyling/learner";
  * without it, Openverse, then Wikimedia Commons when Openverse is down. Those two need no key and only return
  * photos that are public domain or free with credit.
  */
-export async function searchPhotos(query: string): Promise<StoryPhoto[]> {
+export async function searchPhotos(query: string, opts: { reviewer?: boolean } = {}): Promise<StoryPhoto[]> {
   if (process.env.PEXELS_API_KEY) return pexels(query);
   const found = await openverse(query).catch(() => []);
-  return found.length ? found : commons(query);
+  // Commons matches on file names and can return news photos, so only a person choosing from the list gets it.
+  return found.length || !opts.reviewer ? found : commons(query);
 }
 
 interface PexelsPhoto { url: string; photographer: string; src: { large: string } }

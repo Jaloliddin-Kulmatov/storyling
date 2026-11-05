@@ -79,10 +79,15 @@ async function pickCover(s: PublishedStory) {
   return photos[Math.floor(Math.random() * Math.min(photos.length, 5))];
 }
 
-/** Give photos to stories that have none. Stops at `until` (a timestamp) to stay inside the cron's time limit. */
+/**
+ * Give photos to waiting stories that have none, so a reviewer sees each one before learners do.
+ * Published stories are left alone. Stops at `until` (a timestamp) to stay inside the cron's time limit.
+ */
 export async function fillCovers(until: number) {
   const sql = await db();
-  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status <> 'rejected' AND story->'cover' IS NULL ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
+  // One-off: take down a wrongly matched photo.
+  await sql`UPDATE daily_stories SET story = story - 'cover' WHERE story->'cover'->>'url' LIKE '%WTC-Fireman%'`;
+  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status = 'pending' AND story->'cover' IS NULL ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
   let filled = 0;
   for (const r of rows) {
     if (Date.now() > until) break;

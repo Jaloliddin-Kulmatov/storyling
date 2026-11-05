@@ -37,7 +37,7 @@ export const PUT = accountRoute(async (user, req) => {
   const [row] = (await sql`SELECT story FROM daily_stories WHERE id = ${b.data.id}`) as { story: PublishedStory }[];
   if (!row) throw new HttpError("That story is gone.", 404);
   const query = b.data.query || (await photoQuery(row.story));
-  return { query, photos: await searchPhotos(query).catch(() => []) };
+  return { query, photos: await searchPhotos(query, { reviewer: true }).catch(() => []) };
 });
 
 const Write = z.object({ lang: z.string(), level: z.enum(LEVELS as [string, ...string[]]), topic: z.string().refine((t) => t in TOPICS) });
