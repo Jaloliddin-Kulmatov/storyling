@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { today, useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
 import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
-import { Cover, FitBadge, Icon, levelTone } from "@/components/ui";
+import { Cover, Icon, levelTone } from "@/components/ui";
 
 /**
  * Home: a reading feed sorted like a news app. Level tabs across the top ("For you" first),
@@ -177,14 +177,14 @@ function Featured({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCode
             {!!views && <span className="tag">{compact(views)} {views === 1 ? "read" : "reads"}</span>}
             {r.read && <span className="tag">Read</span>}
           </span>
-          <span className="t" lang={lang}>{s.title}</span>
-          {s.titleEnglish && <span className="sub">{s.titleEnglish}</span>}
+          <span className="t">{s.titleEnglish || s.title}</span>
+          {s.titleEnglish && <span className="sub" lang={lang}>{s.title}</span>}
         </span>
       </Cover>
       <span className="hb">
         <span className="snippet" lang={lang}>{s.sentences.slice(0, 2).map((x) => x.tokens.map((t) => t.surface).join(" ")).join(" ").replace(/ ([.,!?:;。、！？])/g, "$1")}</span>
         <span className="spread">
-          <span className="row"><FitBadge coverage={r.coverage} /><span className="muted small">{r.coverage.newWords.length} new words</span></span>
+          <span className="muted small">{r.coverage.newWords.length} new words</span>
           <span className="row"><SaveButton saved={saved} onSave={onSave} /><span className="btn sm primary">Read now</span></span>
         </span>
       </span>
@@ -203,14 +203,13 @@ function StoryTile({ r, lang, saved, onSave, views }: { r: Ranked; lang: LangCod
         <span className="sc-topic">{TOPIC_LABEL[topic] ?? topic}{views ? ` · ${compact(views)} ${views === 1 ? "read" : "reads"}` : ""}</span>
       </Cover>
       <span className="sc-body">
-        <span className="t" lang={lang}>{s.title}</span>
-        {s.titleEnglish && <span className="muted small">{s.titleEnglish}</span>}
+        <span className="t">{s.titleEnglish || s.title}</span>
+        {s.titleEnglish && <span className="muted small" lang={lang}>{s.title}</span>}
         <span className="sc-foot">
           <span className={`lvl ${levelTone(s.level)}`}>{s.level}</span>
           <span className="muted small">{s.date}</span>
           <SaveButton saved={saved} onSave={onSave} />
         </span>
-        <FitBadge coverage={r.coverage} short />
       </span>
     </Link>
   );

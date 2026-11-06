@@ -65,7 +65,7 @@ export function Landing() {
           <p className="muted small enter" style={{ margin: "16px 0 0", ["--d" as string]: ".38s" }}>{t("land.note")}</p>
         </div>
         <div className="demo enter-side" aria-label="Example of the reader">
-          <div className="spread small muted" style={{ marginTop: 10 }}><span>{d.label}</span><span className="pill fit-just_right">{d.fit}</span></div>
+          <div className="spread small muted" style={{ marginTop: 10 }}><span>{d.label}</span></div>
           <p lang={demo} className="hl" style={{ fontFamily: "var(--f-read)", fontSize: 24, lineHeight: 2.05, margin: "14px 0 0" }}>
             {d.before}<span className="w learning">{d.learning}</span>{d.mid}<span className="w new">{d.fresh}</span>{d.after}
           </p>

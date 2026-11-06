@@ -1,6 +1,6 @@
 "use client";
 
-import { FIT_LABEL, type Coverage } from "@storyling/core";
+import type { Coverage } from "@storyling/core";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
 import { coverOf } from "@storyling/content";
@@ -101,10 +101,6 @@ export function Logo({ size = 34 }: { size?: number }) {
   );
 }
 
-export function FitBadge({ coverage, short }: { coverage: Coverage; short?: boolean }) {
-  return <span className={`pill fit-${coverage.fit}`}>{short ? "You know" : `${FIT_LABEL[coverage.fit]} · you know`} {coverage.percent}%</span>;
-}
-
 export function CoverageBar({ coverage }: { coverage: Coverage }) {
   return (
     <span className="covbar" aria-hidden="true">
@@ -119,13 +115,10 @@ export function StoryCard({ story, coverage, read }: { story: AnyStory; coverage
     <Link href={`/${story.lang}/read/${story.id}`} className="story-card">
       <Cover story={story}><span className={`lvl on-img ${levelTone(story.level)}`}>{story.level}</span></Cover>
       <span className="body">
-        <span className="t" lang={story.lang}>{story.title}</span>
-        <span className="muted small">{story.titleEnglish || TOPIC_LABEL[topic]}</span>
+        <span className="t">{story.titleEnglish || story.title}</span>
+        <span className="muted small" lang={story.lang}>{story.titleEnglish ? story.title : TOPIC_LABEL[topic]}</span>
         <CoverageBar coverage={coverage} />
-        <span className="row small muted" style={{ justifyContent: "space-between", marginTop: 4 }}>
-          <span>{story.level} · {story.minutes} min{read ? " · Read" : ""}</span>
-          <FitBadge coverage={coverage} />
-        </span>
+        <span className="small muted" style={{ marginTop: 4 }}>{story.level} · {story.minutes} min{read ? " · Read" : ""}</span>
       </span>
     </Link>
   );
@@ -137,10 +130,9 @@ export function StoryRow({ story, coverage, read }: { story: AnyStory; coverage:
     <Link href={`/${story.lang}/read/${story.id}`} className="row-card">
       <Cover story={story} />
       <span style={{ minWidth: 0, display: "grid", gap: 2 }}>
-        <span className="t" lang={story.lang}>{story.title}</span>
-        <span className="muted small">{story.titleEnglish || TOPIC_LABEL[topic]} · {story.level} · {story.minutes} min{read ? " · Read" : ""}</span>
+        <span className="t">{story.titleEnglish || story.title}</span>
+        <span className="muted small">{story.titleEnglish ? story.title : TOPIC_LABEL[topic]} · {story.level} · {story.minutes} min{read ? " · Read" : ""}</span>
       </span>
-      <FitBadge coverage={coverage} />
     </Link>
   );
 }

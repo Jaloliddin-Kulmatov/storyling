@@ -809,8 +809,7 @@ p.adm-warn { padding-left: 12px; }
 .sc-min { top: 8px; right: 8px; }
 .sc-topic { left: 8px; bottom: 8px; }
 .sc-body { display: grid; gap: 6px; padding: 12px 14px 14px; align-content: start; }
-.sc-body > .pill { justify-self: start; white-space: normal; }
-.sc .t { font-family: var(--f-read); font-size: 19px; line-height: 1.25; }
+.sc .t { font-size: 17px; font-weight: 700; line-height: 1.3; }
 .sc.read .t { color: var(--muted); }
 .sc-foot { display: flex; align-items: center; gap: 8px; margin-top: auto; }
 .sc-foot .save { margin-left: auto; }
