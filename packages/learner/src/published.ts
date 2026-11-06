@@ -21,7 +21,7 @@ export interface PublishedStory extends CatalogStory {
 
 const NONE: PublishedStory[] = [];
 const byLang = new Map<LangCode, PublishedStory[]>();
-const started = new Set<LangCode>();
+const checkedAt = new Map<LangCode, number>();
 const listeners = new Set<() => void>();
 // The website calls its own API; the phone app sets its server address with configurePublished.
 let base: string | null = typeof document === "undefined" ? null : "";
@@ -41,16 +41,36 @@ function add(lang: LangCode, stories: PublishedStory[]) {
 async function fetchStories(query: string): Promise<PublishedStory[]> {
   if (base === null) return NONE;
   const res = await fetch(`${base}/api/stories?${query}`);
-  if (!res.ok) return NONE;
+  if (!res.ok) throw new Error(`Stories ${res.status}`);
   return ((await res.json()) as { stories?: PublishedStory[] }).stories ?? NONE;
 }
 
-/** The newest approved stories, fetched once per visit. */
+/** Replace the list with what's published now, at most every 30 seconds, so unpublished stories go too. */
+function refresh(lang: LangCode) {
+  if (base === null || Date.now() - (checkedAt.get(lang) ?? 0) < 30_000) return;
+  checkedAt.set(lang, Date.now());
+  fetchStories(`lang=${lang}`)
+    .then((s) => {
+      byLang.set(lang, s);
+      listeners.forEach((l) => l());
+    })
+    .catch(() => checkedAt.delete(lang));
+}
+
+/** The newest approved stories: checked on opening a page and on coming back to the tab. */
 export function usePublished(lang: LangCode): PublishedStory[] {
   useEffect(() => {
-    if (started.has(lang) || base === null) return;
-    started.add(lang);
-    fetchStories(`lang=${lang}`).then((s) => add(lang, s)).catch(() => started.delete(lang));
+    refresh(lang);
+    if (typeof document === "undefined") return;
+    const again = () => {
+      if (document.visibilityState === "visible") refresh(lang);
+    };
+    document.addEventListener("visibilitychange", again);
+    window.addEventListener("focus", again);
+    return () => {
+      document.removeEventListener("visibilitychange", again);
+      window.removeEventListener("focus", again);
+    };
   }, [lang]);
   return useSyncExternalStore(subscribe, () => byLang.get(lang) ?? NONE, () => NONE);
 }

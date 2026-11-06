@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db, dbEnabled } from "@/server/db";
 
 const LATEST = 120;
-const HEADERS = { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300", "Access-Control-Allow-Origin": "*" };
+const HEADERS = { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=20", "Access-Control-Allow-Origin": "*" };
 
 /** GET ?lang=de: the newest approved stories. GET ?lang=de&id=…: one approved story. Nothing else leaves the review queue. */
 export async function GET(req: Request) {
