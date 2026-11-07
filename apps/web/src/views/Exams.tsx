@@ -2,6 +2,7 @@
 
 import { grammarFor, language, lookup } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { playSentence, stopAudio } from "@/lib/audio";
 import { useLearner } from "@/lib/learner";
@@ -65,9 +66,18 @@ export function Exams({ lang }: { lang: LangCode }) {
   if (!level)
     return (
       <>
-        <div className="page-head"><div><div className="eyebrow">{meta.name} · {fmt.minutes} minutes</div><h1>{fmt.name}</h1></div></div>
-        <p className="muted" style={{ marginTop: -8 }}>{fmt.note}</p>
-        <p className="muted" style={{ marginTop: -8 }}>Exam-style practice in the structure of the big language exams: Listening, Reading, Vocabulary and Grammar. Pass mark {PASS}%. These papers are written by Storyling from its own texts, they are not official Goethe, Telc or other exam papers.</p>
+        <div className="page-head"><div><div className="eyebrow">{meta.name}</div><h1>Tests</h1></div></div>
+        <h2 style={{ fontSize: 20 }}>Level test</h2>
+        <div className="game-grid" style={{ marginBottom: 22 }}>
+          <Link className="game-card t1" href={`/${lang}/exams/level-test`}>
+            <span className="gi">{Icon.progress}</span>
+            <span className="t">Level test</span>
+            <span className="muted small">10 quick questions on the words of one level. Find out where you are. About 3 minutes.</span>
+          </Link>
+        </div>
+        <h2 style={{ fontSize: 20 }}>Mock exams</h2>
+        <p className="muted"><b>{fmt.name}</b> · {fmt.minutes} minutes. {fmt.note}</p>
+        <p className="muted">Exam-style practice in the structure of the big language exams: Listening, Reading, Vocabulary and Grammar. Pass mark {PASS}%. These papers are written by Storyling from its own texts, they are not official Goethe, Telc or other exam papers.</p>
         <div className="game-grid">
           {meta.levels.map((l) => {
             const best = learner.games[`exam-${l}`];

@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       body: JSON.stringify({
         from,
         to: u.email,
-        subject: "Your 10 minutes of German 📚",
+        subject: "Your 10 minutes of reading 📚",
         text: `Hi ${u.name},\n\nYou haven't read today yet. One short story keeps your streak going:\n${site}/de\n\nTurn these emails off on the Me page: ${site}/de/progress`,
       }),
     });

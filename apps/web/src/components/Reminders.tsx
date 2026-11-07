@@ -12,8 +12,8 @@ function calendarFile(time: string, url: string) {
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Storyling//Reminder//EN", "BEGIN:VEVENT",
     `UID:storyling-daily-${Date.now()}@storyling`, `DTSTAMP:${day}T000000Z`,
     `DTSTART:${day}T${h}${m}00`, `DURATION:PT10M`, "RRULE:FREQ=DAILY",
-    "SUMMARY:📚 10 minutes of German (Storyling)", `DESCRIPTION:Read one story to keep your streak: ${url}`, `URL:${url}`,
-    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Time for German", "TRIGGER:PT0M", "END:VALARM",
+    "SUMMARY:📚 10 minutes of reading (Storyling)", `DESCRIPTION:Read one story to keep your streak: ${url}`, `URL:${url}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Time to read", "TRIGGER:PT0M", "END:VALARM",
     "END:VEVENT", "END:VCALENDAR",
   ].join("\r\n");
 }

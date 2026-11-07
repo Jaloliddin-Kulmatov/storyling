@@ -4,7 +4,7 @@ import { Pricing } from "@/views/Pricing";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Storyling is free to start. Pro adds unlimited stories, AI-graded Goethe-style writing and speaking, and the AI tutor.",
+  description: "Storyling is free to start. Pro adds unlimited stories, AI-graded writing and speaking, and the AI tutor.",
 };
 
 export default function Page() {

@@ -45,7 +45,7 @@ export function Pricing() {
     <div className="pub">
       <header className="pub-head"><Link href="/" className="pub-brand">📖 Storyling</Link><Link className="btn sm" href="/de">Back to reading</Link></header>
       <main className="pub-main">
-        <h1 style={{ textAlign: "center" }}>Learn German your way</h1>
+        <h1 style={{ textAlign: "center" }}>Learn a language your way</h1>
         <p className="muted" style={{ textAlign: "center" }}>Start free. Go Pro when you want unlimited reading and exam training.</p>
         {done && <p className="paid-ok">🎉 Welcome to Pro! It can take a minute to switch on.</p>}
         <div className="seg" role="group" aria-label="Billing period" style={{ margin: "16px auto", width: "fit-content" }}>

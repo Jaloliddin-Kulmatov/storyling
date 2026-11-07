@@ -227,19 +227,24 @@ export function writeStory(lang: string, level: string, topic: string, words: st
 // ── 4. Translate subtitle lines ──
 const LEVEL_GUIDE: Record<string, string> = {
   A1: "8–10 very short sentences in the present tense, using only the most common everyday words.",
-  A2: "8–12 short sentences; the present and simple past or Perfekt, with common words and simple linking words.",
+  A2: "8–12 short sentences; the present and simple past, with common words and simple linking words.",
   B1: "8–10 sentences; clear connected text with subordinate clauses and everyday vocabulary.",
   B2: "8–10 sentences; varied sentence structure, some abstract vocabulary and opinions.",
   C1: "7–9 sentences; rich, precise language with complex sentences and idiomatic expressions.",
+};
+
+/** Levels that aren't named after CEFR, for the length guide. */
+const CEFR: Record<string, string> = {
+  "HSK 1": "A1", "HSK 2": "A2", "HSK 3": "B1", N5: "A1", N4: "A2", N3: "B1", "Level 1": "A1", "Level 2": "A2", "Level 3": "B1",
 };
 
 /** One story for the daily queue. An admin reads it before any learner sees it. */
 export function writeDailyStory(lang: string, level: string, topic: string, avoid: string[]) {
   return parsePrepared(
     `You write short, engaging graded-reader stories for language learners, then prepare them for a reader app. ${TOKEN_RULES(lang)}`,
-    `Write an original story in ${languageName(lang)} for a learner at CEFR level ${level}.\n` +
-      `Topic: ${topic}.\n` +
-      `Length and language: ${LEVEL_GUIDE[level] ?? LEVEL_GUIDE.B1}\n` +
+    `Write an original story in ${languageName(lang)} for a learner at level ${level}${CEFR[level] ? ` (about CEFR ${CEFR[level]})` : ""}.\n` +
+      `Topic: ${topic}. Set it in a place where ${languageName(lang)} is spoken.\n` +
+      `Length and language: ${LEVEL_GUIDE[CEFR[level] ?? level] ?? LEVEL_GUIDE.B1}\n` +
       `Give it a clear beginning and a small surprise or warm ending. The grammar and spelling must be flawless standard ${languageName(lang)}. ` +
       `Do not use quotation marks or dashes. Characters are fictional. Keep it suitable for all ages.\n` +
       (avoid.length ? `Tell a different story from these recent titles: ${avoid.join("; ")}.` : ""),

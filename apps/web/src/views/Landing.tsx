@@ -1,13 +1,13 @@
 "use client";
 
-import { language, storiesFor } from "@storyling/content";
+import { language, languages, storiesFor } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { useSettings } from "@/lib/learner";
 import { UI_LANGS, useT } from "@/lib/i18n";
 import { ContinueButton } from "@/views/ContinueButton";
 import { Logo } from "@/components/ui";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 
 /** Cards fade up as they scroll into view. */
 function useReveal() {
@@ -20,8 +20,8 @@ function useReveal() {
   }, []);
 }
 
-/** Only German is shown to visitors for now; the other languages stay in the code for later. */
-export const FEATURED: LangCode[] = ["de"];
+/** Every language is open to visitors. */
+export const FEATURED: LangCode[] = languages.map((l) => l.code);
 
 const DEMOS: Record<"de" | "ko", { label: string; fit: string; before: string; learning: string; mid: string; fresh: string; after: string; word: string; pos: string; meaning: string }> = {
   de: { label: "Deutsch · Die große Prüfung · A2", fit: "Just right · 96%", before: "Morgen hat Ben eine wichtige ", learning: "Prüfung", mid: ". Er lernt den ganzen Nachmittag in der ", fresh: "Bibliothek", after: ".", word: "die Bibliothek", pos: "noun", meaning: "library · met 2 of about 10 times" },
@@ -103,8 +103,7 @@ export function Landing() {
             const l = language(c);
             return (
               <Link key={c} href={`/start?lang=${c}`} className="lang-opt featured">
-                <span className="pill fit-just_right" style={{ justifySelf: "start" }}>{t("land.featured")}</span>
-                <span className="nat" lang={c}>{l.native}</span>
+                                <span className="nat" lang={c}>{l.native}</span>
                 <b>{l.name}</b>
                 <span className="muted small">{storiesFor(c).length} {t("land.stories")} · {l.levels[0]}–{l.levels[l.levels.length - 1]}</span>
               </Link>
@@ -113,7 +112,7 @@ export function Landing() {
         </div>
       </section>
 
-      <footer className="foot">Storyling · <Link href="/learn/de">German stories A1–C1</Link> · <Link href="/learn/de/level/a1">A1 stories</Link> · <Link href="/learn/de/level/b1">B1 stories</Link> · <Link href="/credits">Credits</Link></footer>
+      <footer className="foot">Storyling · {FEATURED.map((c) => <Fragment key={c}><Link href={`/learn/${c}`}>{language(c).name} stories</Link> · </Fragment>)}<Link href="/credits">Credits</Link></footer>
     </div>
   );
 }

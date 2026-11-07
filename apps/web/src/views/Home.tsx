@@ -140,9 +140,9 @@ export function Home({ lang }: { lang: LangCode }) {
               <button key={x} className="chip" aria-pressed={topic === x} onClick={() => setTopic(x)}>{x === "all" ? "All topics" : TOPIC_LABEL[x] ?? x}</button>
             ))}
           </div>
-          <Link className="promo promo-a" href={`/${lang}/watch`}><b>🎬 Watch and learn</b><span>German videos with subtitles you can tap.</span></Link>
+          <Link className="promo promo-a" href={`/${lang}/watch`}><b>🎬 Watch and learn</b><span>{language(lang).name} videos with subtitles you can tap.</span></Link>
           <Link className="promo promo-b" href={`/${lang}/practice`}><b>🎮 Practice games</b><span>Bingo, picture match, fill the gaps and more.</span></Link>
-          <Link className="promo promo-c" href={`/${lang}/exams`}><b>🎓 Mock exams</b><span>Get ready for Goethe and telc, A1 to C1.</span></Link>
+          <Link className="promo promo-c" href={`/${lang}/exams`}><b>🎓 Mock exams</b><span>{lang === "de" ? "Get ready for Goethe and telc, A1 to C1." : "Timed practice papers for your level."}</span></Link>
         </aside>
       </div>
     </>

@@ -1,8 +1,9 @@
+import type { LangCode } from "@storyling/core";
 import { NextResponse } from "next/server";
 import { aiEnabled } from "@/server/ai";
 import { db, dbEnabled } from "@/server/db";
 import { mailEnabled, sendMail } from "@/server/mail";
-import { adminEmails, DAILY_LANGS, dailyPlan, fillCovers, MAX_WAITING, queueStory, recentTitles } from "@/server/stories";
+import { adminEmails, dailyPlan, fillCovers, levelSlug, MAX_WAITING, queueStory, recentTitles } from "@/server/stories";
 
 export const maxDuration = 60;
 
@@ -19,24 +20,20 @@ export async function GET(req: Request) {
   const sql = await db();
   const written: string[] = [];
   const errors: string[] = [];
-  for (const lang of DAILY_LANGS) {
+  const avoid: Partial<Record<LangCode, string[]>> = {};
+  for (const { lang, level, topic } of dailyPlan(day)) {
+    // The function stops at 60 seconds; what's left waits for the retry run.
+    if (Date.now() - started > 40_000) break;
+    const id = `${lang}-daily-${day}-${levelSlug(level)}`;
     const [row] = (await sql`SELECT COUNT(*)::int AS n FROM daily_stories WHERE lang = ${lang} AND status = 'pending'`) as { n: number }[];
-    let room = MAX_WAITING - row!.n;
-    const avoid = await recentTitles(lang);
-    for (const { level, topic } of dailyPlan(day)) {
-      const id = `${lang}-daily-${day}-${level.toLowerCase()}`;
-      if (room <= 0) break;
-      const seen = await sql`SELECT 1 FROM daily_stories WHERE id = ${id}`;
-      if (seen.length) continue;
-      try {
-        if (await queueStory(id, lang, level, topic, avoid)) {
-          written.push(id);
-          room--;
-        }
-      } catch (e) {
-        console.error(e);
-        errors.push(`${id}: ${e instanceof Error ? e.message : "failed"}`);
-      }
+    if (row!.n >= MAX_WAITING) continue;
+    const seen = await sql`SELECT 1 FROM daily_stories WHERE id = ${id}`;
+    if (seen.length) continue;
+    try {
+      if (await queueStory(id, lang, level, topic, (avoid[lang] ??= await recentTitles(lang)))) written.push(id);
+    } catch (e) {
+      console.error(e);
+      errors.push(`${id}: ${e instanceof Error ? e.message : "failed"}`);
     }
   }
   if (written.length && mailEnabled()) {

@@ -1,5 +1,5 @@
 import "server-only";
-import { lookup, sentenceText } from "@storyling/content";
+import { language, languages, lookup, sentenceText } from "@storyling/content";
 import type { LangCode, Sentence, Token } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
 import { photoKeywords, prepareText, writeDailyStory, type PreparedText } from "./ai";
@@ -7,7 +7,7 @@ import { db } from "./db";
 import { searchPhotos } from "./photos";
 
 /** Languages learners can see, so the only ones worth writing for. */
-export const DAILY_LANGS: LangCode[] = ["de"];
+export const DAILY_LANGS: LangCode[] = languages.map((l) => l.code);
 /** Stop writing when this many stories wait for review, so a quiet week doesn't spend AI credits on a pile nobody reads. */
 export const MAX_WAITING = 21;
 
@@ -15,9 +15,9 @@ const EASY = ["A1", "A2"];
 const HARD = ["B1", "B2", "C1"];
 export const TOPICS: Record<string, string> = {
   daily: "everyday life", food: "food and cooking", work: "work and colleagues", weather: "weather and the seasons",
-  animals: "animals", travel: "a journey", city: "life in a German city", home: "home and neighbours",
-  history: "a moment from German history", people: "family and friendship", nature: "nature and the outdoors",
-  science: "a discovery or invention", culture: "German customs and culture",
+  animals: "animals", travel: "a journey", city: "life in a big city", home: "home and neighbours",
+  history: "a moment from history", people: "family and friendship", nature: "nature and the outdoors",
+  science: "a discovery or invention", culture: "local customs and culture",
 };
 
 const PUNCT = /^[\p{P}\p{S}]+$/u;
@@ -25,14 +25,24 @@ const admins = () => (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.tr
 export const adminEmails = admins;
 export const isAdminEmail = (email: string) => admins().includes(email.toLowerCase());
 
-/** Three stories a day, from easier to harder, moving through the levels and topics. */
-export function dailyPlan(day: string): { level: string; topic: string }[] {
+/** Short form of a level for story ids: "HSK 1" → "hsk1". */
+export const levelSlug = (level: string) => level.toLowerCase().replace(/\s+/g, "");
+
+/** Three German stories a day, from easier to harder, plus one each for the next two other languages in turn. */
+export function dailyPlan(day: string): { lang: LangCode; level: string; topic: string }[] {
   const n = Math.floor(Date.parse(day) / 864e5);
   const topics = Object.keys(TOPICS);
+  const others = DAILY_LANGS.filter((l) => l !== "de");
+  const rotating = [0, 1].map((i) => {
+    const lang = others[(n * 2 + i) % others.length]!;
+    const levels = language(lang).levels;
+    return { lang, level: levels[Math.floor(n / others.length + i) % levels.length]!, topic: topics[(n * 5 + i * 3) % topics.length]! };
+  });
   return [
-    { level: EASY[n % EASY.length]!, topic: topics[(n * 2) % topics.length]! },
-    { level: EASY[(n + 1) % EASY.length]!, topic: topics[(n * 3 + 5) % topics.length]! },
-    { level: HARD[n % HARD.length]!, topic: topics[(n * 2 + 1) % topics.length]! },
+    { lang: "de", level: EASY[n % EASY.length]!, topic: topics[(n * 2) % topics.length]! },
+    { lang: "de", level: EASY[(n + 1) % EASY.length]!, topic: topics[(n * 3 + 5) % topics.length]! },
+    { lang: "de", level: HARD[n % HARD.length]!, topic: topics[(n * 2 + 1) % topics.length]! },
+    ...rotating,
   ];
 }
 

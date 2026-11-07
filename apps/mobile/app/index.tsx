@@ -25,7 +25,7 @@ export default function PickLanguage() {
         <Text style={[s.lead, { color: t.muted }]}>Tap any word for its meaning. Listen, save words, and practice. Explanations are in English.</Text>
         <Text style={[s.label, { color: t.muted }]}>CHOOSE A LANGUAGE</Text>
         <View style={s.grid}>
-          {languages.filter((l) => l.code === "de").map((l) => (
+          {languages.map((l) => (
                           <Pressable key={l.code} onPress={() => router.push(`/start/${l.code}`)} style={[s.card, { backgroundColor: t.surface, borderColor: t.line }]} accessibilityLabel={`${l.name}, ${storiesFor(l.code).length} stories`}>
                 <Text style={[s.native, { color: t.ink }]}>{l.native}</Text>
                 <Text style={[s.name, { color: t.muted }]}>{l.name} · {storiesFor(l.code).length} stories</Text>

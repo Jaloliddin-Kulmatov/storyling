@@ -1,3 +1,4 @@
+import { language, languages } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
 import { z } from "zod";
@@ -15,17 +16,17 @@ function admin(user: Account | null) {
   return user;
 }
 
-const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
-
 /** GET ?status=pending|published|rejected: stories in that state, plus how many wait for review. */
 export const GET = accountRoute(async (user, req) => {
   admin(user);
-  const status = new URL(req.url).searchParams.get("status") ?? "pending";
+  const params = new URL(req.url).searchParams;
+  const status = params.get("status") ?? "pending";
+  const lang = languages.find((l) => l.code === params.get("lang")) ?? language("de");
   if (!["pending", "published", "rejected"].includes(status)) throw new HttpError("Unknown status.");
   const sql = await db();
   const rows = await sql`SELECT id, status, story, warnings, created_at FROM daily_stories WHERE status = ${status} ORDER BY created_at DESC LIMIT 60`;
   const [count] = (await sql`SELECT COUNT(*)::int AS n FROM daily_stories WHERE status = 'pending'`) as { n: number }[];
-  return { stories: rows, waiting: count!.n, levels: LEVELS, topics: TOPICS };
+  return { stories: rows, waiting: count!.n, levels: lang.levels, topics: TOPICS, languages: languages.map((l) => ({ code: l.code, name: l.name })) };
 });
 
 /** PUT { id, query? }: photo choices for a story, from the reviewer's words or the story itself. */
@@ -40,7 +41,7 @@ export const PUT = accountRoute(async (user, req) => {
   return { query, photos: await searchPhotos(query, { reviewer: true }).catch(() => []) };
 });
 
-const Write = z.object({ lang: z.string(), level: z.enum(LEVELS as [string, ...string[]]), topic: z.string().refine((t) => t in TOPICS) });
+const Write = z.object({ lang: z.string(), level: z.string(), topic: z.string().refine((t) => t in TOPICS) });
 
 /** POST { lang, level, topic }: write one more story for the queue now. */
 export const POST = accountRoute(async (user, req) => {
@@ -48,7 +49,7 @@ export const POST = accountRoute(async (user, req) => {
   if (!aiEnabled()) throw new HttpError("AI is turned off on this server.", 503);
   const b = Write.safeParse(await req.json().catch(() => null));
   const lang = b.data?.lang as LangCode;
-  if (!b.success || !DAILY_LANGS.includes(lang)) throw new HttpError("Choose a level and topic.");
+  if (!b.success || !DAILY_LANGS.includes(lang) || !language(lang).levels.includes(b.data.level)) throw new HttpError("Choose a level and topic.");
   const id = `${lang}-daily-${new Date().toISOString().slice(0, 10)}-${Date.now().toString(36)}`;
   try {
     await queueStory(id, lang, b.data.level, b.data.topic, await recentTitles(lang));
@@ -66,7 +67,7 @@ const Review = z.object({
   edit: z.object({
     title: z.string().trim().min(1).max(120),
     titleEnglish: z.string().trim().max(120),
-    level: z.enum(LEVELS as [string, ...string[]]),
+    level: z.string().max(20),
     topic: z.string().refine((t) => t in TOPICS),
     sentences: z.array(z.object({ from: z.number().int(), text: z.string().max(600), tr: z.string().max(600) })).min(1).max(60),
     meanings: z.record(z.string().max(80), z.string().max(200)),

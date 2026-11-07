@@ -15,7 +15,7 @@ import { highlight, shuffle, useWordInfo } from "@/lib/words";
 import { Icon } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 
-type Mode = "review" | "match" | "order" | "listen" | "dictation" | "test" | "picture" | "bingo" | "gaps";
+type Mode = "review" | "match" | "order" | "listen" | "dictation" | "picture" | "bingo" | "gaps";
 
 interface PoolWord {
   lemma: string;
@@ -45,16 +45,16 @@ const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
     { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker", tone: "t2", mins: "2 min" },
     { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker", tone: "t2", mins: "4 min" },
   ] },
-  { title: "Level test", key: "prac.level", cards: [
-    { mode: "test", title: "Level test", text: "10 quick questions on the words of one level. Find out where you are.", icon: "progress", tone: "t1", mins: "3 min" },
-  ] },
-  { title: "Mock exams", key: "prac.exams", cards: [
-    { href: "/exams", title: "Mock exams", text: "Goethe-style papers: Hören, Lesen, Wortschatz, Sprachbausteine, plus Schreiben and Sprechen graded by AI.", icon: "progress", tone: "t3", mins: "20 min" },
-  ] },
   { title: "Grammar", key: "prac.grammar", cards: [
     { href: "/grammar", title: "Grammar", text: "Short rules with exercises, by level.", icon: "library", tone: "t3", mins: "5 min" },
   ] },
 ];
+
+/** The level test lives on the Tests tab with the mock exams. */
+export function LevelTestPage({ lang }: { lang: LangCode }) {
+  const router = useRouter();
+  return <Shell lang={lang} source={false} title="Level test" onBack={() => router.push(`/${lang}/exams`)}><LevelTest lang={lang} /></Shell>;
+}
 
 export function Practice({ lang }: { lang: LangCode }) {
   const params = useSearchParams();
@@ -74,7 +74,6 @@ export function Practice({ lang }: { lang: LangCode }) {
   if (mode === "order") return <Shell lang={lang} title="Build the sentence" onBack={back}><Order lang={lang} /></Shell>;
   if (mode === "listen") return <Shell lang={lang} title="Listening" onBack={back}><Listen lang={lang} /></Shell>;
   if (mode === "dictation") return <Shell lang={lang} title="Dictation" onBack={back}><DictationGame lang={lang} onBack={back} /></Shell>;
-  if (mode === "test") return <Shell lang={lang} source={false} title="Level test" onBack={back}><LevelTest lang={lang} /></Shell>;
 
   const anyGame = Object.values(learner.games).reduce((n, g) => n + g.played, 0);
   return (

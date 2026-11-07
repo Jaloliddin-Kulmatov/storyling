@@ -19,7 +19,7 @@ const ABOUT: Record<string, string> = {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { lang, level } = await params;
   const name = language(lang as LangCode).name;
-  const L = level.toUpperCase();
+  const L = language(lang as LangCode).levels.find((x) => x.toLowerCase() === decodeURIComponent(level).toLowerCase()) ?? "";
   return {
     title: `${L} ${name} stories with audio and translation`,
     description: `Free ${L} ${name} reading practice: short stories ${ABOUT[L] ?? ""}, with audio, English translation and vocabulary.`,
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function Page({ params }: { params: Params }) {
   const { lang: l, level } = await params;
   const lang = l as LangCode;
-  const L = level.toUpperCase();
+  const L = language(lang).levels.find((x) => x.toLowerCase() === decodeURIComponent(level).toLowerCase()) ?? "";
   const list = PUBLIC_LANGS.includes(lang) ? publicStories(lang).filter((s) => s.level === L) : [];
   if (!list.length) notFound();
   const meta = language(lang);

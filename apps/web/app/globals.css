@@ -89,7 +89,7 @@ img { max-width: 100%; }
   .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: sticky; top: 0; z-index: 20;
     background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px; border-bottom: 1px solid var(--line); }
   .topbar .lang-pill { padding: 6px 10px; }
-  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset: auto 0 0 0; z-index: 25; background: var(--surface);
+  .tabbar { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; inset: auto 0 0 0; z-index: 25; background: var(--surface);
     border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
   .tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: none; min-height: 44px; }
   .tabbar a[aria-current="page"] { color: var(--primary); font-weight: 700; }

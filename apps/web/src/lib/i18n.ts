@@ -18,16 +18,17 @@ type Dict = Record<string, string>;
 const en: Dict = {
   "nav.home": "Home",
   "nav.notebook": "Notebook",
+  "nav.tests": "Tests",
   "nav.watch": "Watch",
   "nav.practice": "Practice",
   "nav.dictionary": "Dictionary",
   "nav.me": "Me",
   "nav.settings": "Settings",
-  "land.eyebrow": "Learn German through stories",
+  "land.eyebrow": "Learn languages through stories",
   "land.title1": "Read stories you can",
   "land.title2": "almost",
   "land.title3": "understand.",
-  "land.lead": "Original stories from A1 to C1. Tap any word for its meaning, listen with natural audio, and practice with dictation, flashcards and exam-style tests.",
+  "land.lead": "Original stories for every level. Tap any word for its meaning, listen with natural audio, and practice with dictation, flashcards and exam-style tests.",
   "land.start": "Start reading free",
   "land.how": "How it works",
   "land.note": "No account needed · works on phone and desktop",
@@ -51,7 +52,7 @@ const en: Dict = {
   "land.f5t": "Speak and write",
   "land.f5": "Read aloud and see which words were understood. Write about the story and get corrections.",
   "land.f6t": "Exam practice",
-  "land.f6": "Goethe-style timed papers, grammar lessons and level tests.",
+  "land.f6": "Timed practice papers, grammar lessons and level tests.",
   "land.ui": "Interface language",
   "home.title": "Read today",
   "home.forYou": "For you",
@@ -93,9 +94,9 @@ const en: Dict = {
 };
 
 const uz: Dict = {
-  "nav.home": "Bosh sahifa", "nav.notebook": "Daftar", "nav.watch": "Video", "nav.practice": "Mashq", "nav.dictionary": "Lugʻat", "nav.me": "Men", "nav.settings": "Sozlamalar",
-  "land.eyebrow": "Nemis tilini hikoyalar orqali oʻrganing", "land.title1": "Deyarli", "land.title2": "tushunadigan", "land.title3": "hikoyalaringizni oʻqing.",
-  "land.lead": "A1 dan C1 gacha original hikoyalar. Har bir soʻzni bosib maʼnosini koʻring, tabiiy ovozda tinglang, diktant, kartochkalar va imtihon uslubidagi testlar bilan mashq qiling.",
+  "nav.home": "Bosh sahifa", "nav.notebook": "Daftar", "nav.tests": "Testlar", "nav.watch": "Video", "nav.practice": "Mashq", "nav.dictionary": "Lugʻat", "nav.me": "Men", "nav.settings": "Sozlamalar",
+  "land.eyebrow": "Tillarni hikoyalar orqali oʻrganing", "land.title1": "Deyarli", "land.title2": "tushunadigan", "land.title3": "hikoyalaringizni oʻqing.",
+  "land.lead": "Har bir daraja uchun original hikoyalar. Har bir soʻzni bosib maʼnosini koʻring, tabiiy ovozda tinglang, diktant, kartochkalar va imtihon uslubidagi testlar bilan mashq qiling.",
   "land.start": "Bepul oʻqishni boshlash", "land.how": "Qanday ishlaydi", "land.note": "Roʻyxatdan oʻtish shart emas · telefon va kompyuterda ishlaydi",
   "land.pick": "Darajangizga darhol oʻting", "land.learning": "Oʻrganayotgan tilim", "land.level": "Darajam", "land.go": "Hikoya oʻqish",
   "land.featured": "Asosiy", "land.beta": "Beta", "land.more": "Boshqa tillar (beta)", "land.anyLang": "Istalgan tildan boshlang", "land.stories": "ta hikoya",
@@ -104,7 +105,7 @@ const uz: Dict = {
   "land.f3t": "Tabiiy ovoz", "land.f3": "Har bir hikoya ovozli, joriy gap ajratib koʻrsatiladi. 0.75× tezlikda tinglash mumkin.",
   "land.f4t": "Kunlik reja", "land.f4": "Kuniga bitta hikoya, beshta soʻz va bitta diktant: taxminan 10 daqiqa.",
   "land.f5t": "Gapiring va yozing", "land.f5": "Ovoz chiqarib oʻqing va qaysi soʻzlar tushunilganini koʻring. Hikoya haqida yozing va tuzatishlar oling.",
-  "land.f6t": "Imtihonga tayyorgarlik", "land.f6": "Goethe uslubidagi vaqtli testlar, grammatika darslari va daraja testlari.",
+  "land.f6t": "Imtihonga tayyorgarlik", "land.f6": "Vaqtli testlar, grammatika darslari va daraja testlari.",
   "land.ui": "Interfeys tili",
   "home.title": "Bugun oʻqing", "home.forYou": "Siz uchun", "home.daily": "Kunlik", "home.search": "Hikoya qidirish", "home.addText": "Matn qoʻshish",
   "home.minToday": "daqiqa bugun", "home.streak": "kun ketma-ket", "home.known": "soʻz biladi", "home.toReview": "takrorlash",
@@ -116,9 +117,9 @@ const uz: Dict = {
 };
 
 const ru: Dict = {
-  "nav.home": "Главная", "nav.notebook": "Тетрадь", "nav.watch": "Видео", "nav.practice": "Практика", "nav.dictionary": "Словарь", "nav.me": "Профиль", "nav.settings": "Настройки",
-  "land.eyebrow": "Немецкий через истории", "land.title1": "Читайте истории, которые вы", "land.title2": "почти", "land.title3": "понимаете.",
-  "land.lead": "Оригинальные истории от A1 до C1. Нажмите на любое слово, чтобы увидеть значение, слушайте естественное аудио и тренируйтесь с диктантами, карточками и тестами в формате экзаменов.",
+  "nav.home": "Главная", "nav.notebook": "Тетрадь", "nav.tests": "Тесты", "nav.watch": "Видео", "nav.practice": "Практика", "nav.dictionary": "Словарь", "nav.me": "Профиль", "nav.settings": "Настройки",
+  "land.eyebrow": "Языки через истории", "land.title1": "Читайте истории, которые вы", "land.title2": "почти", "land.title3": "понимаете.",
+  "land.lead": "Оригинальные истории для любого уровня. Нажмите на любое слово, чтобы увидеть значение, слушайте естественное аудио и тренируйтесь с диктантами, карточками и тестами в формате экзаменов.",
   "land.start": "Начать читать бесплатно", "land.how": "Как это работает", "land.note": "Без регистрации · работает на телефоне и компьютере",
   "land.pick": "Сразу к вашему уровню", "land.learning": "Я изучаю", "land.level": "Мой уровень", "land.go": "Читать историю",
   "land.featured": "Основные", "land.beta": "Бета", "land.more": "Другие языки (бета)", "land.anyLang": "Начните с любого языка", "land.stories": "историй",
@@ -127,7 +128,7 @@ const ru: Dict = {
   "land.f3t": "Естественное аудио", "land.f3": "Каждая история озвучена, текущее предложение подсвечено. Можно замедлить до 0.75×.",
   "land.f4t": "План на день", "land.f4": "Одна история, пять слов и один диктант в день: около 10 минут.",
   "land.f5t": "Говорите и пишите", "land.f5": "Читайте вслух и смотрите, какие слова распознаны. Пишите об истории и получайте исправления.",
-  "land.f6t": "Подготовка к экзаменам", "land.f6": "Тесты на время в стиле Goethe, уроки грамматики и тесты уровня.",
+  "land.f6t": "Подготовка к экзаменам", "land.f6": "Тесты на время, уроки грамматики и тесты уровня.",
   "land.ui": "Язык интерфейса",
   "home.title": "Читать сегодня", "home.forYou": "Для вас", "home.daily": "На день", "home.search": "Поиск историй", "home.addText": "Добавить текст",
   "home.minToday": "мин сегодня", "home.streak": "дней подряд", "home.known": "слов знаете", "home.toReview": "повторить",
@@ -139,9 +140,9 @@ const ru: Dict = {
 };
 
 const ko: Dict = {
-  "nav.home": "홈", "nav.notebook": "단어장", "nav.watch": "영상", "nav.practice": "연습", "nav.dictionary": "사전", "nav.me": "내 정보", "nav.settings": "설정",
-  "land.eyebrow": "이야기로 배우는 독일어", "land.title1": "", "land.title2": "거의", "land.title3": "이해할 수 있는 이야기를 읽으세요.",
-  "land.lead": "A1부터 C1까지 직접 쓴 이야기. 단어를 누르면 뜻이 나오고, 자연스러운 음성으로 듣고, 받아쓰기·단어 카드·시험형 문제로 연습해요.",
+  "nav.home": "홈", "nav.notebook": "단어장", "nav.tests": "시험", "nav.watch": "영상", "nav.practice": "연습", "nav.dictionary": "사전", "nav.me": "내 정보", "nav.settings": "설정",
+  "land.eyebrow": "이야기로 배우는 외국어", "land.title1": "", "land.title2": "거의", "land.title3": "이해할 수 있는 이야기를 읽으세요.",
+  "land.lead": "모든 수준을 위해 직접 쓴 이야기. 단어를 누르면 뜻이 나오고, 자연스러운 음성으로 듣고, 받아쓰기·단어 카드·시험형 문제로 연습해요.",
   "land.start": "무료로 읽기 시작", "land.how": "사용 방법", "land.note": "가입 없이 사용 · 휴대폰과 컴퓨터 모두 가능",
   "land.pick": "내 수준으로 바로 가기", "land.learning": "배우는 언어", "land.level": "내 수준", "land.go": "이야기 읽기",
   "land.featured": "추천", "land.beta": "베타", "land.more": "다른 언어 (베타)", "land.anyLang": "어떤 언어로든 시작하세요", "land.stories": "개 이야기",
@@ -150,7 +151,7 @@ const ko: Dict = {
   "land.f3t": "자연스러운 음성", "land.f3": "모든 이야기에 녹음이 있고 읽는 문장이 강조돼요. 0.75배로 느리게 들을 수 있어요.",
   "land.f4t": "오늘의 계획", "land.f4": "하루에 이야기 하나, 단어 다섯 개, 받아쓰기 하나: 약 10분.",
   "land.f5t": "말하기와 쓰기", "land.f5": "소리 내어 읽고 인식된 단어를 확인하세요. 이야기에 대해 쓰고 첨삭을 받아요.",
-  "land.f6t": "시험 연습", "land.f6": "Goethe 형식의 시간제 시험, 문법 수업, 수준 테스트.",
+  "land.f6t": "시험 연습", "land.f6": "시간제 모의시험, 문법 수업, 수준 테스트.",
   "land.ui": "화면 언어",
   "home.title": "오늘의 읽기", "home.forYou": "추천", "home.daily": "오늘", "home.search": "이야기 검색", "home.addText": "글 추가",
   "home.minToday": "분 (오늘)", "home.streak": "일 연속", "home.known": "단어 앎", "home.toReview": "복습",
@@ -162,9 +163,9 @@ const ko: Dict = {
 };
 
 const de: Dict = {
-  "nav.home": "Start", "nav.notebook": "Notizbuch", "nav.watch": "Videos", "nav.practice": "Üben", "nav.dictionary": "Wörterbuch", "nav.me": "Ich", "nav.settings": "Einstellungen",
-  "land.eyebrow": "Deutsch lernen mit Geschichten", "land.title1": "Lies Geschichten, die du", "land.title2": "fast", "land.title3": "verstehst.",
-  "land.lead": "Originale Geschichten von A1 bis C1. Tippe auf jedes Wort für die Bedeutung, höre natürliche Aufnahmen und übe mit Diktat, Karteikarten und Prüfungsaufgaben.",
+  "nav.home": "Start", "nav.notebook": "Notizbuch", "nav.tests": "Tests", "nav.watch": "Videos", "nav.practice": "Üben", "nav.dictionary": "Wörterbuch", "nav.me": "Ich", "nav.settings": "Einstellungen",
+  "land.eyebrow": "Sprachen lernen mit Geschichten", "land.title1": "Lies Geschichten, die du", "land.title2": "fast", "land.title3": "verstehst.",
+  "land.lead": "Originale Geschichten für jedes Niveau. Tippe auf jedes Wort für die Bedeutung, höre natürliche Aufnahmen und übe mit Diktat, Karteikarten und Prüfungsaufgaben.",
   "land.start": "Kostenlos lesen", "land.how": "So funktioniert es", "land.note": "Kein Konto nötig · auf Handy und Computer",
   "land.pick": "Direkt zu deinem Niveau", "land.learning": "Ich lerne", "land.level": "Mein Niveau", "land.go": "Geschichte lesen",
   "land.featured": "Empfohlen", "land.beta": "Beta", "land.more": "Weitere Sprachen (Beta)", "land.anyLang": "Mit jeder Sprache starten", "land.stories": "Geschichten",
@@ -173,7 +174,7 @@ const de: Dict = {
   "land.f3t": "Natürliche Aufnahmen", "land.f3": "Jede Geschichte ist vertont, der aktuelle Satz wird markiert. Langsamer mit 0,75×.",
   "land.f4t": "Tagesplan", "land.f4": "Eine Geschichte, fünf Wörter und ein Diktat am Tag: etwa 10 Minuten.",
   "land.f5t": "Sprechen und schreiben", "land.f5": "Lies laut vor und sieh, welche Wörter erkannt wurden. Schreib über die Geschichte und erhalte Korrekturen.",
-  "land.f6t": "Prüfungstraining", "land.f6": "Zeitprüfungen im Goethe-Stil, Grammatik und Einstufungstests.",
+  "land.f6t": "Prüfungstraining", "land.f6": "Zeitprüfungen, Grammatik und Einstufungstests.",
   "land.ui": "Sprache der Oberfläche",
   "home.title": "Heute lesen", "home.forYou": "Für dich", "home.daily": "Täglich", "home.search": "Geschichten suchen", "home.addText": "Text hinzufügen",
   "home.minToday": "Min. heute", "home.streak": "Tage in Folge", "home.known": "Wörter bekannt", "home.toReview": "wiederholen",

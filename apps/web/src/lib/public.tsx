@@ -1,10 +1,10 @@
-import { language, lookup, stories, type CatalogStory } from "@storyling/content";
+import { language, languages, lookup, stories, type CatalogStory } from "@storyling/content";
 import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 /** Languages with public, indexable pages (the ones open to visitors). */
-export const PUBLIC_LANGS: LangCode[] = ["de"];
+export const PUBLIC_LANGS: LangCode[] = languages.map((l) => l.code);
 export const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://storyling.vercel.app";
 
 export const publicStories = (lang: LangCode): CatalogStory[] => stories.filter((s) => s.lang === lang);

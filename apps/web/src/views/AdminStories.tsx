@@ -20,6 +20,7 @@ interface List {
   waiting: number;
   levels: string[];
   topics: Record<string, string>;
+  languages: { code: LangCode; name: string }[];
 }
 
 async function api<T>(method: string, body?: unknown, query = ""): Promise<T> {
@@ -30,7 +31,8 @@ async function api<T>(method: string, body?: unknown, query = ""): Promise<T> {
 }
 
 /** The daily stories queue: read what the AI wrote, fix it, then publish or reject. */
-export function AdminStories({ lang }: { lang: LangCode }) {
+export function AdminStories({ lang: pageLang }: { lang: LangCode }) {
+  const [lang, setLang] = useState(pageLang);
   const account = useAccount();
   const [tab, setTab] = useState<Status>("pending");
   const [list, setList] = useState<List | null>(null);
@@ -41,8 +43,8 @@ export function AdminStories({ lang }: { lang: LangCode }) {
   const allowed = !!account.user?.admin;
 
   const load = useCallback(() => {
-    if (allowed) api<List>("GET", undefined, `?status=${tab}`).then(setList, (e: Error) => setError(e.message));
-  }, [allowed, tab]);
+    if (allowed) api<List>("GET", undefined, `?status=${tab}&lang=${lang}`).then((l) => { setList(l); setLevel((v) => (l.levels.includes(v) ? v : l.levels[0]!)); }, (e: Error) => setError(e.message));
+  }, [allowed, tab, lang]);
   useEffect(load, [load]);
 
   if (!account.loaded) return <p className="muted">Loading…</p>;
@@ -84,6 +86,7 @@ export function AdminStories({ lang }: { lang: LangCode }) {
         </div>
         {list && (
           <div className="row">
+            <select className="input adm-sel" aria-label="Language" value={lang} onChange={(e) => setLang(e.target.value as LangCode)}>{list.languages.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}</select>
             <select className="input adm-sel" aria-label="Level" value={level} onChange={(e) => setLevel(e.target.value)}>{list.levels.map((l) => <option key={l}>{l}</option>)}</select>
             <select className="input adm-sel" aria-label="Topic" value={topic} onChange={(e) => setTopic(e.target.value)}>{Object.entries(list.topics).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
             <button className="btn sm" disabled={writing} onClick={() => void write(1)}>{writing ? "Writing…" : "Write one now"}</button>
