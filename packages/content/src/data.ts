@@ -6,15 +6,15 @@ import type { RawEntry, RawLang, RawStory } from "./raw";
 // Dictionary entry: [part of speech, meaning] or, for Chinese, [part of speech, meaning, pinyin].
 // Sentence: ["surface=lemma tokens separated by spaces", "English translation"]; punctuation is its own token.
 export const LANGS: Record<string, RawLang> = {
-  en: { name: "English", native: "English", tts: "en-US", voice: "Samantha", levels: ["A1", "A2"] },
+  en: { name: "English", native: "English", tts: "en-US", voice: "Samantha", levels: ["A1", "A2", "B1"] },
   es: { name: "Spanish", native: "Español", tts: "es-ES", voice: "Mónica", levels: ["A1", "A2", "B1"] },
-  fr: { name: "French", native: "Français", tts: "fr-FR", voice: "Thomas", levels: ["A1", "A2"] },
+  fr: { name: "French", native: "Français", tts: "fr-FR", voice: "Thomas", levels: ["A1", "A2", "B1"] },
   de: { name: "German", native: "Deutsch", tts: "de-DE", voice: "Anna", levels: ["A1", "A2", "B1", "B2", "C1"] },
-  zh: { name: "Chinese", native: "中文", tts: "zh-CN", voice: "Tingting", levels: ["HSK 1", "HSK 2"], noSpace: true },
-  ja: { name: "Japanese", native: "日本語", tts: "ja-JP", voice: "Kyoko", levels: ["N5", "N4"] },
+  zh: { name: "Chinese", native: "中文", tts: "zh-CN", voice: "Tingting", levels: ["HSK 1", "HSK 2", "HSK 3"], noSpace: true },
+  ja: { name: "Japanese", native: "日本語", tts: "ja-JP", voice: "Kyoko", levels: ["N5", "N4", "N3"] },
   ko: { name: "Korean", native: "한국어", tts: "ko-KR", voice: "Yuna", levels: ["Level 1", "Level 2", "Level 3"] },
-  pt: { name: "Portuguese", native: "Português", tts: "pt-BR", voice: "Luciana", levels: ["A1", "A2"] },
-  ru: { name: "Russian", native: "Русский", tts: "ru-RU", voice: "Milena", levels: ["A1", "A2"] },
+  pt: { name: "Portuguese", native: "Português", tts: "pt-BR", voice: "Luciana", levels: ["A1", "A2", "B1"] },
+  ru: { name: "Russian", native: "Русский", tts: "ru-RU", voice: "Milena", levels: ["A1", "A2", "B1"] },
   tr: { name: "Turkish", native: "Türkçe", tts: "tr-TR", voice: "Yelda", levels: ["A1", "A2", "B1"] },
 };
 

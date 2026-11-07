@@ -18,6 +18,13 @@ import * as zh2 from "./zh2";
 import * as ja2 from "./ja2";
 import * as ko2 from "./ko2";
 import * as ko3 from "./ko3";
+import * as en3 from "./en3";
+import * as fr3 from "./fr3";
+import * as pt3 from "./pt3";
+import * as ru3 from "./ru3";
+import * as zh3 from "./zh3";
+import * as ja3 from "./ja3";
+import * as es3 from "./es3";
 import * as es from "./es";
 import * as fr from "./fr";
 import * as tr from "./tr";
@@ -68,6 +75,13 @@ const PACKS: Pack[] = [
   { lang: "ko", ...ko2 },
   { lang: "ko", ...ko3 },
   { lang: "tr", ...tr2 },
+  { lang: "es", ...es3 },
+  { lang: "ja", ...ja3 },
+  { lang: "zh", ...zh3 },
+  { lang: "ru", ...ru3 },
+  { lang: "pt", ...pt3 },
+  { lang: "fr", ...fr3 },
+  { lang: "en", ...en3 },
 ];
 
 /** Languages that have the 10-story everyday pack. */

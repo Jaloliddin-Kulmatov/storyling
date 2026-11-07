@@ -51,6 +51,7 @@ export async function db(): Promise<NeonQueryFunction<false, false>> {
       published_at timestamptz,
       reviewed_by text
     )`;
+    await q`CREATE TABLE IF NOT EXISTS site_settings (id integer PRIMARY KEY DEFAULT 1, data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`;
     await q`CREATE INDEX IF NOT EXISTS daily_stories_status ON daily_stories (lang, status, published_at DESC)`;
   })().catch((e) => {
     ready = null;

@@ -30,8 +30,8 @@ export default function CreditsPage() {
       <h2 style={{ fontSize: 20, margin: "26px 0 6px" }}>Voices</h2>
       <p className="muted">
         Story audio is generated with <a href="https://github.com/OHF-Voice/piper1-gpl" rel="noopener noreferrer" target="_blank">Piper</a> using
-        open voices: Thorsten (German, CC0), davefx and Ald (Spanish), Siwis (French, CC BY 4.0), MLS French (CC BY 4.0), Serena (Italian, CC BY 4.0),
-        Faber and Jeff (Portuguese, CC0), Denis and Dmitri (Russian, CC0), Chaowen (Chinese, CC0), and Joe and Kristin (English, CC0 and public domain).
+        open voices: Thorsten (German), Lessac (English), Claude (Spanish), Siwis (French), Faber (Portuguese), Ruslan (Russian), Huayan (Chinese),
+        Hi-Fi Captain (Japanese), KSS (Korean) and DFKI (Turkish).
       </p>
       <h1 style={{ margin: "26px 0 8px", fontSize: 24 }}>Photos</h1>
       <ul className="credit-list" style={{ listStyle: "none", padding: 0 }}>

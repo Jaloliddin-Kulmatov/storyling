@@ -864,3 +864,33 @@ p.adm-warn { padding-left: 12px; }
   .cover img { opacity: 1; }
   .story-grid > .sc, .game-grid > .game-card, .overlay, .overlay .sheet-in, dialog.sheet[open], .panel:not(.idle), .toast { animation: none; }
 }
+
+/* admin panel */
+.site-note { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: var(--primary-soft); color: var(--ink); font-weight: 600; }
+.ap-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 10px; }
+.ap-stat { display: grid; gap: 2px; padding: 14px 16px; }
+.ap-stat b { font-size: 30px; line-height: 1.15; }
+.ap-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; margin-top: 12px; }
+.ap-chart h3, .ap-block h3 { margin: 0 0 8px; font-size: 16px; }
+.ap-block { margin-top: 12px; }
+.ap-two .ap-block { margin-top: 0; }
+.ap-bars { display: grid; grid-template-columns: repeat(30, 1fr); gap: 2px; height: 120px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+.ap-bars button { display: flex; align-items: flex-end; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.ap-bars i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--primary); }
+.ap-bars button:hover i, .ap-bars button:focus-visible i { opacity: 0.7; }
+.ap-scroll { overflow-x: auto; }
+.ap-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ap-table th { text-align: left; padding: 6px 10px; color: var(--muted); font-weight: 600; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.ap-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.ap-table tr:last-child td { border-bottom: 0; }
+.ap-hidden td { opacity: 0.55; }
+.ap-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.ap-list li { display: flex; justify-content: space-between; gap: 12px; }
+ol.ap-list { counter-reset: n; }
+.ap-on { color: var(--ink); }
+.ap-off { color: var(--muted); }
+.ap-search { margin-bottom: 12px; max-width: 340px; }
+.ap-acts { flex-wrap: wrap; gap: 6px; min-width: 200px; }
+.ap-danger { color: #b42318; }
+.ap-langs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.ap-langs label, .ap-check { display: flex; align-items: center; gap: 8px; font-size: 15px; }

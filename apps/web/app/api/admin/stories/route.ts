@@ -4,17 +4,14 @@ import type { PublishedStory } from "@storyling/learner";
 import { z } from "zod";
 import { accountRoute, HttpError } from "@/server/account-route";
 import { AiError, aiEnabled } from "@/server/ai";
-import type { Account } from "@/server/auth";
+import { requireAdmin } from "@/server/admin";
 import { db } from "@/server/db";
 import { searchPhotos } from "@/server/photos";
-import { applySentenceEdits, DAILY_LANGS, isAdminEmail, photoQuery, queueStory, recentTitles, storyWarnings, TOPICS } from "@/server/stories";
+import { applySentenceEdits, DAILY_LANGS, photoQuery, queueStory, recentTitles, storyWarnings, TOPICS } from "@/server/stories";
 
 export const maxDuration = 60;
 
-function admin(user: Account | null) {
-  if (!user || !isAdminEmail(user.email)) throw new HttpError("Only admins can do this.", 403);
-  return user;
-}
+const admin = requireAdmin;
 
 /** GET ?status=pending|published|rejected: stories in that state, plus how many wait for review. */
 export const GET = accountRoute(async (user, req) => {

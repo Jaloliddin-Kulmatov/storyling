@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSettings } from "@/server/admin";
 import { db, dbEnabled } from "@/server/db";
 
 const LATEST = 120;
@@ -15,7 +16,8 @@ export async function GET(req: Request) {
     const rows = (id
       ? await sql`SELECT story, published_at FROM daily_stories WHERE id = ${id} AND lang = ${lang} AND status = 'published'`
       : await sql`SELECT story, published_at FROM daily_stories WHERE lang = ${lang} AND status = 'published' ORDER BY published_at DESC LIMIT ${LATEST}`) as { story: object; published_at: string }[];
-    return NextResponse.json({ stories: rows.map((r) => ({ ...r.story, publishedAt: new Date(r.published_at).getTime() })) }, { headers: HEADERS });
+    const { hiddenStories } = await getSettings();
+    return NextResponse.json({ stories: rows.map((r) => ({ ...r.story, publishedAt: new Date(r.published_at).getTime() })), hidden: hiddenStories.filter((h) => h.startsWith(`${lang}-`)) }, { headers: HEADERS });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ stories: [] });

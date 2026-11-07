@@ -10,6 +10,7 @@ import { useSyncAgent } from "@/lib/account";
 import { CHANGELOG } from "@/lib/changelog";
 import { UI_LANGS, useT } from "@/lib/i18n";
 import { useHydrated, useLearner, useSettings } from "@/lib/learner";
+import { useSite } from "@/lib/site";
 import { Icon, Logo } from "./ui";
 
 const NAV = [
@@ -30,6 +31,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
   const hydrated = useHydrated();
   const learner = useLearner(lang);
   const meta = language(lang);
+  const site = useSite();
   const t = useT();
   useSyncAgent();
   const reading = path.includes("/read/");
@@ -86,7 +88,7 @@ export function AppShell({ lang, children }: { lang: LangCode; children: ReactNo
           </button>
         </div>
       </header>
-      <main className="main"><div className="main-in">{hydrated && learner.started ? children : null}</div></main>
+      <main className="main"><div className="main-in">{site.announcement && <p className="site-note" role="status">{site.announcement}</p>}{hydrated && learner.started ? children : null}</div></main>
       <nav className="tabbar" aria-label="Main">{TABS.map(link)}</nav>
       <SettingsDialog ref={settingsRef} lang={lang} />
     </div>
@@ -98,6 +100,7 @@ function SettingsDialog({ lang, ref }: { lang: LangCode; ref: React.RefObject<HT
   const learner = useLearner(lang);
   const router = useRouter();
   const meta = language(lang);
+  const site = useSite();
   const t = useT();
 
   function exportCsv() {

@@ -1,6 +1,15 @@
 /** What changed in Storyling, newest first. Shown in Settings → What's new. */
 export const CHANGELOG: { version: string; date: string; items: string[] }[] = [
   {
+    version: "1.0",
+    date: "Nov 7, 2026",
+    items: [
+      "All ten languages are open, with new stories and an intermediate level",
+      "New voices and a slower pace for beginners in every language",
+      "A Tests tab for the level test and mock exams",
+    ],
+  },
+  {
     version: "0.9",
     date: "Oct 28, 2026",
     items: [

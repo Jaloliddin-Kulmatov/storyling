@@ -53,7 +53,7 @@ const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
 /** The level test lives on the Tests tab with the mock exams. */
 export function LevelTestPage({ lang }: { lang: LangCode }) {
   const router = useRouter();
-  return <Shell lang={lang} source={false} title="Level test" onBack={() => router.push(`/${lang}/exams`)}><LevelTest lang={lang} /></Shell>;
+  return <Shell lang={lang} source={false} title="Level test" back="Tests" onBack={() => router.push(`/${lang}/exams`)}><LevelTest lang={lang} /></Shell>;
 }
 
 export function Practice({ lang }: { lang: LangCode }) {
@@ -134,14 +134,14 @@ function useFrom(): From {
   return { kind: "all" };
 }
 
-function Shell({ lang, title, onBack, source = true, children }: { lang: LangCode; title: string; onBack: () => void; source?: boolean; children: React.ReactNode }) {
+function Shell({ lang, title, onBack, back = "Practice", source = true, children }: { lang: LangCode; title: string; onBack: () => void; back?: string; source?: boolean; children: React.ReactNode }) {
   useEffect(() => () => stopAudio(), []);
   const params = useSearchParams();
   return (
     <>
       <div className="page-head">
         <div className="row">
-          <button className="btn ghost sm" onClick={onBack}>{Icon.back} Practice</button>
+          <button className="btn ghost sm" onClick={onBack}>{Icon.back} {back}</button>
           <h1 style={{ fontSize: 26 }}>{title}</h1>
         </div>
       </div>

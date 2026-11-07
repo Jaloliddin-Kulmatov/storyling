@@ -11,6 +11,7 @@ import { placementResult, placementWords, type PlacementWord } from "@storyling/
 import { useHydrated, useLearner, type Level } from "@/lib/learner";
 import { Logo } from "@/components/ui";
 import { FEATURED } from "@/views/Landing";
+import { useSite } from "@/lib/site";
 import { useAccount } from "@/lib/account";
 
 const LEVELS: { level: Level; title: string; detail: (first: string) => string }[] = [
@@ -56,6 +57,7 @@ export function Onboarding() {
 }
 
 function LanguageStep({ value, onPick, onNext }: { value: LangCode | null; onPick: (l: LangCode) => void; onNext: () => void }) {
+  const site = useSite();
   return (
     <div className="stack">
       <div>
@@ -63,7 +65,7 @@ function LanguageStep({ value, onPick, onNext }: { value: LangCode | null; onPic
         <p className="muted" style={{ fontSize: 17, marginTop: 8 }}>Explanations are in English. You can switch languages anytime.</p>
       </div>
       <div className="langs" role="radiogroup" aria-label="Languages">
-        {languages.filter((l) => FEATURED.includes(l.code)).map((l) => (
+        {languages.filter((l) => FEATURED.includes(l.code) && !site.hiddenLangs.includes(l.code)).map((l) => (
           <button key={l.code} role="radio" aria-checked={value === l.code} aria-pressed={value === l.code} className="lang-opt" onClick={() => onPick(l.code)}>
             <span className="nat" lang={l.code}>{l.native}</span>
             <b>{l.name} {!FEATURED.includes(l.code) && <span className="pill">Beta</span>}</b>

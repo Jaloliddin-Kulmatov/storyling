@@ -5,6 +5,7 @@ import type { LangCode } from "@storyling/core";
 import Link from "next/link";
 import { useSettings } from "@/lib/learner";
 import { UI_LANGS, useT } from "@/lib/i18n";
+import { useSite } from "@/lib/site";
 import { ContinueButton } from "@/views/ContinueButton";
 import { Logo } from "@/components/ui";
 import { Fragment, useEffect } from "react";
@@ -31,6 +32,8 @@ const DEMOS: Record<"de" | "ko", { label: string; fit: string; before: string; l
 export function Landing() {
   const t = useT();
   const [settings, set] = useSettings();
+  const site = useSite();
+  const shown = FEATURED.filter((c) => !site.hiddenLangs.includes(c));
   const demo = "de" as const;
   const pickLang: LangCode = "de";
   const d = DEMOS[demo];
@@ -87,7 +90,7 @@ export function Landing() {
       </section>
 
       <div className="lang-strip">
-        {FEATURED.map((c) => <span key={c} lang={c}>{language(c).native}</span>)}
+        {shown.map((c) => <span key={c} lang={c}>{language(c).native}</span>)}
       </div>
 
       <section id="how" className="features">
@@ -99,7 +102,7 @@ export function Landing() {
       <section className="card reveal" style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 22, marginBottom: 10 }}>{t("land.anyLang")}</h2>
         <div className="langs">
-          {FEATURED.map((c) => {
+          {shown.map((c) => {
             const l = language(c);
             return (
               <Link key={c} href={`/start?lang=${c}`} className="lang-opt featured">
@@ -112,7 +115,7 @@ export function Landing() {
         </div>
       </section>
 
-      <footer className="foot">Storyling · {FEATURED.map((c) => <Fragment key={c}><Link href={`/learn/${c}`}>{language(c).name} stories</Link> · </Fragment>)}<Link href="/credits">Credits</Link></footer>
+      <footer className="foot">Storyling · {shown.map((c) => <Fragment key={c}><Link href={`/learn/${c}`}>{language(c).name} stories</Link> · </Fragment>)}<Link href="/credits">Credits</Link></footer>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { coverage, recommend, type Coverage, type LangCode, type Sentence } from
 import { useCallback, useMemo } from "react";
 import { useLearner, type StoredWord, type UserStory } from "./index";
 import { FUNCTION_POS, wordLevels } from "./placement";
-import { usePublished, type PublishedStory } from "./published";
+import { useHiddenStories, usePublished, type PublishedStory } from "./published";
 
 /**
  * Library helpers shared by the web and phone apps: the learner's stories next to the catalog,
@@ -28,7 +28,8 @@ export function useStories(lang: LangCode): AnyStory[] {
   const { stories } = useLearner(lang);
   const published = usePublished(lang);
   // Synced stories can come from older versions: keep only ones with a readable shape.
-  return useMemo(() => [...stories.filter(isValidStory), ...published, ...storiesFor(lang)], [stories, published, lang]);
+  const hidden = useHiddenStories(lang);
+  return useMemo(() => [...stories.filter(isValidStory), ...published, ...storiesFor(lang).filter((s) => !hidden.includes(s.id))], [stories, published, lang, hidden]);
 }
 
 export function useStory(lang: LangCode, id: string): AnyStory | undefined {

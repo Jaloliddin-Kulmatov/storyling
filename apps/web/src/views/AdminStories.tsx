@@ -77,7 +77,6 @@ export function AdminStories({ lang: pageLang }: { lang: LangCode }) {
   const TABS: [Status, string][] = [["pending", `Waiting${list ? ` (${list.waiting})` : ""}`], ["published", "Published"], ["rejected", "Rejected"]];
   return (
     <>
-      <div className="page-head"><div><div className="eyebrow">Admin</div><h1>Review stories</h1></div></div>
       <p className="muted">New stories arrive here every morning. Learners only see the ones you publish.</p>
 
       <div className="spread adm-bar">

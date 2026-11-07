@@ -20,6 +20,8 @@ export interface PublishedStory extends CatalogStory {
 }
 
 const NONE: PublishedStory[] = [];
+const NO_IDS: string[] = [];
+const hiddenByLang = new Map<LangCode, string[]>();
 const byLang = new Map<LangCode, PublishedStory[]>();
 const checkedAt = new Map<LangCode, number>();
 const listeners = new Set<() => void>();
@@ -38,11 +40,11 @@ function add(lang: LangCode, stories: PublishedStory[]) {
   listeners.forEach((l) => l());
 }
 
-async function fetchStories(query: string): Promise<PublishedStory[]> {
-  if (base === null) return NONE;
+async function fetchStories(query: string): Promise<{ stories?: PublishedStory[]; hidden?: string[] }> {
+  if (base === null) return {};
   const res = await fetch(`${base}/api/stories?${query}`);
   if (!res.ok) throw new Error(`Stories ${res.status}`);
-  return ((await res.json()) as { stories?: PublishedStory[] }).stories ?? NONE;
+  return res.json();
 }
 
 /** Replace the list with what's published now, at most every 30 seconds, so unpublished stories go too. */
@@ -50,8 +52,9 @@ function refresh(lang: LangCode) {
   if (base === null || Date.now() - (checkedAt.get(lang) ?? 0) < 30_000) return;
   checkedAt.set(lang, Date.now());
   fetchStories(`lang=${lang}`)
-    .then((s) => {
-      byLang.set(lang, s);
+    .then((r) => {
+      byLang.set(lang, r.stories ?? NONE);
+      hiddenByLang.set(lang, r.hidden ?? NO_IDS);
       listeners.forEach((l) => l());
     })
     .catch(() => checkedAt.delete(lang));
@@ -75,10 +78,15 @@ export function usePublished(lang: LangCode): PublishedStory[] {
   return useSyncExternalStore(subscribe, () => byLang.get(lang) ?? NONE, () => NONE);
 }
 
+/** Built-in stories an admin took out of the lists. */
+export function useHiddenStories(lang: LangCode): string[] {
+  return useSyncExternalStore(subscribe, () => hiddenByLang.get(lang) ?? NO_IDS, () => NO_IDS);
+}
+
 /** Fetch one approved story by id, for a link to a story older than the newest list. */
 export async function loadPublishedStory(lang: LangCode, id: string): Promise<boolean> {
   if (!id.includes("-daily-")) return false;
-  const found = await fetchStories(`lang=${lang}&id=${encodeURIComponent(id)}`).catch(() => NONE);
+  const found = (await fetchStories(`lang=${lang}&id=${encodeURIComponent(id)}`).catch(() => null))?.stories ?? NONE;
   if (found.length) add(lang, found);
   return found.length > 0;
 }
