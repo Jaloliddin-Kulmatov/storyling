@@ -19,12 +19,18 @@ export const aiEnabled = () => useGroq() || !!process.env.ANTHROPIC_API_KEY;
 // ── Groq (OpenAI-compatible chat completions) ──
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 // Groq retires models from time to time; when one is gone (404) the next one is tried and remembered.
-const GROQ_MODELS = () => [...new Set([process.env.GROQ_MODEL, "llama-3.3-70b-versatile", "openai/gpt-oss-120b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant"].filter((m): m is string => !!m))];
+const GROQ_MODELS = () => [...new Set([process.env.GROQ_MODEL, "llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3.8-27b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant"].filter((m): m is string => !!m))];
+// Too weak to write in ten languages without a reviewer.
+const WEAK_MODEL = "llama-3.1-8b-instant";
 let groqModel: string | null = null;
+/** The model that answered last, for the daily job's report. */
+export const lastAiModel = () => groqModel;
 
-async function groqChat(system: string, user: string, maxTokens: number, json: boolean): Promise<string> {
-  const models = groqModel ? [groqModel, ...GROQ_MODELS().filter((m) => m !== groqModel)] : GROQ_MODELS();
+async function groqChat(system: string, user: string, maxTokens: number, json: boolean, strong = false): Promise<string> {
+  const all = groqModel ? [groqModel, ...GROQ_MODELS().filter((m) => m !== groqModel)] : GROQ_MODELS();
+  const models = strong ? all.filter((m) => m !== WEAK_MODEL) : all;
   let last = "";
+  let busy = false;
   for (const model of models) {
     const res = await fetch(GROQ_URL, {
       method: "POST",
@@ -40,7 +46,12 @@ async function groqChat(system: string, user: string, maxTokens: number, json: b
         ],
       }),
     });
-    if (res.status === 429) throw new AiError("The AI service is busy. Try again in a minute.", 429);
+    // Limits are per model, so one that's used up doesn't stop the others. 413 means a request bigger than its per-minute limit.
+    if (res.status === 429 || res.status === 413) {
+      busy = true;
+      console.error(`Groq ${model}: ${res.status}`);
+      continue;
+    }
     if (res.status === 401) throw new AiError("The AI key on the server is invalid.", 500);
     if (res.status === 404 || res.status === 400) {
       // Model removed or not available to this key: try the next one.
@@ -57,6 +68,7 @@ async function groqChat(system: string, user: string, maxTokens: number, json: b
     if (choice?.finish_reason === "length") throw new AiError("The text is too long for one go. Try a shorter part.", 413);
     return choice?.message?.content?.trim() ?? "";
   }
+  if (busy) throw new AiError("The AI service is busy. Try again in a minute.", 429);
   throw new AiError(`AI request failed: ${last || "no model available"}.`, 502);
 }
 
@@ -169,10 +181,10 @@ const JSON_SHAPE =
   `"sentences": [{"tokens": [{"s": token as written, "l": lemma or "" for punctuation}], "tr": English translation}], ` +
   `"glossary": [{"lemma": string, "pos": short part of speech, "meaning": short English meaning, "reading": pinyin for Chinese or ""}]}.`;
 
-async function groqPrepared(system: string, user: string): Promise<PreparedText> {
+async function groqPrepared(system: string, user: string, strong: boolean): Promise<PreparedText> {
   let lastError = "";
   for (let attempt = 0; attempt < 2; attempt++) {
-    const text = await groqChat(system + JSON_SHAPE, attempt ? `${user}\n\nYour last reply was not valid (${lastError}). Reply with the JSON object only.` : user, 11000, true);
+    const text = await groqChat(system + JSON_SHAPE, attempt ? `${user}\n\nYour last reply was not valid (${lastError}). Reply with the JSON object only.` : user, strong ? 7000 : 11000, true, strong);
     try {
       const parsed = PreparedText.safeParse(JSON.parse(text));
       if (parsed.success && parsed.data.sentences.length) return parsed.data;
@@ -184,9 +196,9 @@ async function groqPrepared(system: string, user: string): Promise<PreparedText>
   throw new AiError("The AI returned a broken result. Please try again.", 502);
 }
 
-async function parsePrepared(system: string, user: string, maxTokens: number): Promise<PreparedText> {
+async function parsePrepared(system: string, user: string, maxTokens: number, strong = false): Promise<PreparedText> {
   try {
-    if (useGroq()) return await groqPrepared(system, user);
+    if (useGroq()) return await groqPrepared(system, user, strong);
     const res = await getClient().beta.messages.parse({
       ...FALLBACK,
       model: MODEL,
@@ -238,7 +250,7 @@ const CEFR: Record<string, string> = {
   "HSK 1": "A1", "HSK 2": "A2", "HSK 3": "B1", N5: "A1", N4: "A2", N3: "B1", "Level 1": "A1", "Level 2": "A2", "Level 3": "B1",
 };
 
-/** One story for the daily queue. An admin reads it before any learner sees it. */
+/** One daily story. It goes straight to learners if it passes the checks, so only the stronger models write it. */
 export function writeDailyStory(lang: string, level: string, topic: string, avoid: string[]) {
   return parsePrepared(
     `You write short, engaging graded-reader stories for language learners, then prepare them for a reader app. ${TOKEN_RULES(lang)}`,
@@ -249,6 +261,7 @@ export function writeDailyStory(lang: string, level: string, topic: string, avoi
       `Do not use quotation marks or dashes. Characters are fictional. Keep it suitable for all ages.\n` +
       (avoid.length ? `Tell a different story from these recent titles: ${avoid.join("; ")}.` : ""),
     32000,
+    true,
   );
 }
 

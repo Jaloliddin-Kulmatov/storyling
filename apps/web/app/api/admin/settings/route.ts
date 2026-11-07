@@ -4,7 +4,7 @@ import { getSettings, requireAdmin, saveSettings } from "@/server/admin";
 import { aiEnabled } from "@/server/ai";
 import { writeDailyStories } from "@/server/daily";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export const GET = accountRoute(async (user) => {
   requireAdmin(user);
@@ -28,7 +28,7 @@ export const PUT = accountRoute(async (user, req) => {
   return next;
 });
 
-/** POST: write today's stories now instead of waiting for the morning run. */
+/** POST: write and post what's left of today's stories now instead of waiting for the next run. */
 export const POST = accountRoute(async (user) => {
   requireAdmin(user);
   if (!aiEnabled()) throw new HttpError("AI is turned off on this server.", 503);

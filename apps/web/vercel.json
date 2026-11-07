@@ -9,12 +9,44 @@
       "schedule": "0 17 * * *"
     },
     {
-      "path": "/api/cron/stories",
+      "path": "/api/cron/stories?run=1",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=2",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=3",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=4",
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/stories?retry=1",
-      "schedule": "30 4 * * *"
+      "path": "/api/cron/stories?run=5",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=6",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=7",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=8",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=9",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/stories?run=10",
+      "schedule": "0 10 * * *"
     }
   ]
 }

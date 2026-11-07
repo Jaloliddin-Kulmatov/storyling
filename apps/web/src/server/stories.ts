@@ -8,11 +8,9 @@ import { searchPhotos } from "./photos";
 
 /** Languages learners can see, so the only ones worth writing for. */
 export const DAILY_LANGS: LangCode[] = languages.map((l) => l.code);
-/** Stop writing when this many stories wait for review, so a quiet week doesn't spend AI credits on a pile nobody reads. */
-export const MAX_WAITING = 21;
+/** Stories per language per day. */
+export const DAILY_PER_LANG = 4;
 
-const EASY = ["A1", "A2"];
-const HARD = ["B1", "B2", "C1"];
 export const TOPICS: Record<string, string> = {
   daily: "everyday life", food: "food and cooking", work: "work and colleagues", weather: "weather and the seasons",
   animals: "animals", travel: "a journey", city: "life in a big city", home: "home and neighbours",
@@ -28,22 +26,20 @@ export const isAdminEmail = (email: string) => admins().includes(email.toLowerCa
 /** Short form of a level for story ids: "HSK 1" → "hsk1". */
 export const levelSlug = (level: string) => level.toLowerCase().replace(/\s+/g, "");
 
-/** Three German stories a day, from easier to harder, plus one each for the next two other languages in turn. */
-export function dailyPlan(day: string): { lang: LangCode; level: string; topic: string }[] {
+/**
+ * Today's stories: four per language, across its levels and topics. Every language gets its first story before any
+ * gets its second, so a day when the AI runs out of quota is shared evenly.
+ */
+export function dailyPlan(day: string): { id: string; lang: LangCode; level: string; topic: string }[] {
   const n = Math.floor(Date.parse(day) / 864e5);
   const topics = Object.keys(TOPICS);
-  const others = DAILY_LANGS.filter((l) => l !== "de");
-  const rotating = [0, 1].map((i) => {
-    const lang = others[(n * 2 + i) % others.length]!;
-    const levels = language(lang).levels;
-    return { lang, level: levels[Math.floor(n / others.length + i) % levels.length]!, topic: topics[(n * 5 + i * 3) % topics.length]! };
-  });
-  return [
-    { lang: "de", level: EASY[n % EASY.length]!, topic: topics[(n * 2) % topics.length]! },
-    { lang: "de", level: EASY[(n + 1) % EASY.length]!, topic: topics[(n * 3 + 5) % topics.length]! },
-    { lang: "de", level: HARD[n % HARD.length]!, topic: topics[(n * 2 + 1) % topics.length]! },
-    ...rotating,
-  ];
+  return Array.from({ length: DAILY_PER_LANG }, (_, slot) =>
+    DAILY_LANGS.map((lang, i) => {
+      const levels = language(lang).levels;
+      const level = levels[(n + slot) % levels.length]!;
+      return { id: `${lang}-daily-${day}-${slot + 1}-${levelSlug(level)}`, lang, level, topic: topics[(n * DAILY_PER_LANG + slot * 3 + i) % topics.length]! };
+    }),
+  ).flat();
 }
 
 const minutesFor = (s: Sentence[]) => Math.max(1, Math.round(s.reduce((n, x) => n + x.tokens.filter((t) => t.lemma).length, 0) / 80));
@@ -77,6 +73,22 @@ export function storyWarnings(s: PublishedStory): string[] {
   return out;
 }
 
+const SCRIPTS: Partial<Record<LangCode, RegExp>> = { zh: /\p{Script=Han}/u, ja: /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u, ko: /\p{Script=Hangul}/u, ru: /\p{Script=Cyrillic}/u };
+
+/** What keeps a story from going straight to learners. It waits in Review stories instead. */
+export function publishProblems(s: PublishedStory): string[] {
+  const out: string[] = [];
+  if (s.sentences.length < 6) out.push("Too short.");
+  if (!s.title.trim() || !s.titleEnglish.trim()) out.push("No title.");
+  if (s.sentences.some((x) => !x.translation?.trim())) out.push("A sentence has no translation.");
+  const words = s.sentences.flatMap((x) => x.tokens.filter((t) => t.lemma));
+  const unknown = words.filter((t) => !s.dict[t.lemma!] && !lookup(s.lang, t.lemma!)).length;
+  if (unknown > words.length * 0.05) out.push("Too many words have no meaning.");
+  const script = SCRIPTS[s.lang];
+  if (script && words.filter((t) => script.test(t.surface)).length < words.length * 0.8) out.push("Not written in the right language.");
+  return out;
+}
+
 /** Search words for a story's photo, falling back to its topic if the AI is unavailable. */
 export async function photoQuery(s: PublishedStory) {
   const words = await photoKeywords(s.titleEnglish || s.title, s.sentences.slice(0, 2).map((x) => x.translation).join(" ")).catch(() => "");
@@ -91,12 +103,12 @@ async function pickCover(s: PublishedStory) {
 }
 
 /**
- * Give photos to waiting stories that have none, so a reviewer sees each one before learners do.
- * Published stories are left alone. Stops at `until` (a timestamp) to stay inside the cron's time limit.
+ * Give photos to stories from the last few days that have none, when the photo search failed as they were written.
+ * Stops at `until` (a timestamp) to stay inside the cron's time limit.
  */
 export async function fillCovers(until: number) {
   const sql = await db();
-  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status = 'pending' AND story->'cover' IS NULL ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
+  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status IN ('pending', 'published') AND story->'cover' IS NULL AND created_at > now() - interval '3 days' ORDER BY created_at DESC LIMIT 10`) as { id: string; story: PublishedStory }[];
   let filled = 0;
   for (const r of rows) {
     if (Date.now() > until) break;
@@ -108,8 +120,8 @@ export async function fillCovers(until: number) {
   return filled;
 }
 
-/** Write one story and put it in the review queue. Returns false when that id already exists. */
-export async function queueStory(id: string, lang: LangCode, level: string, topic: string, avoid: string[]) {
+/** Write one story and post it, or hold it for review if it fails the checks or `post` is false. Returns where it went. */
+export async function writeAndPost(id: string, lang: LangCode, level: string, topic: string, avoid: string[], post = true) {
   const p = await writeDailyStory(lang, level, TOPICS[topic] ?? topic, avoid);
   const dict = glossary(p);
   const sentences = tokensOf(p, dict);
@@ -122,10 +134,12 @@ export async function queueStory(id: string, lang: LangCode, level: string, topi
   const cover = await pickCover(story);
   if (cover) story.cover = cover;
   const sql = await db();
-  const rows = await sql`INSERT INTO daily_stories (id, lang, story, warnings)
-    VALUES (${id}, ${lang}, ${JSON.stringify(story)}::jsonb, ${JSON.stringify(storyWarnings(story))}::jsonb)
-    ON CONFLICT (id) DO NOTHING RETURNING id`;
-  return rows.length > 0;
+  const held = !post || publishProblems(story).length > 0;
+  const status = held ? "pending" : "published";
+  await sql`INSERT INTO daily_stories (id, lang, status, story, warnings, published_at, reviewed_by)
+    VALUES (${id}, ${lang}, ${status}, ${JSON.stringify(story)}::jsonb, ${JSON.stringify(storyWarnings(story))}::jsonb, ${held ? null : new Date().toISOString()}, ${held ? null : "auto"})
+    ON CONFLICT (id) DO NOTHING`;
+  return status;
 }
 
 export const recentTitles = async (lang: LangCode) => {

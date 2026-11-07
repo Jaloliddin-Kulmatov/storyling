@@ -1,36 +1,43 @@
 import "server-only";
 import type { LangCode } from "@storyling/core";
+import { getSettings } from "./admin";
+import { AiError, lastAiModel } from "./ai";
 import { db } from "./db";
 import { mailEnabled, sendMail } from "./mail";
-import { adminEmails, dailyPlan, fillCovers, levelSlug, MAX_WAITING, queueStory, recentTitles } from "./stories";
+import { adminEmails, dailyPlan, fillCovers, recentTitles, writeAndPost } from "./stories";
 
-/** Write the day's stories into the review queue. Ids include the date, so a second run only fills in what failed. */
+// The function stops at 300 seconds. Whatever's left waits for the next run, an hour later.
+const WRITE_FOR = 240_000;
+const COVERS_UNTIL = 270_000;
+
+/** Write and post what's still missing from today's plan. Ids include the date, so a run only fills the gaps. */
 export async function writeDailyStories() {
   const started = Date.now();
   const day = new Date().toISOString().slice(0, 10);
   const sql = await db();
-  const written: string[] = [];
+  const { hiddenLangs } = await getSettings();
+  const done = new Set(((await sql`SELECT id FROM daily_stories WHERE id LIKE ${`%-daily-${day}-%`}`) as { id: string }[]).map((r) => r.id));
+  const todo = dailyPlan(day).filter((s) => !done.has(s.id) && !hiddenLangs.includes(s.lang));
+  const published: string[] = [];
+  const held: string[] = [];
   const errors: string[] = [];
   const avoid: Partial<Record<LangCode, string[]>> = {};
-  for (const { lang, level, topic } of dailyPlan(day)) {
-    // The function stops at 60 seconds; what's left waits for the retry run.
-    if (Date.now() - started > 40_000) break;
-    const id = `${lang}-daily-${day}-${levelSlug(level)}`;
-    const [row] = (await sql`SELECT COUNT(*)::int AS n FROM daily_stories WHERE lang = ${lang} AND status = 'pending'`) as { n: number }[];
-    if (row!.n >= MAX_WAITING) continue;
-    const seen = await sql`SELECT 1 FROM daily_stories WHERE id = ${id}`;
-    if (seen.length) continue;
+  for (const { id, lang, level, topic } of todo) {
+    if (Date.now() - started > WRITE_FOR) break;
     try {
-      if (await queueStory(id, lang, level, topic, (avoid[lang] ??= await recentTitles(lang)))) written.push(id);
+      const titles = (avoid[lang] ??= await recentTitles(lang));
+      ((await writeAndPost(id, lang, level, topic, titles)) === "published" ? published : held).push(id);
     } catch (e) {
       console.error(e);
       errors.push(`${id}: ${e instanceof Error ? e.message : "failed"}`);
+      // Every model is at its limit: more tries now would only fail too.
+      if (e instanceof AiError && e.status === 429) break;
     }
   }
-  if (written.length && mailEnabled()) {
+  if (held.length && mailEnabled()) {
     const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://storyling.vercel.app";
-    for (const to of adminEmails()) await sendMail(to, `${written.length} new stories to review`, `Read and publish them here:\n${site}/de/admin`);
+    for (const to of adminEmails()) await sendMail(to, `${held.length} stories failed the checks`, `They were not posted. Read them here:\n${site}/de/admin`);
   }
-  const covers = await fillCovers(started + 45_000);
-  return { written, errors, covers };
+  const covers = await fillCovers(started + COVERS_UNTIL);
+  return { published, held, errors, left: todo.length - published.length - held.length, covers, model: lastAiModel(), seconds: Math.round((Date.now() - started) / 1000) };
 }

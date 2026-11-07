@@ -270,8 +270,9 @@ function SiteTab() {
   async function run() {
     setRunning(true); setResult(""); setError(null);
     try {
-      const r = await api<{ written: string[]; errors: string[] }>("/api/admin/settings", "POST");
-      setResult(r.written.length ? `Wrote ${r.written.length} stories. Find them in Review stories.` : r.errors.length ? `Nothing written: ${r.errors[0]}` : "Today's stories are already written.");
+      const r = await api<{ published: string[]; held: string[]; errors: string[]; left: number }>("/api/admin/settings", "POST");
+      const wrote = r.published.length + r.held.length;
+      setResult(wrote ? `Posted ${r.published.length} stories.${r.held.length ? ` ${r.held.length} failed the checks and wait in Review stories.` : ""}${r.left ? ` ${r.left} still to write.` : ""}` : r.errors.length ? `Nothing written: ${r.errors[0]}` : "Today's stories are already written.");
     } catch (e) { setError((e as Error).message); }
     setRunning(false);
   }
@@ -300,8 +301,8 @@ function SiteTab() {
       </section>
       <section className="card ap-block">
         <h3>Daily stories</h3>
-        <p className="muted small">Every morning AI writes 3 German stories and 1 each for 2 other languages, in turn. They wait for your review.</p>
-        <label className="ap-check"><input type="checkbox" checked={!s.dailyOff} onChange={(e) => void save({ dailyOff: !e.target.checked })} /> Write stories every morning</label>
+        <p className="muted small">Every morning AI writes 4 stories for each language and posts them. A story that fails the checks waits in Review stories instead.</p>
+        <label className="ap-check"><input type="checkbox" checked={!s.dailyOff} onChange={(e) => void save({ dailyOff: !e.target.checked })} /> Write and post stories every morning</label>
         <div className="row" style={{ marginTop: 10 }}>
           <button className="btn sm" disabled={running} onClick={() => void run()}>{running ? "Writing…" : "Write today's stories now"}</button>
           {result && <span className="muted small" role="status">{result}</span>}

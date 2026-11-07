@@ -7,7 +7,7 @@ import { AiError, aiEnabled } from "@/server/ai";
 import { requireAdmin } from "@/server/admin";
 import { db } from "@/server/db";
 import { searchPhotos } from "@/server/photos";
-import { applySentenceEdits, DAILY_LANGS, photoQuery, queueStory, recentTitles, storyWarnings, TOPICS } from "@/server/stories";
+import { applySentenceEdits, DAILY_LANGS, photoQuery, recentTitles, storyWarnings, TOPICS, writeAndPost } from "@/server/stories";
 
 export const maxDuration = 60;
 
@@ -49,7 +49,7 @@ export const POST = accountRoute(async (user, req) => {
   if (!b.success || !DAILY_LANGS.includes(lang) || !language(lang).levels.includes(b.data.level)) throw new HttpError("Choose a level and topic.");
   const id = `${lang}-daily-${new Date().toISOString().slice(0, 10)}-${Date.now().toString(36)}`;
   try {
-    await queueStory(id, lang, b.data.level, b.data.topic, await recentTitles(lang));
+    await writeAndPost(id, lang, b.data.level, b.data.topic, await recentTitles(lang), false);
   } catch (e) {
     if (e instanceof AiError) throw new HttpError(e.message, e.status);
     throw e;
