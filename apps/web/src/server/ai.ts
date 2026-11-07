@@ -40,6 +40,8 @@ async function groqChat(system: string, user: string, maxTokens: number, json: b
         max_tokens: maxTokens,
         temperature: json ? 0.3 : 0.5,
         ...(json ? { response_format: { type: "json_object" } } : {}),
+        // Thinking counts against the token limits and can use up a story's length.
+        ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },

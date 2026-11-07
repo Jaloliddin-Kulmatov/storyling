@@ -9,6 +9,7 @@ import { adminEmails, dailyPlan, fillCovers, recentTitles, writeAndPost } from "
 // The function stops at 300 seconds. Whatever's left waits for the next run, an hour later.
 const WRITE_FOR = 240_000;
 const COVERS_UNTIL = 270_000;
+const MINUTE_LIMIT_PAUSE = 62_000;
 
 /** Write and post what's still missing from today's plan. Ids include the date, so a run only fills the gaps. */
 export async function writeDailyStories() {
@@ -22,16 +23,25 @@ export async function writeDailyStories() {
   const held: string[] = [];
   const errors: string[] = [];
   const avoid: Partial<Record<LangCode, string[]>> = {};
-  for (const { id, lang, level, topic } of todo) {
-    if (Date.now() - started > WRITE_FOR) break;
+  let waited = false;
+  for (let i = 0; i < todo.length && Date.now() - started < WRITE_FOR; i++) {
+    const { id, lang, level, topic } = todo[i]!;
     try {
       const titles = (avoid[lang] ??= await recentTitles(lang));
       ((await writeAndPost(id, lang, level, topic, titles)) === "published" ? published : held).push(id);
+      waited = false;
     } catch (e) {
       console.error(e);
+      const busy = e instanceof AiError && e.status === 429;
+      // The limit per minute clears after a pause. Still busy after one means the day's limit, so stop.
+      if (busy && !waited) {
+        waited = true;
+        i--;
+        await new Promise((r) => setTimeout(r, MINUTE_LIMIT_PAUSE));
+        continue;
+      }
       errors.push(`${id}: ${e instanceof Error ? e.message : "failed"}`);
-      // Every model is at its limit: more tries now would only fail too.
-      if (e instanceof AiError && e.status === 429) break;
+      if (busy) break;
     }
   }
   if (held.length && mailEnabled()) {
