@@ -20,6 +20,8 @@ import { DictationRun } from "@/components/DictationRun";
 import { useStories } from "@/lib/stories";
 import { Tr, useTranslated } from "@/lib/translate";
 import { usePlan } from "@/lib/plan";
+import { partsOf, pictureUrl } from "@/lib/parts";
+import { Fragment } from "react";
 
 const RATES = [0.75, 1, 1.25];
 
@@ -55,6 +57,28 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
     );
   }
   return <StoryReader key={story.id} story={story} />;
+}
+
+/** The AI picture before each part of a story. Hidden if it can't be made; tried again a few times while the page is open. */
+function PartPicture({ lang, id, part }: { lang: LangCode; id: string; part: number }) {
+  const [tries, setTries] = useState(0);
+  const [state, setState] = useState<"loading" | "ok" | "failed">("loading");
+  useEffect(() => {
+    if (state !== "failed" || tries >= 3) return;
+    // Stays folded away while trying again, so the text doesn't jump; it opens only when a picture arrives.
+    const t = setTimeout(() => setTries((n) => n + 1), 30_000 + part * 8_000);
+    return () => clearTimeout(t);
+  }, [state, tries, part]);
+  if (state === "failed" && tries >= 3) return null;
+  return (
+    <figure className={`part-pic ${state}`} aria-hidden={state !== "ok"}>
+      {(state !== "failed" || tries < 3) && (
+        <img key={tries} src={pictureUrl(lang, id, part)} alt="" loading={part ? "lazy" : "eager"} decoding="async"
+          onLoad={() => setState("ok")} onError={() => setState("failed")} />
+      )}
+      {state === "ok" && part === 0 && <figcaption>Pictures made with AI</figcaption>}
+    </figure>
+  );
 }
 
 function Paywall({ lang, limit }: { lang: LangCode; limit: number }) {
@@ -184,7 +208,11 @@ function StoryReader({ story }: { story: AnyStory }) {
 
           <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}
             onClick={(e) => { if (!(e.target as HTMLElement).closest("button")) setPicked(null); }}>
-            {story.sentences.map((s, i) => {
+            {(isUserStory(story) ? [[0, story.sentences.length] as [number, number]] : partsOf(story.sentences.length)).map(([from, to], part) => (
+            <Fragment key={part}>
+            {!isUserStory(story) && <PartPicture lang={lang} id={story.id} part={part} />}
+            {story.sentences.slice(from, to).map((s, k) => {
+              const i = from + k;
               const gmarks = gram ? grammarMarks(s) : undefined;
               return (
               <span key={i} id={`s-${i}`} className={`sent${playing === i ? " playing" : ""}`}>
@@ -221,6 +249,8 @@ function StoryReader({ story }: { story: AnyStory }) {
               </span>
               );
             })}
+            </Fragment>
+            ))}
           </div>
 
 
