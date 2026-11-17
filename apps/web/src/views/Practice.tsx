@@ -15,6 +15,7 @@ import { highlight, shuffle, useWordInfo } from "@/lib/words";
 import { Icon } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
 import { Memory, SayIt, SpeedRound, SpellIt } from "./MoreGames";
+import { GameArt } from "./GameArt";
 
 type Mode = "review" | "match" | "order" | "listen" | "dictation" | "picture" | "bingo" | "gaps" | "speed" | "memory" | "spell" | "say";
 
@@ -26,11 +27,14 @@ export interface PoolWord {
   sentence: number;
 }
 
-interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string }
+type Cat = "words" | "listen" | "speak" | "read" | "grammar";
+interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string; cat?: Cat }
 
-const GAME_EMOJI: Record<string, string> = {
-  "Speed round": "⚡", Memory: "🃏", "Spell it": "🔤", "Say it": "🎤", "Picture match": "🖼️", Bingo: "🎯", "Match words": "🧩", "Fill the gaps": "✏️", "Build the sentence": "🧱", Listening: "🎧", Dictation: "✍️", "Level test": "📊", "Mock exams": "🎓", Grammar: "📘",
-};
+const CATS: { key: Cat | "all"; label: string; icon: string }[] = [
+  { key: "all", label: "All", icon: "✦" }, { key: "words", label: "Words", icon: "🧩" }, { key: "listen", label: "Listening", icon: "🎧" },
+  { key: "speak", label: "Speaking", icon: "🎤" }, { key: "read", label: "Reading", icon: "📖" }, { key: "grammar", label: "Grammar", icon: "📘" },
+];
+const CAT_OF: Record<string, Cat> = { speed: "words", memory: "words", picture: "words", bingo: "words", match: "words", gaps: "read", order: "read", listen: "listen", dictation: "listen", spell: "listen", say: "speak" };
 
 const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
   { title: "Word games", key: "prac.words", cards: [
@@ -107,26 +111,40 @@ export function Practice({ lang }: { lang: LangCode }) {
         )}
       </div>
 
-      {SECTIONS.map((sec) => (
-        <section key={sec.title} className="game-section" aria-label={sec.title}>
-          <h2>{t(sec.key)}</h2>
-          <div className="game-grid">
-            {sec.cards.map((g) => {
-              const best = g.mode ? learner.games[g.mode] : undefined;
-              return (
-                <Link key={g.title} href={g.mode ? `/${lang}/practice?mode=${g.mode}` : `/${lang}${g.href}`} className={`game-card ${g.tone}`}>
-                  <span className="spread"><span className="gi" aria-hidden="true">{GAME_EMOJI[g.title] ?? Icon[g.icon]}</span><span className="small muted">{g.mins}</span></span>
-                  <span className="t">{g.title}</span>
-                  <span className="muted small">{g.text}</span>
-                  {g.mode && <span className="small gm">{best ? `Best ${best.best}% · played ${best.played}×` : "Not played yet"}</span>}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+      <GameGallery lang={lang} games={learner.games} />
       {!anyGame && <p className="muted small">Tip: every game uses the words and sentences from the stories you read, so read a story first for the best practice.</p>}
     </>
+  );
+}
+
+/** All games as a gallery: category chips on top, animated preview tiles below. */
+function GameGallery({ lang, games }: { lang: LangCode; games: Record<string, { played: number; best: number }> }) {
+  const [cat, setCat] = useState<Cat | "all">("all");
+  const cards = SECTIONS.flatMap((s) => s.cards).filter((g) => cat === "all" || (g.mode ? CAT_OF[g.mode] : "grammar") === cat);
+  return (
+    <section aria-label="Games">
+      <div className="gp-cats" role="tablist">
+        {CATS.map((c) => (
+          <button key={c.key} role="tab" aria-selected={cat === c.key} className="gp-cat" onClick={() => setCat(c.key)}><span aria-hidden="true">{c.icon}</span>{c.label}</button>
+        ))}
+      </div>
+      <div className="gp-grid" key={cat}>
+        {cards.map((g, i) => {
+          const best = g.mode ? games[g.mode] : undefined;
+          const c = g.mode ? CAT_OF[g.mode] : "grammar";
+          return (
+            <Link key={g.title} href={g.mode ? `/${lang}/practice?mode=${g.mode}` : `/${lang}${g.href}`} className={`gp-card c-${c}`} style={{ ["--i" as string]: i }}>
+              <span className="gp-art"><GameArt mode={g.mode ?? "grammar"} />{(g.mode === "speed" || g.mode === "memory" || g.mode === "spell" || g.mode === "say") && <span className="gp-new">New</span>}</span>
+              <span className="gp-body">
+                <span className="spread"><span className="t">{g.title}</span><span className="small muted">{g.mins}</span></span>
+                <span className="muted small">{g.text}</span>
+                {g.mode && <span className="gp-best small">{best ? <>🏆 Best {best.best}% · played {best.played}×</> : "Not played yet"}</span>}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

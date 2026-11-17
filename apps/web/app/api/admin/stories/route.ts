@@ -49,7 +49,8 @@ export const POST = accountRoute(async (user, req) => {
   if (!b.success || !DAILY_LANGS.includes(lang) || !language(lang).levels.includes(b.data.level)) throw new HttpError("Choose a level and topic.");
   const id = `${lang}-daily-${new Date().toISOString().slice(0, 10)}-${Date.now().toString(36)}`;
   try {
-    await writeAndPost(id, lang, b.data.level, b.data.topic, await recentTitles(lang), false);
+    const problems = await writeAndPost(id, lang, b.data.level, b.data.topic, await recentTitles(lang));
+    if (problems.length) throw new HttpError(`The story failed its checks and wasn't posted: ${problems.join(" ")} Try again.`, 422);
   } catch (e) {
     if (e instanceof AiError) throw new HttpError(e.message, e.status);
     throw e;

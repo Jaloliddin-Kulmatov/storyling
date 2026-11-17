@@ -2,7 +2,7 @@ import "server-only";
 import { language, languages, lookup, sentenceText } from "@storyling/content";
 import type { LangCode, Sentence, Token } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
-import { photoKeywords, prepareText, writeDailyStory, type PreparedText } from "./ai";
+import { glossFor, photoKeywords, prepareText, translateLines, writeDailyStory, type PreparedText } from "./ai";
 import { db } from "./db";
 import { searchPhotos } from "./photos";
 
@@ -89,6 +89,29 @@ export function publishProblems(s: PublishedStory): string[] {
   return out;
 }
 
+/**
+ * Fix what can be fixed without a person: ask the AI for meanings the glossary left out and for missing translations,
+ * then make any word that still has no meaning plain text, so no tap ever shows an empty card. Returns the fixed story
+ * and what still stops it from being posted.
+ */
+export async function selfCheck(input: PublishedStory): Promise<{ story: PublishedStory; problems: string[] }> {
+  const story: PublishedStory = { ...input, dict: { ...input.dict }, sentences: input.sentences.map((s) => ({ ...s, tokens: [...s.tokens] })) };
+  const known = (l: string) => !!story.dict[l] || !!lookup(story.lang, l);
+  const missing = [...new Set(story.sentences.flatMap((s) => s.tokens.flatMap((t) => (t.lemma && !known(t.lemma) ? [t.lemma] : []))))];
+  if (missing.length) {
+    const text = story.sentences.map((s) => sentenceText(story.lang, s)).join(" ");
+    const found = await glossFor(story.lang, missing.slice(0, 40), text).catch(() => []);
+    for (const g of found) if (missing.includes(g.lemma)) story.dict[g.lemma] = g.reading ? [g.pos, g.meaning, g.reading] : [g.pos, g.meaning];
+    story.sentences = story.sentences.map((s) => ({ ...s, tokens: s.tokens.map((t) => (t.lemma && !known(t.lemma) ? { surface: t.surface } : t)) }));
+  }
+  const untranslated = story.sentences.map((s, i) => (s.translation?.trim() ? -1 : i)).filter((i) => i >= 0);
+  if (untranslated.length) {
+    const lines = await translateLines(story.lang, "en", untranslated.map((i) => sentenceText(story.lang, story.sentences[i]!))).catch(() => []);
+    lines.forEach((tr, k) => { if (tr.trim()) story.sentences[untranslated[k]!]!.translation = tr.trim(); });
+  }
+  return { story, problems: publishProblems(story) };
+}
+
 /** Search words for a story's photo, falling back to its topic if the AI is unavailable. */
 export async function photoQuery(s: PublishedStory) {
   const words = await photoKeywords(s.titleEnglish || s.title, s.sentences.slice(0, 2).map((x) => x.translation).join(" ")).catch(() => "");
@@ -120,8 +143,11 @@ export async function fillCovers(until: number) {
   return filled;
 }
 
-/** Write one story and post it, or hold it for review if it fails the checks or `post` is false. Returns where it went. */
-export async function writeAndPost(id: string, lang: LangCode, level: string, topic: string, avoid: string[], post = true) {
+/**
+ * Write one story, let it check and fix itself, and post it. A story that still fails is thrown away, so the next run
+ * writes that slot again. Returns the problems, or none when it was posted.
+ */
+export async function writeAndPost(id: string, lang: LangCode, level: string, topic: string, avoid: string[]): Promise<string[]> {
   const p = await writeDailyStory(lang, level, TOPICS[topic] ?? topic, avoid);
   const dict = glossary(p);
   const sentences = tokensOf(p, dict);
@@ -134,12 +160,29 @@ export async function writeAndPost(id: string, lang: LangCode, level: string, to
   const cover = await pickCover(story);
   if (cover) story.cover = cover;
   const sql = await db();
-  const held = !post || publishProblems(story).length > 0;
-  const status = held ? "pending" : "published";
+  const checked = await selfCheck(story);
+  if (checked.problems.length) return checked.problems;
   await sql`INSERT INTO daily_stories (id, lang, status, story, warnings, published_at, reviewed_by)
-    VALUES (${id}, ${lang}, ${status}, ${JSON.stringify(story)}::jsonb, ${JSON.stringify(storyWarnings(story))}::jsonb, ${held ? null : new Date().toISOString()}, ${held ? null : "auto"})
+    VALUES (${id}, ${lang}, 'published', ${JSON.stringify(checked.story)}::jsonb, ${JSON.stringify(storyWarnings(checked.story))}::jsonb, now(), 'auto-check')
     ON CONFLICT (id) DO NOTHING`;
-  return status;
+  return [];
+}
+
+/** Stories still waiting from before: fix and post each one that passes now; the rest go to Rejected. */
+export async function clearWaiting(until: number) {
+  const sql = await db();
+  const rows = (await sql`SELECT id, story FROM daily_stories WHERE status = 'pending' ORDER BY created_at LIMIT 12`) as { id: string; story: PublishedStory }[];
+  let posted = 0, rejected = 0;
+  for (const r of rows) {
+    if (Date.now() > until) break;
+    const { story, problems } = await selfCheck(r.story);
+    const status = problems.length ? "rejected" : "published";
+    await sql`UPDATE daily_stories SET story = ${JSON.stringify(story)}::jsonb, warnings = ${JSON.stringify(problems.length ? problems : storyWarnings(story))}::jsonb,
+      status = ${status}, reviewed_by = 'auto-check', published_at = ${problems.length ? null : new Date().toISOString()} WHERE id = ${r.id} AND status = 'pending'`;
+    if (problems.length) rejected++;
+    else posted++;
+  }
+  return { posted, rejected };
 }
 
 export const recentTitles = async (lang: LangCode) => {

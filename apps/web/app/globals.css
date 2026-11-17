@@ -947,3 +947,76 @@ ol.ap-list { counter-reset: n; }
 .part-check { display: grid; gap: 10px; margin: 18px 0 6px; padding: 16px; border-radius: 16px; background: var(--surface-2); border: 1px dashed var(--line); font-family: var(--f-ui); font-size: 15px; line-height: 1.45; animation: pop-in 0.35s ease; }
 .part-check b { font-family: var(--f-read); font-size: 18px; }
 .pc-options { display: grid; gap: 8px; }
+
+/* Practice gallery */
+.gp-cats { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 12px; margin-bottom: 4px; scrollbar-width: none; }
+.gp-cat { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 1px solid transparent; background: none; color: var(--ink-soft); font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s, transform 0.15s; }
+.gp-cat:hover { background: var(--surface-2); }
+.gp-cat[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.gp-cat:active { transform: scale(0.96); }
+.gp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); gap: 16px; }
+.gp-card { display: grid; text-decoration: none; color: var(--ink); border-radius: 22px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; opacity: 0; animation: gp-in 0.5s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(var(--i) * 45ms); transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s; }
+.gp-card:hover, .gp-card:focus-visible { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.14); }
+.gp-card:active { transform: scale(0.98); }
+.gp-art { position: relative; aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; }
+.c-words .gp-art { background: linear-gradient(135deg, #fde68a, #fca5a5); }
+.c-listen .gp-art { background: linear-gradient(135deg, #bfdbfe, #c4b5fd); }
+.c-speak .gp-art { background: linear-gradient(135deg, #a7f3d0, #67e8f9); }
+.c-read .gp-art { background: linear-gradient(135deg, #fbcfe8, #fde68a); }
+.c-grammar .gp-art { background: linear-gradient(135deg, #ddd6fe, #bae6fd); }
+.gp-new { position: absolute; top: 10px; left: 10px; background: #111; color: #fff; font: 700 11px/1 var(--f-ui); padding: 5px 9px; border-radius: 999px; letter-spacing: .03em; }
+.gp-body { display: grid; gap: 4px; padding: 14px 16px 16px; }
+.gp-body .t { font-size: 17px; font-weight: 800; }
+.gp-best { color: var(--muted); margin-top: 4px; }
+@keyframes gp-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* Animated previews: run on hover, or always where there is no hover */
+.ga { position: relative; width: 100%; height: 100%; display: grid; place-items: center; color: #1f2937; font-family: var(--f-read); }
+.ga * { animation-play-state: paused; }
+@media (hover: none) { .ga * { animation-play-state: running; } }
+.gp-card:hover .ga *, .gp-card:focus-visible .ga * { animation-play-state: running; }
+.ga-speed b { font-size: 44px; position: absolute; animation: ga-bounce 1s ease-in-out infinite; }
+.ga-speed .ring { width: 96px; height: 96px; border-radius: 50%; background: conic-gradient(#111 0deg, #111 var(--a, 90deg), rgba(255,255,255,.55) 0); -webkit-mask: radial-gradient(circle, transparent 40px, #000 41px); mask: radial-gradient(circle, transparent 40px, #000 41px); animation: ga-spin 2s linear infinite; }
+.ga-speed i { position: absolute; right: 18%; top: 18%; font: 800 15px/1 var(--f-ui); font-style: normal; background: #fff; padding: 5px 8px; border-radius: 8px; }
+.ga-memory { display: flex; gap: 10px; place-content: center; }
+.ga-memory span { width: 56px; height: 72px; position: relative; transform-style: preserve-3d; animation: ga-flip 2.4s ease-in-out infinite; animation-delay: var(--d); }
+.ga-memory em { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 10px; backface-visibility: hidden; font-style: normal; font-weight: 800; font-size: 15px; }
+.ga-memory em:first-child { background: #111; color: #fff; font-size: 22px; }
+.ga-memory em:last-child { background: #fff; transform: rotateY(180deg); }
+.ga-picture span { position: absolute; font-size: 52px; opacity: 0; animation: ga-cycle 3s infinite; }
+.ga-picture span:nth-child(2) { animation-delay: 1s; } .ga-picture span:nth-child(3) { animation-delay: 2s; }
+.ga-picture span:first-child { opacity: 1; }
+.ga-bingo { display: grid; grid-template-columns: repeat(3, 26px); gap: 7px; place-content: center; }
+.ga-bingo span { width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,.7); }
+.ga-bingo span.hit { animation: ga-mark 2.4s infinite; animation-delay: var(--d); }
+.ga-match span { position: absolute; background: #fff; padding: 9px 14px; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.1); }
+.ga-match .l { animation: ga-left 2.2s ease-in-out infinite; } .ga-match .r { animation: ga-right 2.2s ease-in-out infinite; font-family: var(--f-ui); }
+.ga-gaps span { background: #fff; padding: 10px 14px; border-radius: 12px; font-size: 18px; font-weight: 600; }
+.ga-gaps u { text-decoration-thickness: 2px; } .ga-gaps b { color: #0f766e; animation: ga-type 2.4s steps(4) infinite; display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
+.ga-order { display: flex; gap: 8px; }
+.ga-order span { background: #fff; padding: 8px 12px; border-radius: 10px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.1); order: var(--x); animation: ga-hop 2.4s ease-in-out infinite; animation-delay: calc(var(--x) * .2s); }
+.ga-wave { display: flex; gap: 5px; align-items: center; height: 70px; }
+.ga-wave span { width: 7px; height: 22px; border-radius: 4px; background: #312e81; animation: ga-wave 1s ease-in-out infinite; animation-delay: var(--d); }
+.ga-wave.typing { flex-wrap: wrap; place-content: center; height: auto; gap: 4px; }
+.ga-wave.typing i { flex-basis: 100%; text-align: center; font-style: normal; font-weight: 700; margin-top: 10px; background: #fff; border-radius: 10px; padding: 6px; }
+.ga-spell { display: flex; gap: 6px; }
+.ga-spell span { width: 34px; height: 42px; background: #fff; border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 20px; border-bottom: 3px solid #4338ca; animation: ga-drop 2.6s cubic-bezier(.3,1.4,.5,1) infinite; animation-delay: var(--d); }
+.ga-say b { font-size: 46px; position: relative; }
+.ga-say span { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(15,118,110,.6); animation: ga-ping 1.8s ease-out infinite; }
+.ga-say .p2 { animation-delay: .9s; }
+.ga-book b { font-size: 50px; animation: ga-bounce 2s ease-in-out infinite; }
+.ga-book span { position: absolute; bottom: 16%; background: #fff; padding: 5px 10px; border-radius: 999px; font: 700 13px/1 var(--f-ui); }
+@keyframes ga-spin { to { transform: rotate(360deg); } }
+@keyframes ga-bounce { 50% { transform: translateY(-6px) scale(1.05); } }
+@keyframes ga-flip { 0%, 30% { transform: none; } 45%, 80% { transform: rotateY(180deg); } 100% { transform: none; } }
+@keyframes ga-cycle { 0% { opacity: 0; transform: scale(.6); } 8%, 30% { opacity: 1; transform: none; } 38%, 100% { opacity: 0; transform: scale(1.2); } }
+@keyframes ga-mark { 0%, 15% { background: rgba(255,255,255,.7); transform: none; } 25%, 90% { background: #111; transform: scale(1.1); } 100% { background: rgba(255,255,255,.7); } }
+@keyframes ga-left { 0%, 15% { transform: translateX(-60px); } 45%, 70% { transform: translateX(-34px); } 100% { transform: translateX(-60px); } }
+@keyframes ga-right { 0%, 15% { transform: translateX(60px); } 45%, 70% { transform: translateX(34px); } 100% { transform: translateX(60px); } }
+@keyframes ga-type { 0% { width: 0; } 60%, 100% { width: 2.2em; } }
+@keyframes ga-hop { 0%, 100% { transform: none; } 30% { transform: translateY(-10px) rotate(-4deg); } 55% { transform: none; } }
+@keyframes ga-wave { 50% { height: 56px; } }
+@keyframes ga-drop { 0% { transform: translateY(-28px); opacity: 0; } 20%, 85% { transform: none; opacity: 1; } 100% { opacity: 0; } }
+@keyframes ga-ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .gp-card { animation: none; opacity: 1; } .ga * { animation: none !important; } .ga-picture span:not(:first-child) { display: none; } }
+.ga-wave, .ga-spell, .ga-order, .ga-memory { justify-content: center; align-items: center; }

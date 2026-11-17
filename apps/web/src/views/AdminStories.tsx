@@ -34,7 +34,7 @@ async function api<T>(method: string, body?: unknown, query = ""): Promise<T> {
 export function AdminStories({ lang: pageLang }: { lang: LangCode }) {
   const [lang, setLang] = useState(pageLang);
   const account = useAccount();
-  const [tab, setTab] = useState<Status>("pending");
+  const [tab, setTab] = useState<Status>("published");
   const [list, setList] = useState<List | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [level, setLevel] = useState("A2");
@@ -65,9 +65,9 @@ export function AdminStories({ lang: pageLang }: { lang: LangCode }) {
       const keys = Object.keys(list?.topics ?? {});
       for (let i = 0; i < times; i++) {
         await api("POST", { lang, level: times > 1 ? list!.levels[i % list!.levels.length]! : level, topic: times > 1 ? keys[Math.floor(Math.random() * keys.length)]! : topic });
-        if (tab === "pending") load();
+        if (tab === "published") load();
       }
-      if (tab !== "pending") setTab("pending");
+      if (tab !== "published") setTab("published");
     } catch (e) {
       setError((e as Error).message);
     }
@@ -77,7 +77,7 @@ export function AdminStories({ lang: pageLang }: { lang: LangCode }) {
   const TABS: [Status, string][] = [["pending", `Waiting${list ? ` (${list.waiting})` : ""}`], ["published", "Published"], ["rejected", "Rejected"]];
   return (
     <>
-      <p className="muted">New stories arrive here every morning. Learners only see the ones you publish.</p>
+      <p className="muted">Stories check and fix themselves, then post automatically. Unpublish any you don't like; ones that failed their checks are in Rejected.</p>
 
       <div className="spread adm-bar">
         <div className="seg" role="group" aria-label="Status">

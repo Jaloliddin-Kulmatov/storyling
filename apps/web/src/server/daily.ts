@@ -3,15 +3,14 @@ import type { LangCode } from "@storyling/core";
 import { getSettings } from "./admin";
 import { AiError, lastAiModel } from "./ai";
 import { db } from "./db";
-import { mailEnabled, sendMail } from "./mail";
-import { adminEmails, dailyPlan, fillCovers, recentTitles, writeAndPost } from "./stories";
+import { clearWaiting, dailyPlan, fillCovers, recentTitles, writeAndPost } from "./stories";
 
 // The function stops at 300 seconds. Whatever's left waits for the next run, an hour later.
 const WRITE_FOR = 240_000;
 const COVERS_UNTIL = 270_000;
 const MINUTE_LIMIT_PAUSE = 62_000;
 
-/** Write and post what's still missing from today's plan. Ids include the date, so a run only fills the gaps. */
+/** Post what was waiting, then write and post what's still missing from today's plan. A story that fails its own checks is written again on the next run. */
 export async function writeDailyStories() {
   const started = Date.now();
   const day = new Date().toISOString().slice(0, 10);
@@ -19,6 +18,7 @@ export async function writeDailyStories() {
   const { hiddenLangs } = await getSettings();
   const done = new Set(((await sql`SELECT id FROM daily_stories WHERE id LIKE ${`%-daily-${day}-%`}`) as { id: string }[]).map((r) => r.id));
   const todo = dailyPlan(day).filter((s) => !done.has(s.id) && !hiddenLangs.includes(s.lang));
+  const waiting = await clearWaiting(started + 60_000);
   const published: string[] = [];
   const held: string[] = [];
   const errors: string[] = [];
@@ -28,7 +28,9 @@ export async function writeDailyStories() {
     const { id, lang, level, topic } = todo[i]!;
     try {
       const titles = (avoid[lang] ??= await recentTitles(lang));
-      ((await writeAndPost(id, lang, level, topic, titles)) === "published" ? published : held).push(id);
+      const problems = await writeAndPost(id, lang, level, topic, titles);
+      if (problems.length) held.push(`${id}: ${problems.join(" ")}`);
+      else published.push(id);
       waited = false;
     } catch (e) {
       console.error(e);
@@ -44,10 +46,6 @@ export async function writeDailyStories() {
       if (busy) break;
     }
   }
-  if (held.length && mailEnabled()) {
-    const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://storyling.vercel.app";
-    for (const to of adminEmails()) await sendMail(to, `${held.length} stories failed the checks`, `They were not posted. Read them here:\n${site}/de/admin`);
-  }
   const covers = await fillCovers(started + COVERS_UNTIL);
-  return { published, held, errors, left: todo.length - published.length - held.length, covers, model: lastAiModel(), seconds: Math.round((Date.now() - started) / 1000) };
+  return { published, held, waiting, errors, left: todo.length - published.length - held.length, covers, model: lastAiModel(), seconds: Math.round((Date.now() - started) / 1000) };
 }
