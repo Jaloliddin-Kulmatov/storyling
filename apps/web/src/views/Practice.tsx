@@ -335,7 +335,7 @@ function useSentences(lang: LangCode) {
   }, [stories, learner.finished, learner.level, lang, from, allowed]);
 }
 
-export function Done({ score, total, onAgain, note }: { score: number; total: number; onAgain: () => void; note?: string }) {
+export function Done({ score, total, onAgain, note, summary }: { score: number; total: number; onAgain: () => void; note?: string; summary?: string }) {
   const pct = Math.round((score / Math.max(1, total)) * 100);
   const shown = useCountUp(pct);
   return (
@@ -343,7 +343,7 @@ export function Done({ score, total, onAgain, note }: { score: number; total: nu
       {pct >= 80 && <Confetti />}
       <div className="score-ring anim" style={{ ["--p" as string]: pct / 100 }}><b>{shown}%</b></div>
       <h2 style={{ fontSize: 22 }}>{pct >= 80 ? "Great job!" : pct >= 50 ? "Good work!" : "Keep practicing!"}</h2>
-      <p className="muted" style={{ margin: 0 }}>{score} of {total} correct.{note ? ` ${note}` : ""}</p>
+      <p className="muted" style={{ margin: 0 }}>{summary ?? `${score} of ${total} correct.`}{note ? ` ${note}` : ""}</p>
       <button className="btn primary block" onClick={onAgain}>Play again</button>
     </div>
   );

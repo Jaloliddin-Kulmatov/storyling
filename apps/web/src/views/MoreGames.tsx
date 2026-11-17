@@ -121,7 +121,7 @@ export function Memory({ lang }: { lang: LangCode }) {
   }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (pool.length < 6) return <TooFew need={6} />;
-  if (finished) return <Done score={pairs} total={moves} note={`${moves} turns for ${pairs} pairs.`} onAgain={() => { setGame((g) => g + 1); setOpen([]); setFound(new Set()); setMoves(0); }} />;
+  if (finished) return <Done score={pairs} total={moves} summary={`All ${pairs} pairs in ${moves} turns${moves === pairs ? " — perfect memory!" : "."}`} onAgain={() => { setGame((g) => g + 1); setOpen([]); setFound(new Set()); setMoves(0); }} />;
 
   const flip = (c: MemCard) => {
     if (busy.current || open.includes(c.key) || found.has(c.lemma)) return;
@@ -235,7 +235,8 @@ export function SpellIt({ lang }: { lang: LangCode }) {
 }
 
 // ── Say it: read a word aloud and the browser checks what it heard ──
-const plain = (s: string) => s.toLowerCase().normalize("NFKC").replace(/[\p{P}\p{S}\s]+/gu, "");
+// Katakana to hiragana too, so a Japanese answer matches however the recognizer writes it.
+const plain = (s: string) => s.toLowerCase().normalize("NFKC").replace(/[\p{P}\p{S}\s]+/gu, "").replace(/[\u30a1-\u30f6]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
 
 export function SayIt({ lang }: { lang: LangCode }) {
   const pool = usePool(lang);
@@ -259,7 +260,7 @@ export function SayIt({ lang }: { lang: LangCode }) {
     return <TooFew need={3} />;
   }
 
-  const target = plain(cur.display.replace(/^(der|die|das) /, ""));
+  const targets = [cur.display.replace(/^(der|die|das) /, ""), cur.lemma.replace(/#.*$/, "")].map(plain).filter(Boolean);
   const listen = () => {
     rec.current?.stop();
     const r = new Ctor();
@@ -268,7 +269,7 @@ export function SayIt({ lang }: { lang: LangCode }) {
     r.maxAlternatives = 5;
     r.onresult = (e) => {
       const alts = Array.from(e.results[0] ?? []).map((a) => a.transcript);
-      const ok = alts.some((a) => plain(a).includes(target));
+      const ok = alts.some((a) => targets.some((t) => plain(a).includes(t)));
       setHeard(alts[0] ?? "");
       setState(ok ? "ok" : "no");
       setTries((t) => t + 1);
@@ -301,7 +302,7 @@ export function SayIt({ lang }: { lang: LangCode }) {
       <p className={`say-result ${state}`} role="status" lang={lang}>
         {state === "listening" ? "Listening…" : state === "ok" ? `✓ Great! I heard “${heard}”.` : state === "no" ? (heard && !heard.includes(".") ? `I heard “${heard}”. Try again.` : heard) : "Tap the microphone and say the word."}
       </p>
-      <button className="btn primary block" disabled={state === "listening" || (state !== "ok" && tries < 2)} onClick={next}>{state === "ok" ? (n + 1 >= rounds.length ? "See result" : "Next") : "Skip"}</button>
+      <button className="btn primary block" disabled={state === "listening"} onClick={next}>{state === "ok" ? (n + 1 >= rounds.length ? "See result" : "Next") : "Skip"}</button>
     </div>
   );
 }
