@@ -59,6 +59,31 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
   return <StoryReader key={story.id} story={story} />;
 }
 
+/** A quick question between parts: what did one sentence of the part just read mean? */
+function PartCheck({ story, from, to }: { story: AnyStory; from: number; to: number }) {
+  const q = useMemo(() => {
+    const i = from + Math.floor((to - from) / 2);
+    const right = story.sentences[i]?.translation;
+    const others = story.sentences.map((s) => s.translation).filter((t, j): t is string => !!t && t !== right && (j < from || j >= to));
+    if (!right || others.length < 2) return null;
+    return { i, right, options: shuffle([right, ...shuffle(others).slice(0, 2)]) };
+  }, [story, from, to]);
+  const [chosen, setChosen] = useState<string | null>(null);
+  if (!q) return null;
+  return (
+    <div className="part-check" onClick={(e) => e.stopPropagation()}>
+      <span className="small muted">Quick check · what does this mean?</span>
+      <b lang={story.lang}>{textOf(story, story.sentences[q.i]!)}</b>
+      <div className="pc-options">
+        {q.options.map((o) => (
+          <button key={o} disabled={!!chosen} className={`choice${chosen && o === q.right ? " ok" : ""}${chosen === o && o !== q.right ? " no" : ""}`} onClick={() => setChosen(o)}><Tr>{o}</Tr></button>
+        ))}
+      </div>
+      {chosen && <span className="small" role="status">{chosen === q.right ? "✓ Right! Keep reading." : "Not quite. The right one is marked."}</span>}
+    </div>
+  );
+}
+
 /** The AI picture before each part of a story. Hidden if it can't be made; tried again a few times while the page is open. */
 function PartPicture({ lang, id, part }: { lang: LangCode; id: string; part: number }) {
   const [tries, setTries] = useState(0);
@@ -174,6 +199,7 @@ function StoryReader({ story }: { story: AnyStory }) {
     playWord(lang, t.lemma, t.surface);
   }
 
+  const parts = useMemo(() => (isUserStory(story) ? [[0, story.sentences.length] as [number, number]] : partsOf(story.sentences.length)), [story]);
   const progress = story.sentences.length ? ((playing ?? cursor) + 1) / story.sentences.length : 0;
 
   return (
@@ -208,8 +234,9 @@ function StoryReader({ story }: { story: AnyStory }) {
 
           <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}
             onClick={(e) => { if (!(e.target as HTMLElement).closest("button")) setPicked(null); }}>
-            {(isUserStory(story) ? [[0, story.sentences.length] as [number, number]] : partsOf(story.sentences.length)).map(([from, to], part) => (
+            {parts.map(([from, to], part) => (
             <Fragment key={part}>
+            {part > 0 && !isUserStory(story) && <PartCheck story={story} from={parts[part - 1]![0]} to={parts[part - 1]![1]} />}
             {!isUserStory(story) && <PartPicture lang={lang} id={story.id} part={part} />}
             {story.sentences.slice(from, to).map((s, k) => {
               const i = from + k;

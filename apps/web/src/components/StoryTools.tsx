@@ -9,7 +9,7 @@ import { useSettings } from "@/lib/learner";
 import { textOf, type AnyStory } from "@/lib/stories";
 import { Icon } from "@/components/ui";
 
-interface Recognition {
+export interface Recognition {
   lang: string;
   interimResults: boolean;
   maxAlternatives: number;
@@ -20,7 +20,7 @@ interface Recognition {
   stop(): void;
 }
 type RecognitionCtor = new () => Recognition;
-const recognizer = (): RecognitionCtor | undefined =>
+export const recognizer = (): RecognitionCtor | undefined =>
   typeof window === "undefined" ? undefined : ((window as unknown as { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: RecognitionCtor }).webkitSpeechRecognition);
 
 const storyText = (story: AnyStory) => story.sentences.map((s) => textOf(story, s)).join(" ");

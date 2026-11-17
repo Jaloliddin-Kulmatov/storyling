@@ -14,10 +14,11 @@ import { isUserStory, lookupIn, PUNCT, textOf, useStories, type AnyStory } from 
 import { highlight, shuffle, useWordInfo } from "@/lib/words";
 import { Icon } from "@/components/ui";
 import { DictationRun } from "@/components/DictationRun";
+import { Memory, SayIt, SpeedRound, SpellIt } from "./MoreGames";
 
-type Mode = "review" | "match" | "order" | "listen" | "dictation" | "picture" | "bingo" | "gaps";
+type Mode = "review" | "match" | "order" | "listen" | "dictation" | "picture" | "bingo" | "gaps" | "speed" | "memory" | "spell" | "say";
 
-interface PoolWord {
+export interface PoolWord {
   lemma: string;
   display: string;
   meaning: string;
@@ -28,11 +29,13 @@ interface PoolWord {
 interface Card { title: string; text: string; icon: keyof typeof Icon; tone: string; mode?: Mode; href?: string; mins: string }
 
 const GAME_EMOJI: Record<string, string> = {
-  "Picture match": "🖼️", Bingo: "🎯", "Match words": "🧩", "Fill the gaps": "✏️", "Build the sentence": "🧱", Listening: "🎧", Dictation: "✍️", "Level test": "📊", "Mock exams": "🎓", Grammar: "📘",
+  "Speed round": "⚡", Memory: "🃏", "Spell it": "🔤", "Say it": "🎤", "Picture match": "🖼️", Bingo: "🎯", "Match words": "🧩", "Fill the gaps": "✏️", "Build the sentence": "🧱", Listening: "🎧", Dictation: "✍️", "Level test": "📊", "Mock exams": "🎓", Grammar: "📘",
 };
 
 const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
   { title: "Word games", key: "prac.words", cards: [
+    { mode: "speed", title: "Speed round", text: "60 seconds. Pick meanings as fast as you can. Streaks score more.", icon: "spark", tone: "t1", mins: "1 min" },
+    { mode: "memory", title: "Memory", text: "Turn cards two at a time to find each word and its meaning.", icon: "spark", tone: "t1", mins: "2 min" },
     { mode: "picture", title: "Picture match", text: "See a picture, pick the word. Hear a word, find the picture.", icon: "spark", tone: "t1", mins: "2 min" },
     { mode: "bingo", title: "Bingo", text: "Hear a word and mark it on your card. Four in a row wins.", icon: "spark", tone: "t1", mins: "3 min" },
     { mode: "match", title: "Match words", text: "Pair each word with its meaning.", icon: "spark", tone: "t1", mins: "1 min" },
@@ -43,6 +46,8 @@ const SECTIONS: { title: string; key: string; cards: Card[] }[] = [
   ] },
   { title: "Listening and writing", key: "prac.listen", cards: [
     { mode: "listen", title: "Listening", text: "Hear a sentence and pick what was said.", icon: "speaker", tone: "t2", mins: "2 min" },
+    { mode: "spell", title: "Spell it", text: "Hear a word and build it letter by letter.", icon: "speaker", tone: "t2", mins: "3 min" },
+    { mode: "say", title: "Say it", text: "Say the word out loud. Your browser checks what it heard.", icon: "speaker", tone: "t2", mins: "3 min" },
     { mode: "dictation", title: "Dictation", text: "Hear a sentence and type what you hear.", icon: "speaker", tone: "t2", mins: "4 min" },
   ] },
   { title: "Grammar", key: "prac.grammar", cards: [
@@ -66,6 +71,10 @@ export function Practice({ lang }: { lang: LangCode }) {
   const back = () => router.push(`/${lang}/practice`);
   const t = useT();
 
+  if (mode === "speed") return <Shell lang={lang} title="Speed round" onBack={back}><SpeedRound lang={lang} /></Shell>;
+  if (mode === "memory") return <Shell lang={lang} title="Memory" onBack={back}><Memory lang={lang} /></Shell>;
+  if (mode === "spell") return <Shell lang={lang} title="Spell it" onBack={back}><SpellIt lang={lang} /></Shell>;
+  if (mode === "say") return <Shell lang={lang} title="Say it" onBack={back}><SayIt lang={lang} /></Shell>;
   if (mode === "picture") return <Shell lang={lang} title="Picture match" onBack={back}><PictureMatch lang={lang} /></Shell>;
   if (mode === "bingo") return <Shell lang={lang} title="Bingo" onBack={back}><Bingo lang={lang} /></Shell>;
   if (mode === "gaps") return <Shell lang={lang} title="Fill the gaps" onBack={back}><GapFill lang={lang} /></Shell>;
@@ -228,12 +237,12 @@ function useAllowed(lang: LangCode): Set<string> | null {
 }
 
 /** Ask for a wider source when the chosen one has too few words for a game. */
-function TooFew({ need }: { need: number }) {
+export function TooFew({ need }: { need: number }) {
   return <div className="empty"><p className="muted">This game needs at least {need} different words. Choose more stories or “Everything” above.</p></div>;
 }
 
 /** Words with meanings from the learner's saved words first, then from stories (one level, or all). */
-function usePool(lang: LangCode, level?: string) {
+export function usePool(lang: LangCode, level?: string) {
   const stories = useStories(lang);
   const learner = useLearner(lang);
   const from = useFrom();
@@ -308,7 +317,7 @@ function useSentences(lang: LangCode) {
   }, [stories, learner.finished, learner.level, lang, from, allowed]);
 }
 
-function Done({ score, total, onAgain, note }: { score: number; total: number; onAgain: () => void; note?: string }) {
+export function Done({ score, total, onAgain, note }: { score: number; total: number; onAgain: () => void; note?: string }) {
   const pct = Math.round((score / Math.max(1, total)) * 100);
   const shown = useCountUp(pct);
   return (
@@ -347,7 +356,7 @@ function useCountUp(to: number) {
 const CONFETTI_COLORS = ["#2f9e6e", "#f59e0b", "#3b82f6", "#ef4444", "#a855f7", "#10b981"];
 
 /** A short burst of confetti for a good score (CSS only, hidden with reduced motion). */
-function Confetti() {
+export function Confetti() {
   const bits = useMemo(
     () => Array.from({ length: 28 }, (_, i) => ({ x: Math.round((Math.random() - 0.5) * 520), y: Math.round(-120 - Math.random() * 220), r: Math.round(Math.random() * 720 - 360), c: CONFETTI_COLORS[i % CONFETTI_COLORS.length], d: Math.random() * 0.15 })),
     [],
@@ -362,18 +371,18 @@ function Confetti() {
 }
 
 /** Correct answers in a row; shown as a small flame badge from 2 up. */
-function useCombo() {
+export function useCombo() {
   const [combo, setCombo] = useState(0);
   return [combo, (ok: boolean) => setCombo((c) => (ok ? c + 1 : 0))] as const;
 }
 
-function Combo({ n }: { n: number }) {
+export function Combo({ n }: { n: number }) {
   if (n < 2) return null;
   return <span key={n} className="combo" aria-live="polite">🔥 {n} in a row</span>;
 }
 
 /** Animated progress bar for a round of questions. */
-function Progress({ done, total }: { done: number; total: number }) {
+export function Progress({ done, total }: { done: number; total: number }) {
   return (
     <div className="g-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
       <span style={{ width: `${(done / Math.max(1, total)) * 100}%` }} />
@@ -398,14 +407,14 @@ function useKeys(on: (key: string) => void) {
 }
 
 /** Number keys pick an answer, Enter presses the main button (Check / Next). */
-function useChoiceKeys() {
+export function useChoiceKeys() {
   useKeys((k) => {
     if (/^[1-6]$/.test(k)) document.querySelectorAll<HTMLButtonElement>(".flash .choices button:not(:disabled)")[Number(k) - 1]?.click();
     else if (k === "Enter") document.querySelector<HTMLButtonElement>(".flash > .btn.primary.block:not(:disabled)")?.click();
   });
 }
 
-function useFrozen<T>(build: () => T, key: string): T {
+export function useFrozen<T>(build: () => T, key: string): T {
   const ref = useRef<{ key: string; value: T } | null>(null);
   if (!ref.current || ref.current.key !== key) ref.current = { key, value: build() };
   return ref.current.value;
