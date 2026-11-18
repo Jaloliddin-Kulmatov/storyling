@@ -39,17 +39,19 @@ export function ExamSkills({ lang }: { lang: LangCode }) {
   if (open) return <TaskRun lang={lang} task={open} onExit={() => setOpen(null)} />;
   return (
     <section style={{ marginTop: 28 }} aria-label="Writing and speaking">
-      <h2 style={{ fontSize: 20, marginBottom: 4 }}>Schreiben und Sprechen</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 4 }}>Schreiben und Sprechen</h2>
       <p className="muted small" style={{ marginTop: 0 }}>Write or speak your answer and get a score on the four exam criteria, with corrections. Graded by AI, so treat the score as a guide.</p>
-      <div className="game-grid">
-        {tasks.map((t) => {
+      <div className="sk-grid">
+        {tasks.map((t, k) => {
           const best = learner.games[`${t.kind}-${t.level}`];
           return (
-            <button key={`${t.level}-${t.kind}`} className={`game-card ${t.kind === "writing" ? "t2" : "t3"}`} style={{ textAlign: "left" }} onClick={() => setOpen(t)}>
-              <span className="spread"><span className="lvl">{t.level}</span><span className="small muted">{t.kind === "writing" ? `${t.words} words` : `${t.minutes} min`}</span></span>
-              <span className="t">{t.kind === "writing" ? "✍️ Schreiben" : "🎙️ Sprechen"}</span>
-              <span className="muted small">{t.title}</span>
-              <span className="small gm">{best ? `Best ${best.best}%` : "Not taken yet"}</span>
+            <button key={`${t.level}-${t.kind}`} className={`sk-card ${t.kind}`} style={{ ["--i" as string]: k }} onClick={() => setOpen(t)}>
+              <span className="sk-icon" aria-hidden="true">{t.kind === "writing" ? "✍️" : "🎙️"}</span>
+              <span className="sk-body">
+                <span className="spread"><b>{t.kind === "writing" ? "Schreiben" : "Sprechen"} · {t.level}</b><span className="small muted">{t.kind === "writing" ? `${t.words} words` : `${t.minutes} min`}</span></span>
+                <span className="muted small">{t.title}</span>
+                <span className="sk-best small">{best ? `Best ${best.best}%` : "Not taken yet"}</span>
+              </span>
             </button>
           );
         })}

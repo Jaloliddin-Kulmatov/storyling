@@ -63,45 +63,69 @@ export function Exams({ lang }: { lang: LangCode }) {
   const total = Object.values(fmt.count).reduce((a, b) => a + b, 0);
   const counts = useMemo(() => Object.fromEntries(meta.levels.map((l) => [l, stories.filter((s) => s.level === l && !isUserStory(s)).length])), [meta, stories]);
 
-  if (!level)
+  if (!level) {
+    const rec = meta.levels[Math.min(learner.level ?? 0, meta.levels.length - 1)];
+    const sections = (Object.keys(fmt.count) as Section[]).filter((k) => fmt.count[k] > 0);
     return (
       <>
         <div className="page-head"><div><div className="eyebrow">{meta.name}</div><h1>Tests</h1></div></div>
-        <h2 style={{ fontSize: 20 }}>Level test</h2>
-        <div className="game-grid" style={{ marginBottom: 22 }}>
-          <Link className="game-card t1" href={`/${lang}/exams/level-test`}>
-            <span className="gi">{Icon.progress}</span>
-            <span className="t">Level test</span>
-            <span className="muted small">10 quick questions on the words of one level. Find out where you are. About 3 minutes.</span>
-          </Link>
+
+        <Link className="ex-hero" href={`/${lang}/exams/level-test`}>
+          <span className="ex-hero-text">
+            <span className="ex-kicker">Level test · 3 minutes</span>
+            <b>Find your level</b>
+            <span>10 quick questions on the words of each level. See where you are, then pick the right exam.</span>
+            <span className="btn primary sm ex-cta">Start the level test <span aria-hidden="true">→</span></span>
+          </span>
+          <span className="ex-bars" aria-hidden="true">{[38, 62, 48, 84, 70].map((h, k) => <i key={k} style={{ ["--h" as string]: `${h}%`, ["--d" as string]: `${k * 0.12}s` }} />)}</span>
+        </Link>
+
+        <div className="ex-head">
+          <div>
+            <h2>Mock exams</h2>
+            <span className="muted small">{fmt.name}</span>
+          </div>
+          <div className="ex-facts">
+            <span>⏱ {fmt.minutes} min</span><span>📝 {total} questions</span><span>🎯 Pass {PASS}%</span>
+          </div>
         </div>
-        <h2 style={{ fontSize: 20 }}>Mock exams</h2>
-        <p className="muted"><b>{fmt.name}</b> · {fmt.minutes} minutes. {fmt.note}</p>
-        <p className="muted">Exam-style practice in the structure of the big language exams: Listening, Reading, Vocabulary and Grammar. Pass mark {PASS}%. These papers are written by Storyling from its own texts, they are not official Goethe, Telc or other exam papers.</p>
-        <div className="game-grid">
-          {meta.levels.map((l) => {
+        <div className="ex-sections">{sections.map((k) => <span key={k}>{fmt.label[k]} <small>{fmt.count[k]}</small></span>)}</div>
+
+        <div className="ex-grid">
+          {meta.levels.map((l, k) => {
             const best = learner.games[`exam-${l}`];
+            const passed = !!best && best.best >= PASS;
+            const off = counts[l]! < 6;
             return (
-              <button key={l} className="game-card" disabled={counts[l]! < 6} style={{ textAlign: "left" }} onClick={() => { setLevel(l); setRun((r) => r + 1); }}>
-                <span className="t">{l}</span>
-                <span className="muted small">{counts[l]} texts · {total} questions</span>
-                <span className="small gm">{best ? `Best ${best.best}% · taken ${best.played}×` : "Not taken yet"}</span>
+              <button key={l} className={`ex-card${l === rec ? " rec" : ""}${passed ? " passed" : ""}`} disabled={off} style={{ ["--i" as string]: k }} onClick={() => { setLevel(l); setRun((r) => r + 1); }}>
+                {l === rec && <span className="ex-badge">Recommended</span>}
+                <span className="ex-ring" style={{ ["--p" as string]: (best?.best ?? 0) / 100 }}>
+                  <span>{l}</span>
+                </span>
+                <span className="ex-body">
+                  <span className="ex-status">{passed ? `✓ Passed · ${best!.best}%` : best ? `Best ${best.best}% · try again` : off ? "Coming soon" : "Ready to start"}</span>
+                  <span className="muted small">{total} questions · {fmt.minutes} min{best ? ` · taken ${best.played}×` : ""}</span>
+                </span>
+                <span className="ex-go" aria-hidden="true">→</span>
               </button>
             );
           })}
         </div>
+        <p className="muted small" style={{ marginTop: 10 }}>{fmt.note} Written by Storyling from its own texts; not an official Goethe, telc or other exam paper.</p>
+
         <ExamSkills lang={lang} />
         {learner.exams.length > 0 && (
-          <section style={{ marginTop: 24 }} aria-label="Your past papers">
-            <h2 style={{ fontSize: 18 }}>Your past papers</h2>
-            <div className="table">
+          <section style={{ marginTop: 28 }} aria-label="Your past papers">
+            <h2 style={{ fontSize: 20 }}>Your past papers</h2>
+            <div className="ex-history">
               {learner.exams.slice(0, 10).map((e) => (
-                <div className="trow" key={e.at}>
-                  <span>
-                    <b>{e.level}</b> <span className="muted small">{new Date(e.at).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })}</span>
-                    <span className="small muted" style={{ display: "block" }}>{Object.entries(e.sections).map(([n, [r, of]]) => `${n} ${r}/${of}`).join(" · ")}</span>
+                <div className="ex-row" key={e.at}>
+                  <span className="ex-lv">{e.level}</span>
+                  <span className="ex-row-body">
+                    <span className="small muted">{new Date(e.at).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })} · {Object.entries(e.sections).map(([n, [r, of]]) => `${n} ${r}/${of}`).join(" · ")}</span>
+                    <span className="ex-meter"><i style={{ width: `${e.pct}%` }} className={e.pct >= PASS ? "ok" : ""} /><b style={{ left: `${PASS}%` }} /></span>
                   </span>
-                  <b style={{ color: e.pct >= PASS ? "var(--primary)" : undefined }}>{e.pct}%</b>
+                  <b className={e.pct >= PASS ? "ex-pass" : ""}>{e.pct}%</b>
                 </div>
               ))}
             </div>
@@ -109,6 +133,7 @@ export function Exams({ lang }: { lang: LangCode }) {
         )}
       </>
     );
+  }
 
   return <Paper key={`${level}-${run}`} lang={lang} level={level} onExit={() => setLevel(null)} onAgain={() => setRun((r) => r + 1)} />;
 }
