@@ -2,7 +2,8 @@ import type { LangCode } from "@storyling/core";
 import snapshot from "./videos.json";
 
 /** Learner-friendly YouTube channels per language. Videos come from each channel's public feed. */
-export type Band = "beginner" | "intermediate" | "advanced";
+/** Difficulty, or "music" for song playlists (karaoke view, no saved lyrics). */
+export type Band = "beginner" | "intermediate" | "advanced" | "music";
 
 export interface Channel {
   id: string;
@@ -18,6 +19,9 @@ export const CHANNELS: Record<LangCode, Channel[]> = {
   en: [
     { id: "UCHaHD477h-FeBbVh9Sh7syA", name: "BBC Learning English", band: "intermediate", note: "News, grammar and vocabulary in clear English" },
     { id: "UCvgLaFuTGGRXl0eyvBRCifA", name: "Easy English", band: "intermediate", note: "Street interviews with subtitles" },
+    // Music (karaoke view)
+    { id: "music-en-easypeasy", playlist: "PLPIekq7ERNvKsnOuxdkx3IvyNuq6YIH11", name: "Songs · Easy Peasy English", band: "music", note: "Songs picked for B1–B2 learners" },
+    { id: "music-en-h2", playlist: "PLCTnsY4jhCCzNQzH4roRgmfWPWQs5vEDD", name: "Songs · H2English", band: "music", note: "Easy English songs to sing along to" },
   ],
   de: [
     // Beginner (A1–A2)
@@ -41,35 +45,61 @@ export const CHANNELS: Record<LangCode, Channel[]> = {
     { id: "eg-b2", playlist: "PLk1fjOl39-51lvdiuQYsLW-0aGIdNNknA", name: "Easy German B2", band: "advanced", note: "Longer conversations for upper-intermediate learners" },
     { id: "eg-c1", playlist: "PLk1fjOl39-53pjPz2VLCeu5vjOUMKZ22O", name: "Easy German C1", band: "advanced", note: "Politics, society and culture for advanced learners" },
     { id: "UC5NOEUbkLheQcaaRldYW5GA", playlist: "UULF5NOEUbkLheQcaaRldYW5GA", name: "tagesschau", band: "advanced", note: "The main German TV news" },
+    // Music (karaoke view)
+    { id: "music-de-msc", playlist: "PLbSg0EkbdGr3Dc3bjokJ3BwjDSNLHHuAV", name: "Songs · Munich Supercrew", band: "music", note: "Songs written for A1 learners of German" },
+    { id: "music-de-hub", playlist: "PLFlI4CuJOp7SmMfo0j49UYUI1ONFOWgC5", name: "Songs · Learn German Hub", band: "music", note: "Easy German songs to learn with" },
   ],
   es: [
     { id: "UCouyFdE9-Lrjo3M_2idKq1A", name: "Dreaming Spanish", band: "beginner", note: "Comprehensible input, from superbeginner up" },
     { id: "UCAL4AMMMXKxHDu3FqZV6CbQ", name: "Easy Spanish", band: "intermediate", note: "Street interviews with subtitles" },
+    // Music (karaoke view)
+    { id: "music-es-ele", playlist: "PLUKlJas17MPgUQrxmVSjOTE4uqZBWz3Rk", name: "Songs · ProfeDeELE", band: "music", note: "Songs chosen by Spanish teachers" },
   ],
   fr: [
     { id: "UCoUWq2QawqdC3-nRXKk-JUw", name: "Easy French", band: "intermediate", note: "Street interviews and slow French" },
     { id: "UCI4xp8qHD1MDErkqxb1dPbA", name: "innerFrench", band: "intermediate", note: "Clear, natural French on everyday topics" },
+    // Music (karaoke view)
+    { id: "music-fr-carine", playlist: "PLGwLcRYAcTT6T49eMBuITfzjtP9b3omVU", name: "Songs · French with Carine", band: "music", note: "Music for learning French, about A2–B1" },
   ],
   tr: [
     { id: "UC1U-NW0ci6d1aHLc2gOHv8Q", name: "Easy Turkish", band: "intermediate", note: "Street interviews with Turkish and English subtitles" },
     { id: "UC-HOzxLZiH6MhGU5csLgINA", name: "TurkishClass101", band: "beginner", note: "Short lessons and everyday vocabulary" },
+    // Music (karaoke view)
+    { id: "music-tr-easy", playlist: "PL75JEBu9ZQBChLQJ_QFaOlkHEjIWJj3Do", name: "Songs · Learn Turkish by Listening", band: "music", note: "Super easy Turkish songs with lyrics" },
+    { id: "music-tr-more", playlist: "PL75JEBu9ZQBC4HAOtw1zgxJvMd97UOGIo", name: "Songs · Easy Turkish songs", band: "music", note: "Easy songs with English subtitles" },
   ],
   pt: [
     { id: "UCGs6EbIt75S4IMKPRUU0JNQ", name: "Speaking Brazilian", band: "intermediate", note: "Brazilian Portuguese as people really speak it" },
     { id: "UCeLpksGNxcD6eFpl_ixvbMw", name: "Easy Portuguese", band: "intermediate", note: "Street interviews (European Portuguese)" },
+    // Music (karaoke view)
+    { id: "music-pt-brazuca", playlist: "PLf09kOE6_zaLMyrLXXs6Oytu2MK0dVFhN", name: "Songs · Philipe Brazuca", band: "music", note: "Brazilian songs to learn Portuguese" },
+    { id: "music-pt-ana", playlist: "PLpQfKA9qGKqMCHR50Baj8UCY5rsbmmNvo", name: "Songs · Ana Gabriella Souza", band: "music", note: "Brazilian music for learners" },
   ],
   ru: [
     { id: "UCklUqFEcJqFnWKEBozw5p4g", name: "Russian With Max", band: "beginner", note: "Slow, simple Russian" },
     { id: "UCxvt-g7JsPNnEn8tUtZZBBg", name: "Easy Russian", band: "intermediate", note: "Street interviews with subtitles" },
+    // Music (karaoke view)
+    { id: "music-ru-nl", playlist: "PLUuAJRdMIYTpPCPU4Ub-XryijR8MrPYaj", name: "Songs · Russian with lyrics", band: "music", note: "Russian songs with lyrics" },
+    { id: "music-ru-karaoke", playlist: "PLWKS9tJvUVPx9NPpoxqv9HUhR90hy9pnd", name: "Songs · Russian karaoke", band: "music", note: "Russian songs in karaoke style" },
   ],
   zh: [
     { id: "UC2fAiRQHRQT9aj9P_ijYeow", name: "Mandarin Corner", band: "intermediate", note: "Real conversations with Chinese and pinyin subtitles" },
     { id: "UCw837dYLZNGdhk5G5zjySIg", name: "Easy Mandarin", band: "intermediate", note: "Street interviews with subtitles" },
+    // Music (karaoke view)
+    { id: "music-zh-hop", playlist: "PL8g4pmxyo0-OS4fjH_BTc2djGgrkM_Bs1", name: "Songs · HopMandarin", band: "music", note: "Learn Chinese by singing" },
+    { id: "music-zh-hil", playlist: "PL8rkctvSa2wHH5p16X94B5MJmsapHtEuL", name: "Songs · Hopping into Languages", band: "music", note: "Chinese songs for learners" },
   ],
-  ja: [{ id: "UC16-9M0osgdFbLKXvCwpXaw", name: "Easy Japanese Podcast", band: "beginner", note: "Slow, simple Japanese about daily life" }],
+  ja: [
+    { id: "UC16-9M0osgdFbLKXvCwpXaw", name: "Easy Japanese Podcast", band: "beginner", note: "Slow, simple Japanese about daily life" },
+    // Music (karaoke view)
+    { id: "music-ja-beg", playlist: "PLtV9ZgSxYUbxbkwE1Yu9n6VHfvlvKKu5y", name: "Songs · Japanese for beginners", band: "music", note: "Easy Japanese songs to sing" },
+  ],
   ko: [
     { id: "UC5r3WHrX4Z7peSYpDlgktGw", name: "Talk To Me In Korean", band: "beginner", note: "Lessons and listening practice" },
     { id: "UCSM7iNM9o6TEH00dEkn526w", name: "Easy Korean", band: "intermediate", note: "Street interviews with subtitles" },
+    // Music (karaoke view)
+    { id: "music-ko-kwm", playlist: "PLynn3VgsdqsqbWv6OhUxFJ3eEU_txZu72", name: "Songs · Korean with me", band: "music", note: "Learn Korean with Korean songs" },
+    { id: "music-ko-hek", playlist: "PLhRPWEt6IMyuDe12qF4lqMiUBNZWZrGhh", name: "Songs · Hi Easy Korean", band: "music", note: "Korean songs explained for learners" },
   ],
 };
 
@@ -108,7 +138,7 @@ export function parseFeed(xml: string, ch: Channel): Video[] {
     const published = entry.match(/<published>([^<]+)<\/published>/)?.[1] ?? "";
     if (!id || !title || link.includes("/shorts/")) continue;
     const t = decode(title);
-    out.push({ id, title: t, channel: ch.name, channelId: ch.id, published, band: bandFor(t, ch.band) });
+    out.push({ id, title: t, channel: ch.name, channelId: ch.id, published, band: ch.band === "music" ? "music" : bandFor(t, ch.band) });
   }
   return out;
 }

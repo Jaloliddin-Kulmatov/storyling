@@ -149,11 +149,16 @@ function GameGallery({ lang, games }: { lang: LangCode; games: Record<string, { 
 }
 
 /** Where a game takes its words from: everything, the learner's saved words, or chosen stories. */
-type From = { kind: "all" } | { kind: "saved" } | { kind: "stories"; ids: string[] };
+type From = { kind: "all" } | { kind: "saved" } | { kind: "stories"; ids: string[] } | { kind: "words"; lemmas: string[] };
 
 function useFrom(): From {
   const v = useSearchParams().get("from") ?? "";
   if (v === "saved") return { kind: "saved" };
+  // Words picked in the notebook.
+  if (v.startsWith("w:")) {
+    const lemmas = v.slice(2).split(",").map(decodeURIComponent).filter(Boolean);
+    if (lemmas.length) return { kind: "words", lemmas };
+  }
   if (v.startsWith("s:")) {
     const ids = v.slice(2).split(",").filter(Boolean);
     if (ids.length) return { kind: "stories", ids };
@@ -210,6 +215,7 @@ function SourcePicker({ lang }: { lang: LangCode }) {
       <div className="filters">
         <button className="chip" aria-pressed={from.kind === "all"} onClick={() => go(null)}>Everything</button>
         <button className="chip" aria-pressed={from.kind === "saved"} onClick={() => go("saved")}>My saved words · {learner.learningCount}</button>
+        {from.kind === "words" && <button className="chip" aria-pressed>{from.lemmas.length} chosen words</button>}
         <button className="chip" aria-pressed={from.kind === "stories"} onClick={() => setOpen(!open)}>
           {from.kind === "stories" ? (chosenTitles.length === 1 ? chosenTitles[0] : `${chosenTitles.length} stories`) : "Choose stories"} ▾
         </button>
@@ -245,6 +251,7 @@ function useAllowed(lang: LangCode): Set<string> | null {
   const learner = useLearner(lang);
   return useMemo(() => {
     if (from.kind === "saved") return new Set(learner.allWords.filter((w) => w?.lemma && w.saved === "learning").map((w) => w.lemma));
+    if (from.kind === "words") return new Set(from.lemmas);
     if (from.kind === "stories") {
       const out = new Set<string>();
       for (const st of stories) if (from.ids.includes(st.id)) for (const x of st.sentences) for (const t of x.tokens) if (t.lemma) out.add(t.lemma);
@@ -296,11 +303,12 @@ export function usePool(lang: LangCode, level?: string) {
   return useMemo(() => {
     if (level || from.kind === "all") return pool;
     if (from.kind === "saved") return pool.filter((p) => learner.word(p.lemma)?.saved === "learning");
-    // Words from the chosen stories (they may sit above the learner's level, so look them up directly).
+    // Words from the chosen stories or words (they may sit above the learner's level, so look them up directly).
     const out = new Map<string, PoolWord>();
-    for (const st of stories.filter((x) => from.ids.includes(x.id)))
+    const wanted = from.kind === "words" ? new Set(from.lemmas) : null;
+    for (const st of from.kind === "stories" ? stories.filter((x) => from.ids.includes(x.id)) : stories)
       st.sentences.forEach((x, i) => x.tokens.forEach((t) => {
-        if (!t.lemma || t.isName || out.has(t.lemma)) return;
+        if (!t.lemma || t.isName || out.has(t.lemma) || (wanted && !wanted.has(t.lemma))) return;
         const e = lookupIn(st, t.lemma);
         if (e && typeof e.meaning === "string" && !FUNCTION_POS.has(e.pos) && !e.meaning.toLowerCase().includes(e.display.toLowerCase()))
           out.set(t.lemma, { lemma: t.lemma, display: e.display, meaning: e.meaning, story: st, sentence: i });
@@ -319,7 +327,7 @@ function useSentences(lang: LangCode) {
     const fits = (s: Sentence) => { const n = s.tokens.filter((t) => t.lemma).length; return n >= 4 && n <= 10; };
     if (from.kind === "stories")
       return stories.filter((st) => from.ids.includes(st.id)).flatMap((story) => story.sentences.map((s, i) => ({ story, s, i })).filter(({ s }) => fits(s)));
-    if (from.kind === "saved" && allowed)
+    if ((from.kind === "saved" || from.kind === "words") && allowed)
       return stories.flatMap((story) => story.sentences.map((s, i) => ({ story, s, i })).filter(({ s }) => fits(s) && s.tokens.some((t) => t.lemma && allowed.has(t.lemma)))).slice(0, 200);
     const read = stories.filter((s) => learner.finished.includes(s.id));
     const rest = stories.filter((s) => !learner.finished.includes(s.id) && s.level === language(lang).levels[Math.min(learner.level ?? 0, language(lang).levels.length - 1)]);
@@ -1036,7 +1044,7 @@ function GapFill({ lang }: { lang: LangCode }) {
     const near = fit.filter((s) => learner.finished.includes(s.id) || s.level === at);
     const chosen = from.kind === "stories" ? stories.filter((s) => from.ids.includes(s.id) && s.sentences.length >= 2) : [];
     // Saved words: a story that uses the most of them.
-    const bySaved = from.kind === "saved" && allowed?.size
+    const bySaved = (from.kind === "saved" || from.kind === "words") && allowed?.size
       ? [...fit].sort((a, b) => count(b) - count(a)).slice(0, 3)
       : [];
     function count(st: AnyStory) { return st.sentences.reduce((n, x) => n + x.tokens.filter((t) => t.lemma && allowed!.has(t.lemma)).length, 0); }
@@ -1052,7 +1060,7 @@ function GapFill({ lang }: { lang: LangCode }) {
       story.sentences[si]!.tokens.forEach((t, ti) => {
         if (PUNCT.test(t.surface) || !t.lemma || t.isName || /\d/.test(t.surface)) return;
         // With saved words chosen, gap those words first; otherwise every second word.
-        const want = from.kind === "saved" && allowed ? allowed.has(t.lemma) || n % 2 === 1 : n % 2 === 1;
+        const want = (from.kind === "saved" || from.kind === "words") && allowed ? allowed.has(t.lemma) || n % 2 === 1 : n % 2 === 1;
         n++;
         if (want && t.surface.length >= 2 && gaps.length < 16) {
           const keep = Math.ceil(t.surface.length / 2);

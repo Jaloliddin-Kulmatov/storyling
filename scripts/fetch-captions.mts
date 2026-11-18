@@ -12,7 +12,8 @@ const out = new URL("../apps/web/public/captions/", import.meta.url);
 mkdirSync(out, { recursive: true });
 
 const ids = new Set<string>();
-for (const ch of CHANNELS[lang]) {
+// Song lyrics are not saved: music plays with YouTube's own captions.
+for (const ch of CHANNELS[lang].filter((c) => c.band !== "music")) {
   const xml = await (await fetch(`https://www.youtube.com/feeds/videos.xml?${ch.playlist ? `playlist_id=${ch.playlist}` : `channel_id=${ch.id}`}`)).text();
   for (const entry of xml.split("<entry>").slice(1)) {
     const id = entry.match(/<yt:videoId>([^<]+)/)?.[1];

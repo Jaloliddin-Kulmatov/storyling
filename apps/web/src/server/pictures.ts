@@ -7,11 +7,26 @@ import "server-only";
  *   3. Pollinations without a key: free, one picture every 45 seconds per server, weaker model and a small watermark.
  * The same story and part always get the same seed, so a picture made again looks the same.
  */
-const STYLE = "Storybook illustration, soft watercolour and gouache, warm gentle colours, simple clean shapes, friendly mood. No text, no letters, no words, no signs with writing.";
+// Each story gets one of these looks, so stories don't all look alike; every part of a story shares it.
+const STYLES = [
+  "soft watercolour storybook illustration, warm gentle light",
+  "cut-paper collage illustration, layered textured paper, bright cheerful colours",
+  "gouache painting, rich colours, visible brush strokes, cosy mood",
+  "flat vector illustration, bold simple shapes, modern pastel palette",
+  "coloured pencil and crayon drawing, hand-drawn texture, playful",
+  "cinematic digital painting, golden hour light, detailed background",
+  "Japanese woodblock print style, clean outlines, calm colours",
+  "3D clay animation style, soft rounded characters, studio lighting",
+];
+const NO_TEXT = "No text, no letters, no words, no captions, no signs with writing. Well composed, high detail, beautiful.";
 
-export function picturePrompt(titleEnglish: string, sentences: string[]) {
-  const scene = sentences.join(" ").replace(/\s+/g, " ").slice(0, 600);
-  return `${STYLE} A scene from the story "${titleEnglish}": ${scene}`;
+export function styleOf(id: string) {
+  return STYLES[seedOf(id) % STYLES.length]!;
+}
+
+/** The prompt for one picture: the story's look, then the scene. `scene` is a short description, or the part's sentences. */
+export function picturePrompt(id: string, scene: string) {
+  return `${styleOf(id)}. ${scene.replace(/\s+/g, " ").slice(0, 500)} ${NO_TEXT}`;
 }
 
 export function seedOf(id: string) {

@@ -12,6 +12,7 @@ import { today, useLearner, useSettings } from "@/lib/learner";
 import { useRankedStories, type Ranked } from "@/lib/rank";
 import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
 import { Cover, Icon, levelTone } from "@/components/ui";
+import { Challenges } from "@/components/Challenges";
 
 /**
  * Home: a reading feed sorted like a news app. Level tabs across the top ("For you" first),
@@ -88,7 +89,7 @@ export function Home({ lang }: { lang: LangCode }) {
         )}
       </div>
 
-      <DailyPlan lang={lang} next={ranked.find((r) => !isUserStory(r.story) && !r.read)} />
+      {(() => { const next = ranked.find((r) => !isUserStory(r.story) && !r.read); return <Challenges lang={lang} storyHref={next ? `/${lang}/read/${next.story.id}` : `/${lang}`} />; })()}
 
       <div className="level-tabs" role="tablist" aria-label="Level">
         <button role="tab" aria-selected={level === "for-you"} onClick={() => { setLevel("for-you"); setTopic("all"); }}>{t("home.forYou")}</button>
@@ -237,39 +238,3 @@ function dailyPicks(pool: Ranked[], day: string, level: number, levels: string[]
 }
 
 
-/** Today's plan: one story, five words, one dictation (about 10 minutes). Each step ticks itself off. */
-function DailyPlan({ lang, next }: { lang: LangCode; next?: Ranked }) {
-  const learner = useLearner(lang);
-  const t = useT();
-  const day = learner.log[today()];
-  const steps = [
-    { key: "story", label: t("plan.story"), done: (day?.stories ?? 0) > 0, href: next ? `/${lang}/read/${next.story.id}` : `/${lang}`, note: next?.story.title },
-    { key: "words", label: t("plan.words"), done: (day?.reviews ?? 0) >= 5, href: `/${lang}/practice?mode=review`, note: `${Math.min(5, day?.reviews ?? 0)}/5` },
-    { key: "dictation", label: t("plan.dictation"), done: (day?.dictations ?? 0) > 0, href: `/${lang}/practice?mode=dictation` },
-  ];
-  const done = steps.filter((s) => s.done).length;
-  return (
-    <section className="plan" aria-label={t("plan.title")}>
-      <div className="spread">
-        <span><b>{t("plan.title")}</b> <span className="muted small">· {t("plan.sub")}</span></span>
-        <span className="small muted">{done}/3</span>
-      </div>
-      {done === 3 ? (
-        <p className="small" style={{ margin: 0 }}>🎉 {t("plan.done")}</p>
-      ) : (
-        <ol className="plan-steps">
-          {steps.map((s, i) => (
-            <li key={s.key} className={s.done ? "done" : ""}>
-              <span className="plan-dot" aria-hidden="true">{s.done ? "✓" : i + 1}</span>
-              <span className="plan-label">
-                {s.label}
-                {s.note && <span className="muted small" lang={s.key === "story" ? lang : undefined}> · {s.note}</span>}
-              </span>
-              {!s.done && <Link className="btn sm" href={s.href}>{t("plan.go")}</Link>}
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
-  );
-}

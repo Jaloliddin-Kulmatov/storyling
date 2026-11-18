@@ -32,6 +32,11 @@ export function Notebook({ lang }: { lang: LangCode }) {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"due" | "az" | "seen">("due");
   const due = learner.dueWords().length;
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const toggle = (l: string) => setPicked((p) => { const n = new Set(p); if (n.has(l)) n.delete(l); else n.add(l); return n; });
+  const stopPicking = () => { setPicking(false); setPicked(new Set()); };
+  const practiceUrl = (mode: string, words?: string[]) => `/${lang}/practice?mode=${mode}${words ? `&from=w:${words.map(encodeURIComponent).join(",")}` : "&from=saved"}`;
 
   const counts = {
     learning: learner.allWords.filter((w) => w.saved === "learning").length,
@@ -79,16 +84,21 @@ export function Notebook({ lang }: { lang: LangCode }) {
       {tab === "words" && (
         <>
           {counts.learning > 0 && (
-            <div className="review-hero" style={{ marginTop: 14 }}>
-              <span className="rh-icon" aria-hidden="true">{Icon.words}</span>
-              <span className="rh-body">
-                <b>{due ? `${due} of ${counts.learning} words are due` : `${counts.learning} words saved, none due`}</b>
-                <span className="muted small">Flashcards bring each word back just before you would forget it.</span>
-              </span>
-              <span className="row">
-                <Link className="btn sm" href={`/${lang}/practice?mode=match`}>Match game</Link>
-                <Link className="btn primary sm" href={`/${lang}/practice?mode=review`}>{due ? "Review now" : "Review anyway"}</Link>
-              </span>
+            <div className="nb-practice">
+              <div className="nb-stats">
+                <span><b>{counts.learning}</b> to learn</span>
+                <span><b>{due}</b> due now</span>
+                <span><b>{counts.known}</b> known</span>
+              </div>
+              <span className="small muted">Practise your saved words:</span>
+              <div className="nb-games">
+                <Link className={`nb-game${due ? " hot" : ""}`} href={`/${lang}/practice?mode=review`}><span>🃏</span>Flashcards{due ? <small>{due} due</small> : null}</Link>
+                <Link className="nb-game" href={practiceUrl("speed")}><span>⚡</span>Speed round</Link>
+                <Link className="nb-game" href={practiceUrl("memory")}><span>🧠</span>Memory</Link>
+                <Link className="nb-game" href={practiceUrl("spell")}><span>🔤</span>Spell it</Link>
+                <Link className="nb-game" href={practiceUrl("match")}><span>🧩</span>Match</Link>
+                <Link className="nb-game" href={practiceUrl("say")}><span>🎤</span>Say it</Link>
+              </div>
             </div>
           )}
           <div className="spread" style={{ margin: "14px 0", flexWrap: "wrap", gap: 8 }}>
@@ -106,6 +116,7 @@ export function Notebook({ lang }: { lang: LangCode }) {
                 <option value="seen">Most seen</option>
               </select>
               <input className="input" type="search" placeholder="Search words" aria-label="Search words" value={q} onChange={(e) => setQ(e.target.value)} style={{ width: 180 }} />
+              {list.length > 0 && <button className={`btn sm${picking ? " primary" : ""}`} aria-pressed={picking} onClick={() => (picking ? stopPicking() : setPicking(true))}>{picking ? "Done" : "Select"}</button>}
             </span>
           </div>
           {list.length ? (
@@ -114,9 +125,10 @@ export function Notebook({ lang }: { lang: LangCode }) {
                 const e = meaningOf(w);
                 const ctx = contextOf(w);
                 return (
-                  <div className="word-card" key={w.lemma}>
+                  <div className={`word-card${picking ? " picking" : ""}${picked.has(w.lemma) ? " picked" : ""}`} key={w.lemma} onClick={picking ? () => toggle(w.lemma) : undefined}>
                     <div className="spread">
                       <span>
+                        {picking && <input type="checkbox" className="nb-check" checked={picked.has(w.lemma)} onChange={() => toggle(w.lemma)} onClick={(e) => e.stopPropagation()} aria-label={`Select ${w.lemma}`} />}
                         <span className="l" lang={lang}>{e?.display ?? w.lemma}</span>{" "}
                         {e?.pos && <span className="pill">{e.pos}</span>}
                       </span>
@@ -125,11 +137,14 @@ export function Notebook({ lang }: { lang: LangCode }) {
                     {e?.reading && <span className="reading">{e.reading}</span>}
                     <span className="g">{e?.meaning ? <Tr>{e.meaning}</Tr> : "No meaning saved"}</span>
                     {ctx && <Link href={`/${lang}/read/${ctx.story.id}`} className="ex" lang={lang}>{ctx.text}</Link>}
+                    <span className="nb-strength" title={`Strength ${Math.round(w.pKnown * 100)}%`} aria-label={`Strength ${Math.round(w.pKnown * 100)}%`}>
+                      {[0, 1, 2, 3, 4].map((k) => <i key={k} className={w.pKnown > k / 5 ? "on" : ""} />)}
+                    </span>
                     <div className="spread small">
                       <span className="muted">
                         Seen {w.encounters}×{w.card && w.saved === "learning" ? ` · review ${days((new Date(w.card.due).getTime() - Date.now()) / 864e5)}` : ""}
                       </span>
-                      <span className="row" style={{ gap: 6 }}>
+                      {!picking && <span className="row" style={{ gap: 6 }}>
                         {filter === "learning" ? (
                           <>
                             <button className="btn ghost sm" aria-label={`Remove ${w.lemma} from the notebook`} onClick={() => learner.setWord(w.lemma, undefined)}>Remove</button>
@@ -138,13 +153,30 @@ export function Notebook({ lang }: { lang: LangCode }) {
                         ) : (
                           <button className="btn sm" onClick={() => learner.setWord(w.lemma, "learning")}>Learn again</button>
                         )}
-                      </span>
+                      </span>}
                     </div>
                   </div>
                 );
               })}
             </div>
-          ) : (
+          ) : null}
+          {picking && (
+            <div className="nb-bar" role="toolbar" aria-label="Selected words">
+              <span className="small"><b>{picked.size}</b> selected</span>
+              <button className="btn ghost sm" onClick={() => setPicked(picked.size === list.length ? new Set() : new Set(list.map((w) => w.lemma)))}>{picked.size === list.length ? "None" : "All"}</button>
+              {picked.size > 0 && (
+                <>
+                  {picked.size >= 4 ? <Link className="btn primary sm" href={practiceUrl("speed", [...picked].slice(0, 60))}>⚡ Speed</Link> : <span className="small muted">Pick 4+ for Speed</span>}
+                  {picked.size >= 6 && <Link className="btn sm" href={practiceUrl("memory", [...picked].slice(0, 60))}>🧠 Memory</Link>}
+                  <Link className="btn sm" href={practiceUrl("spell", [...picked].slice(0, 60))}>🔤 Spell</Link>
+                  {filter !== "known" && <button className="btn sm" onClick={() => { picked.forEach((l) => learner.setWord(l, "known")); stopPicking(); }}>I know these</button>}
+                  {filter !== "learning" && <button className="btn sm" onClick={() => { picked.forEach((l) => learner.setWord(l, "learning")); stopPicking(); }}>Learn again</button>}
+                  {filter === "learning" && <button className="btn ghost sm" onClick={() => { picked.forEach((l) => learner.setWord(l, undefined)); stopPicking(); }}>Remove</button>}
+                </>
+              )}
+            </div>
+          )}
+          {!list.length && (
             <div className="empty">
               <p className="muted" style={{ margin: 0 }}>
                 {filter === "learning" ? "Tap a word while reading and press Review to add it here." : "No words here yet."}

@@ -8,7 +8,7 @@ import { useLearner } from "@/lib/learner";
 import { Icon } from "@/components/ui";
 import { VideoWithTranscript } from "@/components/Transcript";
 
-const BAND_LABEL: Record<Band, string> = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" };
+const BAND_LABEL: Record<Band, string> = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced", music: "🎵 Music" };
 
 function ago(iso: string) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
@@ -22,7 +22,7 @@ function ago(iso: string) {
 export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Video[]; channels: Channel[] }) {
   const meta = language(lang);
   const learner = useLearner(lang);
-  const bands = (["beginner", "intermediate", "advanced"] as Band[]).filter((b) => videos.some((v) => v.band === b));
+  const bands = (["beginner", "intermediate", "advanced", "music"] as Band[]).filter((b) => videos.some((v) => v.band === b));
   // Start on the band that fits the learner: placement level 0–1 is beginner.
   const start: Band | "all" = (learner.level ?? 0) <= 1 && bands.includes("beginner") ? "beginner" : "all";
   const [band, setBand] = useState<Band | "all">(start);
@@ -61,7 +61,7 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
 
       {current ? (
         <div className="player-card">
-          <VideoWithTranscript lang={lang} videoId={current.id} title={current.title} />
+          <VideoWithTranscript lang={lang} videoId={current.id} title={current.title} karaoke={current.band === "music"} />
           <div className="pc-body pc-info">
             <span className="row small"><span className="lvl">{BAND_LABEL[current.band]}</span><span className="muted">{current.channel} · {ago(current.published)}</span></span>
             <b className="pc-title">{current.title}</b>

@@ -53,13 +53,29 @@ export interface DayLog {
   reviews?: number;
   /** Dictation rounds finished that day. */
   dictations?: number;
+  /** Games finished that day, and how many scored 80% or more. */
+  games?: number;
+  wins?: number;
+  /** Which games were played that day. */
+  played?: string[];
 }
 
 /** Add to today's counters. */
-const bumpDay = (log: Record<string, DayLog>, patch: Partial<Record<"reviews" | "dictations", number>>): Record<string, DayLog> => {
+const bumpDay = (log: Record<string, DayLog>, patch: Partial<Record<"reviews" | "dictations" | "games" | "wins", number>> & { game?: string }): Record<string, DayLog> => {
   const day = today();
   const cur = log[day] ?? { seconds: 0, words: 0, stories: 0 };
-  return { ...log, [day]: { ...cur, reviews: (cur.reviews ?? 0) + (patch.reviews ?? 0), dictations: (cur.dictations ?? 0) + (patch.dictations ?? 0) } };
+  const played = patch.game && !(cur.played ?? []).includes(patch.game) ? [...(cur.played ?? []), patch.game] : cur.played;
+  return {
+    ...log,
+    [day]: {
+      ...cur,
+      reviews: (cur.reviews ?? 0) + (patch.reviews ?? 0),
+      dictations: (cur.dictations ?? 0) + (patch.dictations ?? 0),
+      games: (cur.games ?? 0) + (patch.games ?? 0),
+      wins: (cur.wins ?? 0) + (patch.wins ?? 0),
+      ...(played ? { played } : {}),
+    },
+  };
 };
 
 interface LangProfile {
@@ -254,7 +270,7 @@ function mergeProfile(a: LangProfile, b: LangProfile): LangProfile {
   for (const [d, l] of Object.entries(b.log)) {
     const m = log[d];
     log[d] = m
-      ? { seconds: Math.max(m.seconds, l.seconds), words: Math.max(m.words, l.words), stories: Math.max(m.stories, l.stories), reviews: Math.max(m.reviews ?? 0, l.reviews ?? 0), dictations: Math.max(m.dictations ?? 0, l.dictations ?? 0) }
+      ? { seconds: Math.max(m.seconds, l.seconds), words: Math.max(m.words, l.words), stories: Math.max(m.stories, l.stories), reviews: Math.max(m.reviews ?? 0, l.reviews ?? 0), dictations: Math.max(m.dictations ?? 0, l.dictations ?? 0), games: Math.max(m.games ?? 0, l.games ?? 0), wins: Math.max(m.wins ?? 0, l.wins ?? 0), played: [...new Set([...(m.played ?? []), ...(l.played ?? [])])] }
       : l;
   }
   const games = { ...a.games };
@@ -511,7 +527,7 @@ export function useLearner(lang: LangCode) {
         return {
           ...p,
           games: { ...p.games, [game]: { played: g.played + 1, best: Math.max(g.best, score) } },
-          ...(game === "dictation" ? { log: bumpDay(p.log, { dictations: 1 }) } : {}),
+          log: bumpDay(p.log, { games: 1, wins: score >= 80 ? 1 : 0, game, ...(game === "dictation" ? { dictations: 1 } : {}) }),
         };
       }),
     [update],

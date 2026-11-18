@@ -3,6 +3,7 @@ import type { LangCode } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
 import { partsOf } from "@/lib/parts";
 import { db, dbEnabled } from "@/server/db";
+import { aiEnabled, languageName, pictureScene } from "@/server/ai";
 import { makePicture, picturePrompt, seedOf } from "@/server/pictures";
 
 export const maxDuration = 60;
@@ -30,9 +31,14 @@ export async function GET(req: Request) {
   const story = await findStory(lang as LangCode, id).catch(() => undefined);
   const range = story && partsOf(story.sentences.length)[part];
   if (!story || !range) return new Response("Not found", { status: 404, headers: NO_STORE });
-  const prompt = picturePrompt(story.titleEnglish || story.title, story.sentences.slice(range[0], range[1]).map((s) => s.translation ?? ""));
+  const title = story.titleEnglish || story.title;
+  const text = story.sentences.slice(range[0], range[1]).map((s) => s.translation ?? "").join(" ");
+  // A short scene from the AI draws far better than the raw sentences; the sentences are the fallback.
+  const scene = aiEnabled() ? await pictureScene(title, text, `a place where ${languageName(lang)} is spoken`).catch(() => "") : "";
+  const prompt = picturePrompt(id, scene || `A scene from the story "${title}": ${text}`);
   try {
-    const pic = await makePicture(prompt, seedOf(id));
+    // A different seed for each part, so the pictures of one story differ.
+    const pic = await makePicture(prompt, seedOf(`${id}#${part}`));
     return new Response(pic.bytes, { headers: { ...KEEP, "Content-Type": pic.type, "X-Picture-By": pic.by } });
   } catch (e) {
     console.error(e);

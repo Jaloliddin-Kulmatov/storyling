@@ -99,7 +99,7 @@ const read = (id: string): Saved => {
 const write = (id: string, v: Saved) => { try { localStorage.setItem(KEY(id), JSON.stringify(v)); } catch { /* storage may be blocked */ } };
 
 /** A YouTube player with a synced transcript: paste subtitles, tap a line to jump, optional English translation. */
-export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; videoId: string; title: string }) {
+export function VideoWithTranscript({ lang, videoId, title, karaoke = false }: { lang: LangCode; videoId: string; title: string; karaoke?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const player = useRef<YTPlayer | null>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -110,6 +110,10 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [showTr, setShowTr] = useState(true);
+  // Karaoke: the line being sung, big, filling up as it goes. On by default for songs.
+  const [sing, setSing] = useState(karaoke);
+  const [pos, setPos] = useState(0);
+  useEffect(() => setSing(karaoke), [karaoke, videoId]);
   const cuesRef = useRef<Cue[]>([]);
   cuesRef.current = saved.cues;
 
@@ -155,7 +159,12 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
       });
       timer = setInterval(() => {
         const t = player.current?.getCurrentTime?.();
-        if (typeof t === "number" && cuesRef.current.length) setNow(cueAt(cuesRef.current, t));
+        if (typeof t === "number" && cuesRef.current.length) {
+          const i = cueAt(cuesRef.current, t);
+          setNow(i);
+          const c = cuesRef.current[i];
+          setPos(c ? Math.max(0, Math.min(1, (t - c.start) / Math.max(0.5, c.end - c.start))) : 0);
+        }
       }, 300);
     });
     return () => { dead = true; clearInterval(timer); player.current?.destroy?.(); player.current = null; };
@@ -207,12 +216,21 @@ export function VideoWithTranscript({ lang, videoId, title }: { lang: LangCode; 
             <div className="spread">
               <b>Subtitles {auto && <span className="pill">auto</span>}</b>
               <span className="row">
+                <button className="chip" aria-pressed={sing} onClick={() => setSing(!sing)}>🎤 Karaoke</button>
                 {hasTr && <button className="chip" aria-pressed={showTr} onClick={() => setShowTr(!showTr)}>English</button>}
                 {ai && <button className="btn sm" disabled={busy} onClick={translate}>{busy ? "Translating…" : hasTr ? "Translate the rest" : "Translate to English"}</button>}
                 <button className="btn ghost sm" onClick={() => save({ cues: [], tr: {} })}>Remove</button>
               </span>
             </div>
-            <div className="transcript" ref={list} lang={lang}>
+            {sing && (
+              <div className="karaoke" lang={lang} aria-live="polite">
+                <span className="k-prev">{saved.cues[now - 1]?.text ?? ""}</span>
+                <span key={now} className="k-now" style={{ ["--p" as string]: `${Math.round(pos * 100)}%` }}>{saved.cues[now]?.text ?? "♪ ♪ ♪"}</span>
+                {showTr && saved.tr[now] && <small className="k-tr" lang="en">{saved.tr[now]}</small>}
+                <span className="k-next">{saved.cues[now + 1]?.text ?? ""}</span>
+              </div>
+            )}
+            <div className={`transcript${sing ? " small-list" : ""}`} ref={list} lang={lang}>
               {saved.cues.map((c, i) => (
                 <div key={i} data-i={i} className={`cue${i === now ? " on" : ""}`}>
                   <button className="cue-play" aria-label="Play from this line" onClick={() => { player.current?.seekTo(c.start, true); player.current?.playVideo(); setNow(i); }}>{fmt(c.start)}</button>

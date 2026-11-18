@@ -5,7 +5,7 @@ export function partsOf(count: number): [number, number][] {
 }
 
 /** Bump to make every picture again, e.g. after changing the prompt or provider order. */
-export const PICTURE_VERSION = 1;
+export const PICTURE_VERSION = 2;
 
 export const pictureUrl = (lang: string, id: string, part: number) =>
   `/api/picture?lang=${lang}&id=${encodeURIComponent(id)}&part=${part}&v=${PICTURE_VERSION}`;

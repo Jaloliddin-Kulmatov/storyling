@@ -30,19 +30,31 @@ export function Dictionary({ lang, embedded = false }: { lang: LangCode; embedde
   const all = useMemo(() => dictionary(lang), [lang]);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<Tab>("word");
+  const [lv, setLv] = useState<number | "all">("all");
+  const [more, setMore] = useState(1);
+  const [justSaved, setJustSaved] = useState<string | null>(null);
+  // Word of the day: the same for everyone on a given day, from words with a level and an example.
+  const wotd = useMemo(() => {
+    const pool = all.filter((e) => wordLevelOf(lang, e.lemma) !== undefined && e.meaning.length < 40);
+    if (!pool.length) return undefined;
+    const d = new Date().toISOString().slice(0, 10);
+    return pool[[...d].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % pool.length];
+  }, [all, lang]);
   const input = useRef<HTMLInputElement>(null);
 
   const results = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return all.slice(0, 40);
+    const atLevel = (e: (typeof all)[number]) => lv === "all" || wordLevelOf(lang, e.lemma) === lv;
+    if (!s) return all.filter(atLevel).slice(0, 40 * more);
     return all
+      .filter(atLevel)
       .filter((e) => e.display.toLowerCase().includes(s) || e.meaning.toLowerCase().includes(s) || e.reading?.toLowerCase().includes(s))
       .sort((a, b) => {
         const rank = (e: (typeof all)[number]) => (e.display.toLowerCase() === s ? 0 : e.display.toLowerCase().startsWith(s) ? 1 : 2);
         return rank(a) - rank(b) || a.display.length - b.display.length;
       })
-      .slice(0, 60);
-  }, [all, q]);
+      .slice(0, 60 * more);
+  }, [all, q, lv, more, lang]);
 
   const trMeanings = useTranslated(results.slice(0, 40).map((e) => e.meaning));
   const sentences = useMemo(() => {
@@ -90,8 +102,28 @@ export function Dictionary({ lang, embedded = false }: { lang: LangCode; embedde
         </div>
       )}
       <input ref={input} className="input" type="search" autoFocus={!embedded} placeholder={`Search ${all.length} ${meta.name} words or English`} aria-label="Search the dictionary" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
+      {!q && wotd && (
+        <div className="wotd">
+          <span className="small muted">Word of the day</span>
+          <span className="wotd-word" lang={lang}>{wotd.display}</span>
+          {wotd.reading && <span className="reading">{wotd.reading}</span>}
+          <span className="g">{wotd.meaning}</span>
+          <span className="row" style={{ gap: 8 }}>
+            <button className="btn sm" onClick={() => playWord(lang, wotd.lemma, wotd.display)}>{Icon.speaker} Listen</button>
+            {learner.word(wotd.lemma)?.saved === "learning"
+              ? <span className="pill">Saved</span>
+              : <button className="btn primary sm" onClick={() => { learner.setWord(wotd.lemma, "learning"); setJustSaved(wotd.lemma); }}>+ Notebook</button>}
+          </span>
+        </div>
+      )}
       <div className="filters" role="tablist" aria-label="Search in" style={{ marginBottom: 12 }}>
         <button role="tab" className="chip" aria-selected={tab === "word"} aria-pressed={tab === "word"} onClick={() => setTab("word")}>Word</button>
+        {tab === "word" && (
+          <select className="select" aria-label="Level" value={lv} onChange={(e) => { setLv(e.target.value === "all" ? "all" : Number(e.target.value)); setMore(1); }} style={{ width: "auto", marginLeft: "auto" }}>
+            <option value="all">All levels</option>
+            {meta.levels.map((l, i) => <option key={l} value={i}>{l}</option>)}
+          </select>
+        )}
         <button role="tab" className="chip" aria-selected={tab === "example"} aria-pressed={tab === "example"} onClick={() => setTab("example")}>Examples{q.trim().length >= 2 ? ` · ${sentences.length}${sentences.length >= 40 ? "+" : ""}` : ""}</button>
       </div>
 
@@ -118,13 +150,14 @@ export function Dictionary({ lang, embedded = false }: { lang: LangCode; embedde
                   ) : known ? (
                     <span className="pill fit-easy">Known</span>
                   ) : (
-                    <button className="btn sm" onClick={() => learner.setWord(e.lemma, "learning")}>+ Notebook</button>
+                    <button className={`btn sm${justSaved === e.lemma ? " pop" : ""}`} onClick={() => { learner.setWord(e.lemma, "learning"); setJustSaved(e.lemma); }}>+ Notebook</button>
                   )}
                 </span>
               </div>
             );
           })}
           {!results.length && <div className="trow"><span className="muted">No words found.</span></div>}
+          {results.length >= (q.trim() ? 60 : 40) * more && <button className="btn block" style={{ marginTop: 10 }} onClick={() => setMore((m) => m + 1)}>Show more</button>}
         </div>
       )}
 
