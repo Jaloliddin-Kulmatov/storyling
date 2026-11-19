@@ -199,7 +199,7 @@ function StoryReader({ story }: { story: AnyStory }) {
     for (let i = from; i < story.sentences.length; i++) {
       setPlaying(i);
       setCursor(i);
-      document.getElementById(`s-${i}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      document.getElementById(`s-${i}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
       const ok = await playSentence(story.id, lang, i, textOf(story, story.sentences[i]!), settings.rate);
       if (mine !== run.current) return;
       if (!ok) break;
