@@ -25,10 +25,10 @@ export async function writeDailyStories() {
   const avoid: Partial<Record<LangCode, string[]>> = {};
   let waited = false;
   for (let i = 0; i < todo.length && Date.now() - started < WRITE_FOR; i++) {
-    const { id, lang, level, topic } = todo[i]!;
+    const { id, lang, level, topic, fact } = todo[i]!;
     try {
       const titles = (avoid[lang] ??= await recentTitles(lang));
-      const problems = await writeAndPost(id, lang, level, topic, titles);
+      const problems = await writeAndPost(id, lang, level, topic, titles, fact);
       if (problems.length) held.push(`${id}: ${problems.join(" ")}`);
       else published.push(id);
       waited = false;

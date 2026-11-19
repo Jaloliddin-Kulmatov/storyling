@@ -15,6 +15,7 @@ import { Icon, Logo } from "./ui";
 
 const NAV = [
   { href: "", label: "nav.home", icon: Icon.home },
+  { href: "/path", label: "nav.path", icon: Icon.spark },
   { href: "/words", label: "nav.notebook", icon: Icon.notebook },
   { href: "/exams", label: "nav.tests", icon: Icon.progress },
   { href: "/watch", label: "nav.watch", icon: Icon.video },
@@ -22,7 +23,7 @@ const NAV = [
   { href: "/progress", label: "nav.me", icon: Icon.me },
 ] as const;
 
-// The Dictionary lives inside the Notebook, so phones and desktop share the same six tabs.
+// The Dictionary lives inside the Notebook, so phones and desktop share the same seven tabs.
 const TABS = NAV;
 
 export function AppShell({ lang, children }: { lang: LangCode; children: ReactNode }) {

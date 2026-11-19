@@ -13,6 +13,7 @@ import { useRankedStories, type Ranked } from "@/lib/rank";
 import { isPublished, isUserStory, TOPIC_LABEL } from "@/lib/stories";
 import { Cover, Icon, levelTone } from "@/components/ui";
 import { Challenges } from "@/components/Challenges";
+import { PathCard } from "@/views/Path";
 
 /**
  * Home: a reading feed sorted like a news app. Level tabs across the top ("For you" first),
@@ -89,6 +90,7 @@ export function Home({ lang }: { lang: LangCode }) {
         )}
       </div>
 
+      <PathCard lang={lang} />
       {(() => { const next = ranked.find((r) => !isUserStory(r.story) && !r.read); return <Challenges lang={lang} storyHref={next ? `/${lang}/read/${next.story.id}` : `/${lang}`} />; })()}
 
       <div className="level-tabs" role="tablist" aria-label="Level">

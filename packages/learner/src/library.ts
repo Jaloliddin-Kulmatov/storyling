@@ -18,7 +18,7 @@ export const PUNCT = /^[\p{P}\p{S}]+$/u;
 export const TOPIC_LABEL: Record<string, string> = {
   daily: "Daily life", food: "Food", work: "Work", weather: "Weather", animals: "Animals",
   travel: "Travel", city: "City", home: "Home", history: "History", people: "People",
-  nature: "Nature", science: "Science", culture: "Culture", mine: "My texts",
+  nature: "Nature", science: "Science", culture: "Culture", facts: "True facts", mine: "My texts",
 };
 
 export const topicOf = (s: AnyStory) => (isUserStory(s) ? "mine" : s.topic);

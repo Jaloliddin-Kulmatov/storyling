@@ -19,6 +19,7 @@ const en: Dict = {
   "nav.home": "Home",
   "nav.notebook": "Notebook",
   "nav.tests": "Tests",
+  "nav.path": "Path",
   "nav.watch": "Watch",
   "nav.practice": "Practice",
   "nav.dictionary": "Dictionary",
@@ -94,7 +95,7 @@ const en: Dict = {
 };
 
 const uz: Dict = {
-  "nav.home": "Bosh sahifa", "nav.notebook": "Daftar", "nav.tests": "Testlar", "nav.watch": "Video", "nav.practice": "Mashq", "nav.dictionary": "Lugʻat", "nav.me": "Men", "nav.settings": "Sozlamalar",
+  "nav.home": "Bosh sahifa", "nav.path": "Yoʻl", "nav.notebook": "Daftar", "nav.tests": "Testlar", "nav.watch": "Video", "nav.practice": "Mashq", "nav.dictionary": "Lugʻat", "nav.me": "Men", "nav.settings": "Sozlamalar",
   "land.eyebrow": "Tillarni hikoyalar orqali oʻrganing", "land.title1": "Deyarli", "land.title2": "tushunadigan", "land.title3": "hikoyalaringizni oʻqing.",
   "land.lead": "Har bir daraja uchun original hikoyalar. Har bir soʻzni bosib maʼnosini koʻring, tabiiy ovozda tinglang, diktant, kartochkalar va imtihon uslubidagi testlar bilan mashq qiling.",
   "land.start": "Bepul oʻqishni boshlash", "land.how": "Qanday ishlaydi", "land.note": "Roʻyxatdan oʻtish shart emas · telefon va kompyuterda ishlaydi",
@@ -117,7 +118,7 @@ const uz: Dict = {
 };
 
 const ru: Dict = {
-  "nav.home": "Главная", "nav.notebook": "Тетрадь", "nav.tests": "Тесты", "nav.watch": "Видео", "nav.practice": "Практика", "nav.dictionary": "Словарь", "nav.me": "Профиль", "nav.settings": "Настройки",
+  "nav.home": "Главная", "nav.path": "Путь", "nav.notebook": "Тетрадь", "nav.tests": "Тесты", "nav.watch": "Видео", "nav.practice": "Практика", "nav.dictionary": "Словарь", "nav.me": "Профиль", "nav.settings": "Настройки",
   "land.eyebrow": "Языки через истории", "land.title1": "Читайте истории, которые вы", "land.title2": "почти", "land.title3": "понимаете.",
   "land.lead": "Оригинальные истории для любого уровня. Нажмите на любое слово, чтобы увидеть значение, слушайте естественное аудио и тренируйтесь с диктантами, карточками и тестами в формате экзаменов.",
   "land.start": "Начать читать бесплатно", "land.how": "Как это работает", "land.note": "Без регистрации · работает на телефоне и компьютере",
@@ -140,7 +141,7 @@ const ru: Dict = {
 };
 
 const ko: Dict = {
-  "nav.home": "홈", "nav.notebook": "단어장", "nav.tests": "시험", "nav.watch": "영상", "nav.practice": "연습", "nav.dictionary": "사전", "nav.me": "내 정보", "nav.settings": "설정",
+  "nav.home": "홈", "nav.path": "코스", "nav.notebook": "단어장", "nav.tests": "시험", "nav.watch": "영상", "nav.practice": "연습", "nav.dictionary": "사전", "nav.me": "내 정보", "nav.settings": "설정",
   "land.eyebrow": "이야기로 배우는 외국어", "land.title1": "", "land.title2": "거의", "land.title3": "이해할 수 있는 이야기를 읽으세요.",
   "land.lead": "모든 수준을 위해 직접 쓴 이야기. 단어를 누르면 뜻이 나오고, 자연스러운 음성으로 듣고, 받아쓰기·단어 카드·시험형 문제로 연습해요.",
   "land.start": "무료로 읽기 시작", "land.how": "사용 방법", "land.note": "가입 없이 사용 · 휴대폰과 컴퓨터 모두 가능",
@@ -163,7 +164,7 @@ const ko: Dict = {
 };
 
 const de: Dict = {
-  "nav.home": "Start", "nav.notebook": "Notizbuch", "nav.tests": "Tests", "nav.watch": "Videos", "nav.practice": "Üben", "nav.dictionary": "Wörterbuch", "nav.me": "Ich", "nav.settings": "Einstellungen",
+  "nav.home": "Start", "nav.path": "Pfad", "nav.notebook": "Notizbuch", "nav.tests": "Tests", "nav.watch": "Videos", "nav.practice": "Üben", "nav.dictionary": "Wörterbuch", "nav.me": "Ich", "nav.settings": "Einstellungen",
   "land.eyebrow": "Sprachen lernen mit Geschichten", "land.title1": "Lies Geschichten, die du", "land.title2": "fast", "land.title3": "verstehst.",
   "land.lead": "Originale Geschichten für jedes Niveau. Tippe auf jedes Wort für die Bedeutung, höre natürliche Aufnahmen und übe mit Diktat, Karteikarten und Prüfungsaufgaben.",
   "land.start": "Kostenlos lesen", "land.how": "So funktioniert es", "land.note": "Kein Konto nötig · auf Handy und Computer",

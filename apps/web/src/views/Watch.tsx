@@ -40,6 +40,7 @@ export function Watch({ lang, videos, channels }: { lang: LangCode; videos: Vide
     <>
       <div className="page-head">
         <div><div className="eyebrow">{meta.name} · {videos.length} videos</div><h1>Watch</h1></div>
+        <a className="btn sm" href={`/${lang}/listen`}>🎧 Listen to stories</a>
       </div>
 
       <div className="level-tabs" role="tablist" aria-label="Difficulty">

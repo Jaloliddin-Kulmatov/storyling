@@ -2,7 +2,8 @@ import "server-only";
 import { language, languages, lookup, sentenceText } from "@storyling/content";
 import type { LangCode, Sentence, Token } from "@storyling/core";
 import type { PublishedStory } from "@storyling/learner";
-import { glossFor, photoKeywords, prepareText, translateLines, writeDailyStory, type PreparedText } from "./ai";
+import { glossFor, photoKeywords, prepareText, translateLines, writeDailyStory, writeFactStory, type PreparedText } from "./ai";
+import { factFor, type Fact } from "./facts";
 import { db } from "./db";
 import { searchPhotos } from "./photos";
 
@@ -15,7 +16,7 @@ export const TOPICS: Record<string, string> = {
   daily: "everyday life", food: "food and cooking", work: "work and colleagues", weather: "weather and the seasons",
   animals: "animals", travel: "a journey", city: "life in a big city", home: "home and neighbours",
   history: "a moment from history", people: "family and friendship", nature: "nature and the outdoors",
-  science: "a discovery or invention", culture: "local customs and culture",
+  science: "a discovery or invention", culture: "local customs and culture", facts: "a true and surprising fact",
 };
 
 const PUNCT = /^[\p{P}\p{S}]+$/u;
@@ -30,13 +31,15 @@ export const levelSlug = (level: string) => level.toLowerCase().replace(/\s+/g, 
  * Today's stories: four per language, across its levels and topics. Every language gets its first story before any
  * gets its second, so a day when the AI runs out of quota is shared evenly.
  */
-export function dailyPlan(day: string): { id: string; lang: LangCode; level: string; topic: string }[] {
+export function dailyPlan(day: string): { id: string; lang: LangCode; level: string; topic: string; fact?: Fact }[] {
   const n = Math.floor(Date.parse(day) / 864e5);
   const topics = Object.keys(TOPICS);
   return Array.from({ length: DAILY_PER_LANG }, (_, slot) =>
     DAILY_LANGS.map((lang, i) => {
       const levels = language(lang).levels;
       const level = levels[(n + slot) % levels.length]!;
+      // The last story of the day retells a true fact from our list instead of making one up.
+      if (slot === DAILY_PER_LANG - 1) return { id: `${lang}-daily-${day}-${slot + 1}-${levelSlug(level)}`, lang, level, topic: "facts", fact: factFor(lang, n, i) };
       return { id: `${lang}-daily-${day}-${slot + 1}-${levelSlug(level)}`, lang, level, topic: topics[(n * DAILY_PER_LANG + slot * 3 + i) % topics.length]! };
     }),
   ).flat();
@@ -147,8 +150,8 @@ export async function fillCovers(until: number) {
  * Write one story, let it check and fix itself, and post it. A story that still fails is thrown away, so the next run
  * writes that slot again. Returns the problems, or none when it was posted.
  */
-export async function writeAndPost(id: string, lang: LangCode, level: string, topic: string, avoid: string[]): Promise<string[]> {
-  const p = await writeDailyStory(lang, level, TOPICS[topic] ?? topic, avoid);
+export async function writeAndPost(id: string, lang: LangCode, level: string, topic: string, avoid: string[], fact?: Fact): Promise<string[]> {
+  const p = fact ? await writeFactStory(lang, level, fact.fact) : await writeDailyStory(lang, level, TOPICS[topic] ?? topic, avoid);
   const dict = glossary(p);
   const sentences = tokensOf(p, dict);
   const story: PublishedStory = {

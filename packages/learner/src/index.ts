@@ -94,6 +94,13 @@ interface LangProfile {
   history: { id: string; at: number }[];
   /** Finished mock exams, newest first. */
   exams: ExamRecord[];
+  /** The guided path: finished lessons (story id → day finished) and the bootcamp, if one is running. */
+  path?: PathProgress;
+}
+
+export interface PathProgress {
+  done: Record<string, string>;
+  camp?: { level: string; start: string; days: number };
 }
 
 /** One finished mock exam paper. */
@@ -293,6 +300,11 @@ function mergeProfile(a: LangProfile, b: LangProfile): LangProfile {
     games,
     exams: [...new Map([...a.exams, ...b.exams].map((e) => [e.at, e])).values()].sort((x, y) => y.at - x.at).slice(0, 100),
     history: [...history.entries()].map(([id, at]) => ({ id, at })).sort((x, y) => y.at - x.at).slice(0, 200),
+    path: {
+      done: { ...(b.path?.done ?? {}), ...(a.path?.done ?? {}) },
+      // The bootcamp started most recently wins.
+      camp: [a.path?.camp, b.path?.camp].filter((c) => !!c).sort((x, y) => y!.start.localeCompare(x!.start))[0],
+    },
   };
 }
 
@@ -348,6 +360,8 @@ export function streakFrom(log: Record<string, DayLog>, now = new Date()): numbe
   }
   return streak;
 }
+
+const NO_PATH: PathProgress = { done: {} };
 
 export function useLearner(lang: LangCode) {
   const store = useStore();
@@ -533,6 +547,18 @@ export function useLearner(lang: LangCode) {
     [update],
   );
 
+  /** Mark a path lesson finished today. */
+  const completeLesson = useCallback(
+    (id: string) => update((p) => ({ ...p, path: { ...p.path, done: { ...(p.path?.done ?? {}), [id]: p.path?.done?.[id] ?? today() } } })),
+    [update],
+  );
+  /** Start (or restart) a bootcamp: one lesson a day for `days` days. */
+  const startCamp = useCallback(
+    (level: string, days: number) => update((p) => ({ ...p, path: { done: p.path?.done ?? {}, camp: { level, start: today(), days } } })),
+    [update],
+  );
+  const stopCamp = useCallback(() => update((p) => ({ ...p, path: { done: p.path?.done ?? {} } })), [update]);
+
   const addStory = useCallback((story: UserStory) => update((p) => ({ ...p, stories: [story, ...p.stories] })), [update]);
   const removeStory = useCallback((id: string) => update((p) => ({ ...p, stories: p.stories.filter((s) => s.id !== id) })), [update]);
 
@@ -556,6 +582,7 @@ export function useLearner(lang: LangCode) {
     history: profile?.history ?? [],
     exams: profile?.exams ?? [],
     games: profile?.games ?? {},
+    path: profile?.path ?? NO_PATH,
     knownCount: words.filter((w) => displayState(w) === "known").length,
     learningCount: words.filter((w) => w.saved === "learning").length,
     allWords: words,
@@ -578,6 +605,9 @@ export function useLearner(lang: LangCode) {
     recordExam,
     addStory,
     removeStory,
+    completeLesson,
+    startCamp,
+    stopCamp,
     reset,
   };
 }

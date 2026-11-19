@@ -21,6 +21,7 @@ import { useStories } from "@/lib/stories";
 import { Tr, useTranslated } from "@/lib/translate";
 import { usePlan } from "@/lib/plan";
 import { partsOf, pictureUrl } from "@/lib/parts";
+import { keywordsOf } from "@/lib/path";
 import { Fragment } from "react";
 
 const RATES = [0.75, 1, 1.25];
@@ -57,6 +58,26 @@ export function Reader({ lang, id }: { lang: LangCode; id: string }) {
     );
   }
   return <StoryReader key={story.id} story={story} />;
+}
+
+/** "5 words to know" above the story: the words most worth learning first. Tap one for its card. */
+function WordsToKnow({ story, known, onPick }: { story: AnyStory; known: (l: string) => boolean; onPick: (lemma: string, surface: string, sentence: number) => void }) {
+  const [words] = useState(() => keywordsOf(story, known));
+  const tr = useTranslated(words.map((w) => w.meaning));
+  if (words.length < 3) return null;
+  return (
+    <div className="kw-top">
+      <span>{words.length} words to know</span>
+      <div className="kw compact">
+        {words.map((w, i) => (
+          <button key={w.lemma} className="kw-card" style={{ ["--i" as string]: i }} onClick={() => onPick(w.lemma, w.surface, w.sentence)}>
+            <b lang={story.lang}>{w.display}</b>
+            <span className="small muted">{tr.texts[i] ?? w.meaning}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 /** A quick question between parts: what did one sentence of the part just read mean? */
@@ -227,11 +248,12 @@ function StoryReader({ story }: { story: AnyStory }) {
           </div>
           <h1 lang={lang} style={{ marginTop: 6 }}>{story.title}</h1>
           {story.titleEnglish && <p className="muted" style={{ margin: "4px 0 0" }}>{story.titleEnglish}</p>}
-          {isPublished(story) && <p className="small muted" style={{ margin: "6px 0 0" }}>Written with AI and checked by the Storyling team.</p>}
+          {isPublished(story) && <p className="small muted" style={{ margin: "6px 0 0" }}>{story.topic === "facts" ? "Written with AI from a true fact on Storyling's fact list. Not yet checked by a person." : "Written with AI and checked automatically. Not yet checked by a person."}</p>}
           {!isUserStory(story) && !isPublished(story) && (reviewOf(story.id)
             ? <p className="small review-ok" style={{ margin: "6px 0 0" }}>✓ Checked by a native speaker</p>
             : <p className="small muted" style={{ margin: "6px 0 0" }}>Written by Storyling. Not yet checked by a native speaker.</p>)}
 
+          {!isUserStory(story) && <WordsToKnow story={story} known={(l) => learner.wordState(l) === "known"} onPick={(lemma, surface, sentence) => { setPicked({ lemma, surface, sentence }); playWord(lang, lemma, surface); }} />}
           <div className={`text${gram ? " gram-on" : `${settings.highlightNew ? " hl" : ""}${settings.levelUnderline ? " lvl-on" : ""}`}`} lang={lang} style={{ ["--scale" as string]: settings.fontScale }}
             onClick={(e) => { if (!(e.target as HTMLElement).closest("button")) setPicked(null); }}>
             {parts.map(([from, to], part) => (
