@@ -471,8 +471,23 @@ export async function lessonGrammar(lang: string, level: string, story: string):
     700,
     true,
   );
-  const d = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1)) as Record<string, unknown>;
-  const out = { title: String(d.title ?? "").trim(), explain: String(d.explain ?? "").trim(), example: String(d.example ?? "").trim() };
-  if (!out.title || !out.explain) throw new AiError("No grammar note.", 502);
-  return out;
+  const parse = (r: string) => {
+    const d = JSON.parse(r.slice(r.indexOf("{"), r.lastIndexOf("}") + 1)) as Record<string, unknown>;
+    return { title: String(d.title ?? "").trim(), explain: String(d.explain ?? "").trim(), example: String(d.example ?? "").trim() };
+  };
+  const draft = parse(raw);
+  if (!draft.title || !draft.explain) throw new AiError("No grammar note.", 502);
+  // A second, strict pass: a wrong rule taught to a beginner does more harm than no rule.
+  const checked = parse(
+    await complete(
+      `You are a strict ${languageName(lang)} grammar expert reviewing a note written for learners. Check every rule in it against standard ${languageName(lang)} grammar. ` +
+        "Fix anything wrong or misleading, and remove any claim you are not certain of; keep it simple and under 90 words. " +
+        'Reply with JSON only, in the same shape: {"title": string, "explain": string, "example": string}. If the note cannot be made correct, reply {"title": "", "explain": "", "example": ""}.',
+      `Note:\n${JSON.stringify(draft)}`,
+      700,
+      true,
+    ),
+  );
+  if (!checked.title || !checked.explain) throw new AiError("No grammar note.", 502);
+  return checked;
 }

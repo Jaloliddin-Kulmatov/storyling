@@ -252,7 +252,7 @@ function AiGrammar({ lang, id, onFail }: { lang: LangCode; id: string; onFail: (
   const [note, setNote] = useState<{ title: string; explain: string; example: string } | null | "none">(null);
   useEffect(() => {
     let dead = false;
-    fetch(`/api/lesson-grammar?lang=${lang}&id=${encodeURIComponent(id)}`)
+    fetch(`/api/lesson-grammar?lang=${lang}&id=${encodeURIComponent(id)}&v=2`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (dead) return; setNote(d?.title ? d : "none"); if (!d?.title) onFail(); })
       .catch(() => { if (!dead) { setNote("none"); onFail(); } });
@@ -261,7 +261,7 @@ function AiGrammar({ lang, id, onFail }: { lang: LangCode; id: string; onFail: (
   if (note === "none") return null;
   return (
     <div className="pl-grammar">
-      <span className="small muted">Grammar point · written by AI</span>
+      <span className="small muted">Grammar point · written and checked by AI, not yet by a teacher</span>
       {note ? (
         <>
           <b>{note.title}</b>
